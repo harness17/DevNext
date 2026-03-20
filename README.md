@@ -127,6 +127,24 @@ dotnet test
 - PDF エクスポート（一覧 / 単体）
   - 単体PDFでは PNG・JPEG・JPG は画像として埋め込み
 
+### ファイル管理
+
+- ファイルアップロード（サイズ・拡張子バリデーション）
+- ファイル一覧表示（検索・ページング）
+- ファイルダウンロード / 削除
+- ファイルメタデータの DB 管理
+
+### メール送信サンプル
+
+- テンプレートベースのメール送信（プレースホルダー置換）
+- SMTP 設定（`appsettings.json` で管理）
+- smtp4dev による開発時の擬似送受信
+
+### 多段階フォーム（ウィザード）
+
+- セッションを利用したステップ間データ保持
+- 確認画面 → 完了画面の一連フロー
+
 ### 共通機能（CommonLibrary）
 
 - ジェネリックリポジトリ（CRUD・バッチ挿入・論理削除・履歴管理）
@@ -143,23 +161,35 @@ dotnet test
 ```
 DevNext/
 ├── Common/
-│   ├── DBContext.cs          # EF Core コンテキスト（Identity統合）
-│   ├── EnumDefine.cs         # Enum定義
-│   ├── ConstDefine.cs        # 定数定義（ファイルパス等）
-│   └── localutil.cs          # 共通ユーティリティ
+│   ├── DBContext.cs              # EF Core コンテキスト（Identity統合）
+│   ├── EnumDefine.cs             # Enum定義
+│   ├── ConstDefine.cs            # 定数定義（ファイルパス等）
+│   ├── Email.cs                  # SMTP メール送信
+│   └── localutil.cs              # 共通ユーティリティ
 ├── Controllers/
-│   ├── AccountController.cs  # 認証
-│   ├── ManageController.cs   # アカウント管理
-│   ├── DatabaseSampleController.cs  # DBサンプルCRUD
+│   ├── HomeController.cs         # ホーム画面
+│   ├── AccountController.cs      # 認証（ログイン・登録・パスワードリセット）
+│   ├── ManageController.cs       # アカウント管理（パスワード変更）
+│   ├── DatabaseSampleController.cs  # DBサンプル CRUD
+│   ├── FileManagementController.cs  # ファイル管理
+│   ├── MailSampleController.cs      # メール送信サンプル
+│   ├── WizardSampleController.cs    # 多段階フォーム
 │   ├── ViewSampleController.cs      # UIパターンサンプル
-│   └── HomeController.cs
-├── Entity/                   # エンティティ定義
-├── Models/                   # ビューモデル
-├── Service/                  # ビジネスロジック
-├── Repository/               # データアクセス層
-├── Views/                    # Razor ビュー
-├── Migrations/               # EF Core マイグレーション
-└── Program.cs                # DI・ミドルウェア設定
+│   └── RootErrorController.cs       # エラーハンドリング
+├── Entity/                       # エンティティ定義
+├── Models/                       # ビューモデル
+├── Service/                      # ビジネスロジック
+│   ├── DatabaseSampleService.cs  # CRUD・Excel/PDF 出力
+│   ├── FileManagementService.cs  # ファイル管理
+│   ├── MailSampleService.cs      # メール送信
+│   ├── WizardSampleService.cs    # 多段階フォーム
+│   └── CommonService.cs          # 共通サービス
+├── Repository/                   # データアクセス層
+│   ├── SampleEntityRepository.cs
+│   ├── FileEntityRepository.cs
+│   └── WizardEntityRepository.cs
+├── Views/                        # Razor ビュー
+└── Program.cs                    # DI・ミドルウェア設定
 
 CommonLibrary/
 ├── Attributes/               # カスタム属性（AccessLog・FileValidation）

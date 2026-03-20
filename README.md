@@ -1,6 +1,7 @@
 # DevNext
 
 ASP.NET Core 10 製の Web アプリケーションテンプレート。旧 .NET Framework 版（DevNet）からの移行・リニューアルプロジェクト。
+ClaudeCodeの支援の元作成
 
 ## 概要
 

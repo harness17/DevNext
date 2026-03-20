@@ -1,0 +1,55 @@
+@model WizardStep1ViewModel
+@{
+    ViewData["Title"] = "多段階フォーム - Step 1: 基本情報";
+}
+
+<h2>多段階フォームサンプル</h2>
+
+@await Html.PartialAsync("_ProgressBar", 1)
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <strong>Step 1</strong> — 基本情報を入力してください
+            </div>
+            <div class="card-body">
+                <form asp-action="Step1" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <span class="text-danger">*</span>
+                        <input asp-for="Name" class="form-control" placeholder="山田 太郎" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <span class="text-danger">*</span>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="example@example.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" type="tel" class="form-control" placeholder="090-0000-0000（任意）" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            次へ <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

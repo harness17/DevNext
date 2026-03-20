@@ -73,4 +73,17 @@ namespace Site.Common
         [Display(Name = "選択肢23")]
         select23 = 3
     }
+
+    /// <summary>多段階フォームサンプルのカテゴリ</summary>
+    public enum WizardCategory
+    {
+        [Display(Name = "お問い合わせ")]
+        Inquiry = 1,
+        [Display(Name = "ご要望")]
+        Request = 2,
+        [Display(Name = "不具合報告")]
+        BugReport = 3,
+        [Display(Name = "その他")]
+        Other = 4,
+    }
 }

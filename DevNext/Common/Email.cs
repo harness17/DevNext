@@ -1,9 +1,11 @@
+using System.Net;
 using System.Net.Mail;
 
 namespace Site.Common
 {
     /// <summary>
-    /// メール送信クラス
+    /// メール送信クラス。
+    /// SMTP設定は appsettings.json の Smtp セクションから読み込む。
     /// </summary>
     public class Email
     {
@@ -35,10 +37,34 @@ namespace Site.Common
         {
             try
             {
+                // --- SMTP 接続設定 ---
+                // appsettings.json の Smtp セクションから各設定を取得する
+                // 設定が存在しない場合のデフォルト値:
+                //   Host: localhost、Port: 25、EnableSsl: false、Timeout: 30秒
                 var smtpHost = _config["Smtp:Host"] ?? "localhost";
                 var smtpPort = int.Parse(_config["Smtp:Port"] ?? "25");
+                var enableSsl = bool.Parse(_config["Smtp:EnableSsl"] ?? "false");
+                var userName = _config["Smtp:UserName"];
+                var password = _config["Smtp:Password"];
+                var timeout = int.Parse(_config["Smtp:Timeout"] ?? "30000");
 
                 using var mailer = new SmtpClient(smtpHost, smtpPort);
+
+                // ポイント: SSL/TLS の有効化
+                // Port 465 (SMTPS) または 587 (STARTTLS) を使う場合は true にする
+                // Port 25 (平文) では false のまま使用する
+                mailer.EnableSsl = enableSsl;
+
+                // ポイント: SMTP 認証（ユーザー名・パスワードが設定されている場合のみ有効）
+                // Gmail / SendGrid / Mailgun 等の外部SMTPサービスでは認証が必須
+                // 社内 SMTP サーバーや MailHog（開発用）では認証不要の場合が多い
+                if (!string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(password))
+                    mailer.Credentials = new NetworkCredential(userName, password);
+
+                // ポイント: 送信タイムアウト（ミリ秒）
+                // デフォルト 100000ms（100秒）は長すぎるためアプリの要件に合わせて設定する
+                mailer.Timeout = timeout;
+
                 using var message = CreateMessage();
                 mailer.Send(message);
                 return SendMailResult.Success;
@@ -72,6 +98,7 @@ namespace Site.Common
             foreach (var bcc in BccList)
                 message.Bcc.Add(new MailAddress(bcc));
 
+            // ポイント: 件名を Base64 エンコード（B エンコード）して日本語を扱えるようにする
             message.Subject = EncodeMailHeader(Subject ?? "", enc);
             message.Body = Body;
 

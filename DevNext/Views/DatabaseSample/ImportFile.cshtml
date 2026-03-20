@@ -7,12 +7,18 @@
 
 <div class="row">
     <div class="col-md-8">
+        @*
+            ポイント: ファイルアップロードには enctype="multipart/form-data" が必須
+            これがないとサーバー側で IFormFile が null になる
+        *@
         <form asp-controller="DatabaseSample" asp-action="ImportFile" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="All" class="text-danger"></div>
 
             <div class="mb-3">
                 <label asp-for="ImportDataFile" class="form-label">インポートファイル (xlsx)</label>
+                @* ポイント: accept=".xlsx" でファイル選択ダイアログを xlsx に絞る（サーバー側バリデーションも [FileTypes] で実施）
+                           ブラウザの accept は補助的なもので、サーバー側バリデーションが本命 *@
                 <input asp-for="ImportDataFile" type="file" class="form-control" accept=".xlsx" />
                 <span asp-validation-for="ImportDataFile" class="text-danger"></span>
                 <small class="text-muted">対応形式: xlsx (最大2MB)</small>
@@ -26,6 +32,11 @@
             </div>
         </form>
 
+        @*
+            ポイント: インポートエラーがある場合にのみエラー一覧を表示する
+            サービス層で検出したエラーを ImportErrList に詰めてモデルで返している
+            エラーなし（Count == 0）の場合は TempData にメッセージを入れてリダイレクトも可能
+        *@
         @if (Model.ImportErrList != null && Model.ImportErrList.Any())
         {
             <div class="alert alert-danger mt-3">

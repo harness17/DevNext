@@ -42,6 +42,12 @@ namespace Site.Common
         public DbSet<SampleEntityChild> SampleEntityChild { get; set; }
         public DbSet<SampleEntityChildHistory> SampleEntityChildHistory { get; set; }
 
+        // ファイル管理サンプル
+        public DbSet<FileEntity> FileEntity { get; set; }
+
+        // 多段階フォームサンプル
+        public DbSet<WizardEntity> WizardEntity { get; set; }
+
         #endregion
     }
 }

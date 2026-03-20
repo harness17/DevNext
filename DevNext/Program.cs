@@ -63,6 +63,15 @@ builder.Services.AddScoped<DatabaseSampleService>();
 builder.Services.AddScoped<CommonService>();
 builder.Services.AddScoped<Dev.CommonLibrary.Attributes.AccessLogAttribute>();
 
+// メール送信サンプル
+builder.Services.AddScoped<Site.Service.MailSampleService>();
+
+// ファイル管理サンプル
+builder.Services.AddScoped<Site.Service.FileManagementService>();
+
+// 多段階フォームサンプル
+builder.Services.AddScoped<Site.Service.WizardSampleService>();
+
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 

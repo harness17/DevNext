@@ -29,3 +29,34 @@
         </div>
     </div>
 </div>
+
+<div class="row mt-3">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-envelope me-2"></i>メール送信サンプル</h5>
+                <p class="card-text">Email.cs とテキストテンプレートを使ったメール送信のサンプルです。</p>
+                <a asp-controller="MailSample" asp-action="Index" class="btn btn-primary">フォームへ</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-folder-open me-2"></i>ファイル管理</h5>
+                <p class="card-text">ファイルのアップロード・ダウンロード・削除のサンプルです。</p>
+                <a asp-controller="FileManagement" asp-action="Index" class="btn btn-primary">一覧へ</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-list-ol me-2"></i>多段階フォーム</h5>
+                <p class="card-text">Step1 → Step2 → 確認 → 完了 のウィザード形式フォームのサンプルです。</p>
+                <a asp-controller="WizardSample" asp-action="Index" class="btn btn-primary me-2">一覧へ</a>
+                <a asp-controller="WizardSample" asp-action="Step1" class="btn btn-secondary">新規登録</a>
+            </div>
+        </div>
+    </div>
+</div>

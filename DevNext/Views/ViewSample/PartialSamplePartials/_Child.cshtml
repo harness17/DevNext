@@ -1,6 +1,14 @@
 @model PartialSampleChildModel
 @using Microsoft.AspNetCore.Mvc.Rendering
 
+@*
+    ポイント: パーシャルビューは <tr> のみを返すフラグメント
+    親ビューで <table><tbody> を用意して、その中にこのパーシャルを埋め込むことで
+    テーブル行として表示される
+
+    このパーシャルは読み取り専用（表示専用）のサンプル
+    入力フォームとして使う場合は input に name="ChildList[idx].プロパティ名" を指定する必要がある
+*@
 <tr>
     <td>
         <span>@Model.Text</span>
@@ -9,6 +17,7 @@
         <span>@Model.Number</span>
     </td>
     <td>
+        @* ポイント: Enum 値は .ToString() で文字列として表示される（Display 属性に対応させたい場合は拡張メソッドを使う）*@
         <span>@Model.Enum</span>
     </td>
 </tr>

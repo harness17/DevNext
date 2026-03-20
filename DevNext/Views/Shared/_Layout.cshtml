@@ -38,6 +38,20 @@
                                 <li><a class="dropdown-item" asp-controller="ViewSample" asp-action="SortSample">SortSample</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="MailSample" asp-action="Index">メールサンプル</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="FileManagement" asp-action="Index">ファイル管理</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="wizardDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">多段階フォーム</a>
+                            <ul class="dropdown-menu" aria-labelledby="wizardDropdown">
+                                <li><a class="dropdown-item" asp-controller="WizardSample" asp-action="Index">一覧</a></li>
+                                <li><a class="dropdown-item" asp-controller="WizardSample" asp-action="Step1">新規登録</a></li>
+                            </ul>
+                        </li>
                     </ul>
                     <ul class="navbar-nav">
                         @await Html.PartialAsync("_LoginPartial")

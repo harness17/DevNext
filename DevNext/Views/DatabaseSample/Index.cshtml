@@ -9,6 +9,11 @@
     <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus me-1"></i>Create New</a>
 </p>
 
+@*
+    ポイント: 検索フォームの hidden フィールドで Page / Sort / SortDir / RecordNum / PageRead を管理する
+    JavaScript がこれらの値を書き換えてから submit することで、ページング・ソート・件数変更に対応する
+    @Html.AntiForgeryToken() で CSRF 対策トークンをフォームに埋め込む
+*@
 <form id="SearchForm" asp-controller="DatabaseSample" asp-action="Index" method="post">
     @Html.AntiForgeryToken()
     <input asp-for="Page" type="hidden" />
@@ -23,6 +28,8 @@
             <div class="row mb-2">
                 <div class="col-md-3">
                     <label asp-for="Cond.ApplicationUserId" class="form-label">ユーザー</label>
+                    @* ポイント: asp-items でドロップダウンの選択肢を動的に生成する
+                               先頭の <option value="">全て</option> は「未選択＝全件」の選択肢 *@
                     <select asp-for="Cond.ApplicationUserId" asp-items="Model.Cond.ApplicationUserIdist" class="form-select">
                         <option value="">全て</option>
                     </select>
@@ -40,6 +47,11 @@
                 <div class="col-md-4">
                     <label class="form-label">BoolData</label>
                     <div>
+                        @*
+                            ポイント: bool? 型はラジオボタンで「全て / あり / なし」の3択にする
+                            asp-for が使えないため name を手動指定し、checked 属性を Razor 式で制御する
+                            null（未選択）= 全て表示、true = あり、false = なし に対応
+                        *@
                         @foreach (var item in Model.Cond.BoolDataSelectList)
                         {
                             <div class="form-check form-check-inline">
@@ -56,6 +68,12 @@
                 <div class="col-md-4">
                     <label class="form-label">EnumData</label>
                     <div>
+                        @*
+                            ポイント: Enum の複数選択はチェックボックスで実装する
+                            同じ name="Cond.EnumData" を複数のチェックボックスに付けることで
+                            MVC バインディングが List<string> にまとめてくれる
+                            checked 状態は Model.Cond.EnumData.Contains(item.Value) で判定する
+                        *@
                         @foreach (var item in Model.Cond.EnumDataList)
                         {
                             <div class="form-check form-check-inline">
@@ -71,6 +89,7 @@
                 </div>
                 <div class="col-md-4">
                     <label asp-for="Cond.EnumData2" class="form-label">EnumData2</label>
+                    @* ポイント: Enum の単一選択はドロップダウンで実装（先頭に "全て" を追加） *@
                     <select asp-for="Cond.EnumData2" asp-items="Model.Cond.EnumData2List" class="form-select">
                         <option value="">全て</option>
                     </select>
@@ -79,6 +98,8 @@
             <div class="row mb-2">
                 <div class="col-md-3">
                     <label asp-for="Cond.Create_start_date" class="form-label"></label>
+                    @* ポイント: date input は value を "yyyy-MM-dd" 形式で指定する必要がある
+                               asp-for の DisplayFormat が効かない場合に value を直接 Razor 式で制御する *@
                     <input asp-for="Cond.Create_start_date" type="date" class="form-control"
                            value="@(Model.Cond.Create_start_date?.ToString("yyyy-MM-dd"))" />
                 </div>
@@ -109,22 +130,30 @@
     </div>
 </form>
 
+@*
+    ポイント: 検索結果エリアを div で囲んでおき、Ajax 成功時にこの div の中身をパーシャルビューで差し替える
+    初期表示は @await Html.PartialAsync でサーバー側レンダリングし、以降は Ajax で部分更新する
+*@
 <div id="SearchResult">
     @await Html.PartialAsync("_IndexPartial", Model)
 </div>
 
 @section Scripts {
     <script>
+        // ポイント: 検索ボタン押下時は Page を 1 にリセットし、PageRead に "Resarch" をセットして Ajax POST する
         function funcSearch() {
             $('#Page').val(1);
             $('#PageRead').val('Resarch');
             submitSearch();
         }
 
+        // ポイント: クリアはフォームをリセットせず URL を直接変更してリダイレクトする
+        //           Url.Action でサーバー側で生成した URL を使うことで相対パス問題を避ける
         function funcClear() {
             window.location.href = '@Url.Action("Index")';
         }
 
+        // ポイント: ソートは現在の Sort と比較して同じ列なら方向を反転、異なる列なら ASC から始める
         function funcSort(sortColumn) {
             var currentSort = $('#Sort').val();
             var currentDir = $('#SortDir').val();
@@ -139,6 +168,7 @@
             submitSearch();
         }
 
+        // ポイント: 表示件数変更時は Page を 1 に戻してから検索する
         function funcRecordNumber(val) {
             $('#RecordNum').val(val);
             $('#Page').val(1);
@@ -152,6 +182,9 @@
             submitSearch();
         }
 
+        // ポイント: Excel/PDFダウンロードはフォームの action を一時的に変更して通常 submit する
+        //           Ajax submit だとファイルダウンロードができないため通常フォーム送信を使う
+        //           submit 後にすぐ元の action に戻すことで次回の Ajax 検索に影響を与えない
         function funcExcelDownload() {
             $('#Page').val(1);
             var form = $('#SearchForm');
@@ -170,6 +203,8 @@
             form.attr('action', action);
         }
 
+        // ポイント: Ajax POST でフォームデータを送信し、結果（パーシャルビューのHTML）で SearchResult を更新する
+        //           serialize() でフォームの全入力値をクエリ文字列形式に変換する
         function submitSearch() {
             $.ajax({
                 type: 'POST',

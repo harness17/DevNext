@@ -8,7 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DbMigrationRunner
 {
     /// <summary>
-    /// EF Core マイグレーション実行ツール
+    /// DB作成・スキーマ更新ツール。
+    /// - DBが存在しない場合: EnsureCreatedAsync でテーブルをすべて作成する。
+    /// - DBが既に存在する場合: 不足テーブルのみ追加する（既存データは削除しない）。
     /// </summary>
     class Program
     {
@@ -45,10 +47,21 @@ namespace DbMigrationRunner
 
                 var context = sp.GetRequiredService<DBContext>();
 
-                // DB作成
-                Console.WriteLine("データベースを更新しています...");
-                await context.Database.EnsureCreatedAsync();
-                Console.WriteLine("データベースの更新が完了しました。");
+                // DBが存在しない場合は EnsureCreatedAsync で全テーブルを作成する。
+                // DBが既に存在する場合は EnsureCreatedAsync は何もしないため、
+                // 不足テーブルのみ個別に追加する（既存データは保持される）。
+                Console.WriteLine("データベースを確認しています...");
+                bool created = await context.Database.EnsureCreatedAsync();
+                if (created)
+                {
+                    Console.WriteLine("データベースを新規作成しました。");
+                }
+                else
+                {
+                    Console.WriteLine("既存データベースを検出しました。不足テーブルを追加します...");
+                    await ApplyMissingTablesAsync(context);
+                    Console.WriteLine("スキーマの更新が完了しました。");
+                }
 
                 // Seedデータ投入
                 Console.WriteLine("Seedデータを投入しています...");
@@ -71,6 +84,66 @@ namespace DbMigrationRunner
 
             Console.WriteLine("\n任意のキーを押して終了してください...");
             Console.ReadKey();
+        }
+
+        /// <summary>
+        /// 不足しているテーブルを追加する。
+        /// 新しいエンティティを追加した場合は、このメソッドに対応するブロックを追記すること。
+        /// EF Core が生成する DDL と型を合わせるため、各カラムの型は EF Core の規約に従う。
+        ///   - string（[Required][MaxLength(N)]）→ nvarchar(N) NOT NULL
+        ///   - string?（[MaxLength(N)]）         → nvarchar(N) NULL
+        ///   - string?（MaxLength指定なし）       → nvarchar(max) NULL
+        ///   - long                              → bigint NOT NULL
+        ///   - bool                              → bit NOT NULL
+        ///   - DateTime                          → datetime2(7) NOT NULL
+        ///   - DateTime?                         → datetime2(7) NULL
+        ///   - enum (int)                        → int NOT NULL
+        /// </summary>
+        static async Task ApplyMissingTablesAsync(DBContext context)
+        {
+            // ─── FileEntity ──────────────────────────────────────────────
+            Console.WriteLine("  テーブル [FileEntity] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'FileEntity')
+                BEGIN
+                    CREATE TABLE [FileEntity] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [OriginalFileName]          nvarchar(260)   NOT NULL,
+                        [SavedFileName]             nvarchar(260)   NOT NULL,
+                        [FileSize]                  bigint          NOT NULL,
+                        [ContentType]               nvarchar(100)   NOT NULL,
+                        [Description]               nvarchar(500)   NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_FileEntity] PRIMARY KEY ([Id])
+                    )
+                END");
+
+            // ─── WizardEntity ─────────────────────────────────────────────
+            Console.WriteLine("  テーブル [WizardEntity] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'WizardEntity')
+                BEGIN
+                    CREATE TABLE [WizardEntity] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [Name]                      nvarchar(100)   NOT NULL,
+                        [Email]                     nvarchar(256)   NOT NULL,
+                        [Phone]                     nvarchar(20)    NULL,
+                        [Subject]                   nvarchar(200)   NOT NULL,
+                        [Content]                   nvarchar(2000)  NOT NULL,
+                        [Category]                  int             NOT NULL,
+                        [DesiredDate]               datetime2(7)    NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_WizardEntity] PRIMARY KEY ([Id])
+                    )
+                END");
         }
 
         static async Task SeedAsync(DBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)

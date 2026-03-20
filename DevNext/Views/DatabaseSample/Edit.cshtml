@@ -1,0 +1,99 @@
+@model DatabaseSampleDetailViewModel
+@{
+    ViewData["Title"] = Model.Id == null ? "新規作成" : "編集";
+    bool isNew = Model.Id == null;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-controller="DatabaseSample" asp-action="@(isNew ? "Create" : "Edit")" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="StringData" class="control-label"></label>
+                <input asp-for="StringData" class="form-control" />
+                <span asp-validation-for="StringData" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="IntData" class="control-label"></label>
+                <input asp-for="IntData" type="number" class="form-control" />
+                <span asp-validation-for="IntData" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="BoolData" class="control-label"></label>
+                <div class="form-check">
+                    <input asp-for="BoolData" class="form-check-input" />
+                    <label asp-for="BoolData" class="form-check-label">あり</label>
+                </div>
+                <span asp-validation-for="BoolData" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">EnumData</label>
+                <div>
+                    @foreach (var item in Model.EnumDataList)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   asp-for="EnumData"
+                                   id="EnumData_@item.Value"
+                                   value="@item.Value" />
+                            <label class="form-check-label" for="EnumData_@item.Value">@item.Text</label>
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="EnumData" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="EnumData2" class="control-label"></label>
+                <select asp-for="EnumData2" asp-items="Model.EnumData2List" class="form-control">
+                    <option value="">選択してください</option>
+                </select>
+                <span asp-validation-for="EnumData2" class="text-danger"></span>
+            </div>
+
+            @if (!isNew)
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="FileData_file" class="control-label">ファイルアップロード</label>
+                    <input asp-for="FileData_file" type="file" class="form-control" multiple />
+                    <span asp-validation-for="FileData_file" class="text-danger"></span>
+                    <small class="text-muted">対応形式: pdf, xls, xlsx, doc, docx, ppt, pptx, png, jpeg, jpg, gif (最大2MB)</small>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.FileData))
+                {
+                    <div class="form-group mb-3">
+                        <label class="control-label">既存ファイル</label>
+                        <div>
+                            @foreach (var fileName in Model.FileData.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <div class="mb-1">
+                                    <i class="fas fa-file me-1"></i>@fileName.Trim()
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="form-group mb-3">
+                <button type="submit" class="btn btn-primary">
+                    @(isNew ? "作成" : "更新")
+                </button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

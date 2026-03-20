@@ -1,0 +1,47 @@
+@model SampleEntity
+@{
+    ViewData["Title"] = "詳細";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">ID</dt>
+            <dd class="col-sm-8">@Model.Id</dd>
+
+            <dt class="col-sm-4">ユーザーID</dt>
+            <dd class="col-sm-8">@Model.ApplicationUserId</dd>
+
+            <dt class="col-sm-4">文字列データ</dt>
+            <dd class="col-sm-8">@Model.StringData</dd>
+
+            <dt class="col-sm-4">数値データ</dt>
+            <dd class="col-sm-8">@Model.IntData</dd>
+
+            <dt class="col-sm-4">BoolData</dt>
+            <dd class="col-sm-8">@(Model.BoolData ? "あり" : "無し")</dd>
+
+            <dt class="col-sm-4">EnumData</dt>
+            <dd class="col-sm-8">@Model.EnumData</dd>
+
+            <dt class="col-sm-4">EnumData2</dt>
+            <dd class="col-sm-8">@Model.EnumData2</dd>
+
+            <dt class="col-sm-4">ファイル</dt>
+            <dd class="col-sm-8">@Model.FileData</dd>
+
+            <dt class="col-sm-4">更新日時</dt>
+            <dd class="col-sm-8">@Model.UpdateDate.ToString("yyyy/MM/dd HH:mm:ss")</dd>
+
+            <dt class="col-sm-4">作成日時</dt>
+            <dd class="col-sm-8">@Model.CreateDate.ToString("yyyy/MM/dd HH:mm:ss")</dd>
+        </dl>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+</div>

@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "ホーム";
+}
+
+<div class="text-center">
+    <h1 class="display-4">DevNext サンプルアプリ</h1>
+    <p class="lead mt-3">ASP.NET Core MVC サンプルプロジェクト</p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-database me-2"></i>DBサンプル</h5>
+                <p class="card-text">データベースの検索・登録・更新・削除のサンプルです。</p>
+                <a asp-controller="DatabaseSample" asp-action="Index" class="btn btn-primary me-2">一覧へ</a>
+                <a asp-controller="DatabaseSample" asp-action="MapperUsage" class="btn btn-secondary">MapperUsage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-layer-group me-2"></i>ビューサンプル</h5>
+                <p class="card-text">パーシャルビュー・ソート機能のサンプルです。</p>
+                <a asp-controller="ViewSample" asp-action="PartialSample" class="btn btn-primary me-2">PartialSample</a>
+                <a asp-controller="ViewSample" asp-action="SortSample" class="btn btn-secondary">SortSample</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+@model IndexViewModel
+@{
+    ViewData["Title"] = "アカウント管理";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["StatusMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["StatusMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">パスワード</dt>
+            <dd class="col-sm-8">
+                @if (Model.HasPassword)
+                {
+                    <a asp-action="ChangePassword" class="btn btn-sm btn-secondary">パスワードを変更する</a>
+                }
+                else
+                {
+                    <a asp-action="SetPassword" class="btn btn-sm btn-secondary">パスワードを設定する</a>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>

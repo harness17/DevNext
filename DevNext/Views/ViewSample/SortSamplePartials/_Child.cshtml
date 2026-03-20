@@ -1,0 +1,26 @@
+@model PartialSampleChildModel
+
+<tr class="sort-item">
+    <td class="text-center sortable-handle" style="cursor:grab;">
+        <i class="fas fa-grip-vertical"></i>
+    </td>
+    <td>
+        <input type="text" name="ChildList[__INDEX__].Text" class="form-control" value="@Model.Text" placeholder="テキスト" />
+    </td>
+    <td>
+        <input type="number" name="ChildList[__INDEX__].Number" class="form-control" value="@Model.Number" placeholder="数値" />
+    </td>
+    <td>
+        <select name="ChildList[__INDEX__].Enum" class="form-control">
+            <option value="0" selected="@(Model != null && Model.Enum == SampleEnum.select1)">選択肢1</option>
+            <option value="2" selected="@(Model != null && Model.Enum == SampleEnum.select2)">選択肢2</option>
+            <option value="3" selected="@(Model != null && Model.Enum == SampleEnum.select3)">選択肢3</option>
+        </select>
+    </td>
+    <td>
+        <input type="hidden" name="ChildList[__INDEX__].Order" class="order-field" value="@Model.Order" />
+        <button type="button" class="btn btn-sm btn-danger delete-item-btn">
+            <i class="fas fa-trash"></i>
+        </button>
+    </td>
+</tr>

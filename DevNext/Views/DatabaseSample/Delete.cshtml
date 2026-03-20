@@ -1,0 +1,46 @@
+@model SampleEntity
+@{
+    ViewData["Title"] = "削除確認";
+}
+
+<h2>@ViewData["Title"]</h2>
+<h3 class="text-danger">このデータを削除しますか？</h3>
+
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">ID</dt>
+            <dd class="col-sm-8">@Model.Id</dd>
+
+            <dt class="col-sm-4">ユーザーID</dt>
+            <dd class="col-sm-8">@Model.ApplicationUserId</dd>
+
+            <dt class="col-sm-4">文字列データ</dt>
+            <dd class="col-sm-8">@Model.StringData</dd>
+
+            <dt class="col-sm-4">数値データ</dt>
+            <dd class="col-sm-8">@Model.IntData</dd>
+
+            <dt class="col-sm-4">BoolData</dt>
+            <dd class="col-sm-8">@(Model.BoolData ? "あり" : "無し")</dd>
+
+            <dt class="col-sm-4">EnumData</dt>
+            <dd class="col-sm-8">@Model.EnumData</dd>
+
+            <dt class="col-sm-4">EnumData2</dt>
+            <dd class="col-sm-8">@Model.EnumData2</dd>
+
+            <dt class="col-sm-4">作成日時</dt>
+            <dd class="col-sm-8">@Model.CreateDate.ToString("yyyy/MM/dd HH:mm:ss")</dd>
+        </dl>
+
+        <form asp-controller="DatabaseSample" asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash me-1"></i>削除する
+            </button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+        </form>
+    </div>
+</div>

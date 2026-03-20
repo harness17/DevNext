@@ -1,0 +1,147 @@
+@model PartialSampleViewModel
+@{
+    ViewData["Title"] = "Sort サンプル";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p>Sortable.jsを使用したドラッグ&amp;ドロップ並び替えのサンプルです。</p>
+
+<form asp-controller="ViewSample" asp-action="SortSample" method="post" id="SortForm">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-success" id="AddItemBtn">
+            <i class="fas fa-plus me-1"></i>追加
+        </button>
+        <button type="submit" class="btn btn-primary ms-2">
+            <i class="fas fa-save me-1"></i>保存
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:40px;"></th>
+                        <th>テキスト</th>
+                        <th>数値</th>
+                        <th>Enum</th>
+                        <th style="width:80px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="SortableList">
+                    @for (int i = 0; i < Model.ChildList.Count; i++)
+                    {
+                        var idx = i;
+                        var child = Model.ChildList[i];
+                        <tr class="sort-item" data-index="@idx">
+                            <td class="text-center sortable-handle" style="cursor:grab;">
+                                <i class="fas fa-grip-vertical"></i>
+                            </td>
+                            <td>
+                                <input type="text" name="ChildList[@idx].Text" class="form-control" value="@child.Text" placeholder="テキスト" />
+                            </td>
+                            <td>
+                                <input type="number" name="ChildList[@idx].Number" class="form-control" value="@child.Number" placeholder="数値" />
+                            </td>
+                            <td>
+                                <select name="ChildList[@idx].Enum" class="form-control">
+                                    <option value="0" selected="@(child.Enum == SampleEnum.select1)">選択肢1</option>
+                                    <option value="2" selected="@(child.Enum == SampleEnum.select2)">選択肢2</option>
+                                    <option value="3" selected="@(child.Enum == SampleEnum.select3)">選択肢3</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="hidden" name="ChildList[@idx].Order" class="order-field" value="@child.Order" />
+                                <button type="button" class="btn btn-sm btn-danger delete-item-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<!-- テンプレートタグ -->
+<template id="sort-child-template">
+    <tr class="sort-item">
+        <td class="text-center sortable-handle" style="cursor:grab;">
+            <i class="fas fa-grip-vertical"></i>
+        </td>
+        <td>
+            <input type="text" name="ChildList[__INDEX__].Text" class="form-control" placeholder="テキスト" />
+        </td>
+        <td>
+            <input type="number" name="ChildList[__INDEX__].Number" class="form-control" placeholder="数値" />
+        </td>
+        <td>
+            <select name="ChildList[__INDEX__].Enum" class="form-control">
+                <option value="0">選択肢1</option>
+                <option value="2">選択肢2</option>
+                <option value="3">選択肢3</option>
+            </select>
+        </td>
+        <td>
+            <input type="hidden" name="ChildList[__INDEX__].Order" class="order-field" value="0" />
+            <button type="button" class="btn btn-sm btn-danger delete-item-btn">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script>
+        var itemIndex = @Model.ChildList.Count;
+
+        // Sortable初期化
+        var sortable = new Sortable(document.getElementById('SortableList'), {
+            handle: '.sortable-handle',
+            animation: 150,
+            onEnd: function () {
+                updateOrder();
+            }
+        });
+
+        // 追加ボタン
+        $('#AddItemBtn').on('click', function () {
+            var template = document.getElementById('sort-child-template');
+            var html = template.innerHTML.replace(/__INDEX__/g, itemIndex);
+            $('#SortableList').append(html);
+            itemIndex++;
+            updateOrder();
+        });
+
+        // 削除ボタン (動的要素対応)
+        $(document).on('click', '.delete-item-btn', function () {
+            $(this).closest('tr').remove();
+            reindexItems();
+            updateOrder();
+        });
+
+        // インデックス再付与
+        function reindexItems() {
+            $('#SortableList tr').each(function (idx) {
+                $(this).find('input, select').each(function () {
+                    var name = $(this).attr('name');
+                    if (name) {
+                        $(this).attr('name', name.replace(/ChildList\[\d+\]/, 'ChildList[' + idx + ']'));
+                    }
+                });
+            });
+            itemIndex = $('#SortableList tr').length;
+        }
+
+        // Order更新
+        function updateOrder() {
+            $('#SortableList tr').each(function (idx) {
+                $(this).find('.order-field').val(idx);
+            });
+        }
+    </script>
+}

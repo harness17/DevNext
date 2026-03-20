@@ -1,0 +1,58 @@
+@model PartialSampleViewModel
+@{
+    ViewData["Title"] = "Partial サンプル";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p>パーシャルビューの使用例です。</p>
+
+<form asp-controller="ViewSample" asp-action="PartialSample" method="post">
+    @Html.AntiForgeryToken()
+
+    <h4>単体パーシャル (Child)</h4>
+    <div class="card mb-4">
+        <div class="card-body">
+            @await Html.PartialAsync("PartialSamplePartials/_Child", Model.Child)
+        </div>
+    </div>
+
+    <h4>リストパーシャル (ChildList)</h4>
+    <div class="card mb-4">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>テキスト</th>
+                        <th>数値</th>
+                        <th>Enum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.ChildList.Count; i++)
+                    {
+                        @await Html.PartialAsync("PartialSamplePartials/_Child", Model.ChildList[i])
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-group mb-3">
+        <button type="submit" class="btn btn-primary">送信</button>
+    </div>
+</form>
+
+<!-- テンプレートタグ (JavaScript用テンプレート) -->
+<template id="child-template">
+    <tr>
+        <td><input type="text" class="form-control" placeholder="テキスト" /></td>
+        <td><input type="number" class="form-control" placeholder="数値" /></td>
+        <td>
+            <select class="form-control">
+                <option value="0">選択肢1</option>
+                <option value="2">選択肢2</option>
+                <option value="3">選択肢3</option>
+            </select>
+        </td>
+    </tr>
+</template>

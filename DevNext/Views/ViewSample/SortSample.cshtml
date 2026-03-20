@@ -46,7 +46,7 @@
                                 <input type="number" name="ChildList[@idx].Number" class="form-control" value="@child.Number" placeholder="数値" />
                             </td>
                             <td>
-                                <select name="ChildList[@idx].Enum" class="form-control">
+                                <select name="ChildList[@idx].Enum" class="form-select">
                                     <option value="0" selected="@(child.Enum == SampleEnum.select1)">選択肢1</option>
                                     <option value="2" selected="@(child.Enum == SampleEnum.select2)">選択肢2</option>
                                     <option value="3" selected="@(child.Enum == SampleEnum.select3)">選択肢3</option>
@@ -79,7 +79,7 @@
             <input type="number" name="ChildList[__INDEX__].Number" class="form-control" placeholder="数値" />
         </td>
         <td>
-            <select name="ChildList[__INDEX__].Enum" class="form-control">
+            <select name="ChildList[__INDEX__].Enum" class="form-select">
                 <option value="0">選択肢1</option>
                 <option value="2">選択肢2</option>
                 <option value="3">選択肢3</option>

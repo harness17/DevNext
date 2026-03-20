@@ -11,7 +11,7 @@
         <input type="number" name="ChildList[__INDEX__].Number" class="form-control" value="@Model.Number" placeholder="数値" />
     </td>
     <td>
-        <select name="ChildList[__INDEX__].Enum" class="form-control">
+        <select name="ChildList[__INDEX__].Enum" class="form-select">
             <option value="0" selected="@(Model != null && Model.Enum == SampleEnum.select1)">選択肢1</option>
             <option value="2" selected="@(Model != null && Model.Enum == SampleEnum.select2)">選択肢2</option>
             <option value="3" selected="@(Model != null && Model.Enum == SampleEnum.select3)">選択肢3</option>

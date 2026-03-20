@@ -414,3 +414,4 @@ DevNext/wwwroot/js/bootstrap*
 # Data Protection Keys（IIS用暗号化キー、環境ごとに生成されるため除外）
 **/DataProtectionKeys/
 
+/DevNext/wwwroot/Uploads/Files

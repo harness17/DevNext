@@ -1,4 +1,5 @@
 using Dev.CommonLibrary.Entity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Site.Common;
@@ -6,6 +7,13 @@ using Site.Entity;
 using Site.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Data Protection キーの永続化
+// IIS環境でワーカープロセス再起動後もキーを維持し、認証クッキーの復号を可能にする
+var keysFolder = Path.Combine(builder.Environment.ContentRootPath, "DataProtectionKeys");
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysFolder))
+    .SetApplicationName("DevNext");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()

@@ -181,7 +181,7 @@ namespace Dev.CommonLibrary.Common
     /// <summary>
     /// 共通関数クラス
     /// </summary>
-    public static class util
+    public static class Util
     {
         public static string calcMd5(string srcStr)
         {

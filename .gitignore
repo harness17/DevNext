@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Data Protection Keys (IIS用暗号化キー、環境ごとに生成されるため除外)
+**/DataProtectionKeys/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -363,4 +366,51 @@ MigrationBackup/
 FodyWeavers.xsd
 /.claude
 CLAUDE.md
+サンプルベース/
+
+# ===== DevNext プロジェクト固有 =====
+
+# ビルド出力DLL/EXE（プロジェクトフォルダ直下に置かれたもの）
+*.dll
+*.exe
+*.pdb
+
+# dotnet publish が生成するランタイム設定ファイル
+*.deps.json
+*.runtimeconfig.json
+*.staticwebassets.endpoints.json
+
+# NuGetパッケージ由来のロケールリソースフォルダ
+DevNext/cs/
+DevNext/de/
+DevNext/es/
+DevNext/fr/
+DevNext/it/
+DevNext/ja/
+DevNext/ko/
+DevNext/pl/
+DevNext/pt-BR/
+DevNext/ru/
+DevNext/tr/
+DevNext/zh-Hans/
+DevNext/zh-Hant/
+
+# NuGetパッケージ由来のランタイム・参照アセンブリ
+DevNext/refs/
+DevNext/runtimes/
+DevNext/LatoFont/
+
+# IIS用 web.config（dotnet publish が自動生成、発行プロファイルで管理）
+DevNext/web.config
+
+# 静的Webアセットの圧縮ファイル（ビルド時に自動生成）
+**/*.br
+**/*.gz
+
+# BootstrapのNuGet配布ファイル（wwwroot/cssとwwwroot/jsに展開されたもの）
+DevNext/wwwroot/css/bootstrap*
+DevNext/wwwroot/js/bootstrap*
+
+# Data Protection Keys（IIS用暗号化キー、環境ごとに生成されるため除外）
+**/DataProtectionKeys/
 

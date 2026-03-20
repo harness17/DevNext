@@ -12,7 +12,7 @@ namespace Site.Common
     /// <summary>
     /// 共通関数クラス
     /// </summary>
-    public static class localutil
+    public static class LocalUtil
     {
         public static IEnumerable<SelectListItem> SetRecoedNumberList()
         {

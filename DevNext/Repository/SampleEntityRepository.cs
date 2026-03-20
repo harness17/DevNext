@@ -58,9 +58,9 @@ namespace Site.Repository
             }
 
             int totalRecords = query.Count();
-            localutil.SetTakeSkip(ref query, cond);
+            LocalUtil.SetTakeSkip(ref query, cond);
             model.rows = query.ToList();
-            model.Summary = util.CreateSummary(cond.Pager, totalRecords, "{0}件中 {1} - {2} を表示");
+            model.Summary = Util.CreateSummary(cond.Pager, totalRecords, "{0}件中 {1} - {2} を表示");
             return model;
         }
 

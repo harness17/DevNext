@@ -26,7 +26,7 @@ namespace Site.Controllers
         [HttpGet]
         public IActionResult Index(SearchModelBase? pageModel = null)
         {
-            var model = localutil.MapPageModelTo<DatabaseSampleViewModel>(pageModel);
+            var model = LocalUtil.MapPageModelTo<DatabaseSampleViewModel>(pageModel);
 
             if (model.PageRead != null || IsAjaxRequest())
             {
@@ -137,7 +137,7 @@ namespace Site.Controllers
             {
                 _workerService.InsertFile(ref model);
                 if (model.ImportErrList.Count == 0)
-                    TempData[SessionKey.Message] = localutil.GetUpdateAlertMessage("サンプルエンティティ");
+                    TempData[SessionKey.Message] = LocalUtil.GetUpdateAlertMessage("サンプルエンティティ");
             }
             return View("ImportFile", model);
         }

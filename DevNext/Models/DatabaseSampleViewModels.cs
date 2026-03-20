@@ -12,7 +12,7 @@ namespace Site.Models
     {
         public DatabaseSampleDataViewModel RowData { get; set; } = new();
         public DatabaseSampleCondViewModel Cond { get; set; } = new();
-        public IEnumerable<SelectListItem> RecoedNumberList { get; } = localutil.SetRecoedNumberList();
+        public IEnumerable<SelectListItem> RecoedNumberList { get; } = LocalUtil.SetRecoedNumberList();
     }
 
     public class DatabaseSampleCondViewModel : SearchCondModelBase

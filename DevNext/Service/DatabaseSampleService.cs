@@ -31,7 +31,7 @@ namespace Site.Service
         public DatabaseSampleViewModel GetSampleEntityList(DatabaseSampleViewModel model)
         {
             if (model.Cond == null) model.Cond = new DatabaseSampleCondViewModel();
-            localutil.SetPager(model.Cond, model);
+            LocalUtil.SetPager(model.Cond, model);
             model.RowData = _sampleRepository.GetSampleEntityList(_sampleRepository.GetCondModel(model.Cond));
             return model;
         }
@@ -77,9 +77,9 @@ namespace Site.Service
 
                 foreach (var fileitem in model.FileData_file.Where(f => f != null))
                 {
-                    if (fileitem != null && util.IsSafePath(fileitem.FileName, true))
+                    if (fileitem != null && Util.IsSafePath(fileitem.FileName, true))
                     {
-                        var fileName = util.SetFileName(fileitem.FileName);
+                        var fileName = Util.SetFileName(fileitem.FileName);
                         var filePath = Path.Combine(tempFolderPath, fileName);
                         using (var stream = new FileStream(filePath, FileMode.Create))
                             fileitem.CopyTo(stream);

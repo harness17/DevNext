@@ -116,6 +116,58 @@ namespace Site.Models
     }
 
     // ─────────────────────────────────────────────
+    // 一括登録・編集用 ViewModel
+    // ─────────────────────────────────────────────
+
+    // ポイント: 親エンティティと任意件数の子エンティティを1フォームでまとめて登録・編集するための ViewModel
+    //           Id が null → 新規登録、値あり → 編集 として Controller/View で判定する
+    public class DatabaseSampleBulkEditViewModel
+    {
+        public long? Id { get; set; }
+
+        [Display(Name = "文字列データ")]
+        [Required(ErrorMessage = "文字列データは必須です。")]
+        [MaxLength(200)]
+        public string StringData { get; set; } = "";
+
+        [Display(Name = "数値データ")]
+        public int IntData { get; set; }
+
+        [Display(Name = "BoolData")]
+        public bool BoolData { get; set; }
+
+        [Display(Name = "EnumData")]
+        public SampleEnum? EnumData { get; set; }
+        public List<SelectListItem> EnumDataList { get; set; } = SelectListUtility.GetEnumSelectListItem<SampleEnum>().ToList();
+
+        [Display(Name = "EnumData2")]
+        public SampleEnum2 EnumData2 { get; set; }
+        public List<SelectListItem> EnumData2List { get; set; } = SelectListUtility.GetEnumSelectListItem<SampleEnum2>().ToList();
+
+        // ポイント: 子エンティティの一覧。新規行は Id = null、既存行は Id に DB の主キーをセットする
+        public List<DatabaseSampleBulkChildViewModel> Children { get; set; } = new();
+    }
+
+    // ポイント: 一括編集フォーム内の子エンティティ1行分のデータ
+    //           Id が null → POST 時に新規 INSERT、値あり → UPDATE 対象
+    public class DatabaseSampleBulkChildViewModel
+    {
+        // ポイント: 既存レコードの更新と新規追加を同一リストで扱うため Id は nullable にする
+        public long? Id { get; set; }
+
+        [Display(Name = "文字列データ")]
+        [Required(ErrorMessage = "文字列データは必須です。")]
+        [MaxLength(200)]
+        public string StringData { get; set; } = "";
+
+        [Display(Name = "数値データ")]
+        public int IntData { get; set; }
+
+        [Display(Name = "BoolData")]
+        public bool BoolData { get; set; }
+    }
+
+    // ─────────────────────────────────────────────
     // 詳細画面用 ViewModel（親エンティティ + 子一覧）
     // ─────────────────────────────────────────────
 

@@ -121,11 +121,15 @@ dotnet test
 
 - 一覧表示（検索・ページング・ソート）
 - 新規作成 / 編集 / 削除（論理削除）
+- 一括登録 / 一括編集（親＋子エンティティをまとめて登録・編集、子行を動的に追加・削除）
+- 親子関係 CRUD（詳細画面から子エンティティの追加・編集・削除）
+- 編集・削除後の一覧復帰で検索条件・ページ位置を再現
 - ファイルアップロード
 - Excel インポート（XLSX）
 - Excel エクスポート
 - PDF エクスポート（一覧 / 単体）
-  - 単体PDFでは PNG・JPEG・JPG は画像として埋め込み
+  - 単体 PDF には子エンティティ一覧を含む
+  - 単体 PDF では PNG・JPEG・JPG は画像として埋め込み
 
 ### ファイル管理
 
@@ -186,6 +190,7 @@ DevNext/
 │   └── CommonService.cs          # 共通サービス
 ├── Repository/                   # データアクセス層
 │   ├── SampleEntityRepository.cs
+│   ├── SampleEntityChildRepository.cs
 │   ├── FileEntityRepository.cs
 │   └── WizardEntityRepository.cs
 ├── Views/                        # Razor ビュー

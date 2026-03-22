@@ -115,7 +115,7 @@
                 <button type="submit" class="btn btn-primary">
                     @(isNew ? "作成" : "更新")
                 </button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+                <a asp-action="Index" asp-route-returnList="true" class="btn btn-secondary ms-2">一覧に戻る</a>
             </div>
         </form>
     </div>

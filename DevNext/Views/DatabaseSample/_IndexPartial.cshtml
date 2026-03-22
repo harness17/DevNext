@@ -106,10 +106,11 @@ else
                         <td>@row.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
                         <td>
                             @* ポイント: asp-route-id で行の Id をルートパラメータとして渡す *@
-                            <a asp-action="Edit" asp-route-id="@row.Id" class="btn btn-sm btn-primary">Edit</a>
-                            <a asp-action="Details" asp-route-id="@row.Id" class="btn btn-sm btn-info">Details</a>
-                            <a asp-action="PdfOutput" asp-route-id="@row.Id" class="btn btn-sm btn-warning">PDF</a>
-                            <a asp-action="Delete" asp-route-id="@row.Id" class="btn btn-sm btn-danger">Delete</a>
+                            <a asp-action="Details" asp-route-id="@row.Id" class="btn btn-sm btn-info">詳細</a>
+                            <a asp-action="Edit" asp-route-id="@row.Id" class="btn btn-sm btn-primary">編集</a>
+                            <a asp-action="BulkEdit" asp-route-id="@row.Id" class="btn btn-sm btn-warning">一括編集</a>
+                            <a asp-action="PdfOutput" asp-route-id="@row.Id" class="btn btn-sm btn-secondary">PDF</a>
+                            <a asp-action="Delete" asp-route-id="@row.Id" class="btn btn-sm btn-danger">削除</a>
                         </td>
                     </tr>
                 }

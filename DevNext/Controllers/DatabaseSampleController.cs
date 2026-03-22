@@ -33,15 +33,16 @@ namespace Site.Controllers
         // ポイント: GETとPOSTで同名アクション "Index" を使い分ける
         //           GET はURL直打ち・ページング・ソートからの遷移に対応
         //           pageModel にはクエリパラメータで Page/Sort/SortDir/RecordNum/PageRead が渡される
+        //           returnList=true のとき（編集・削除後の一覧復帰）は TempData から検索・ページ状態を復元する
         [HttpGet]
-        public IActionResult Index(SearchModelBase? pageModel = null)
+        public IActionResult Index(SearchModelBase? pageModel = null, bool returnList = false)
         {
             // SearchModelBase のプロパティを DatabaseSampleViewModel へコピーする共通ユーティリティ
             var model = LocalUtil.MapPageModelTo<DatabaseSampleViewModel>(pageModel);
 
-            // ページング・ソート変更時、または Ajax リクエスト時は
+            // ページング・ソート変更時、Ajax リクエスト時、または一覧復帰時は
             // TempData に保存済みの検索条件を復元して同じ条件で再取得する
-            if (model.PageRead != null || IsAjaxRequest())
+            if (model.PageRead != null || IsAjaxRequest() || returnList)
             {
                 // TempData.Peek: 読み出してもキーを消さない（次のリクエストでも保持される）
                 // TempData[key] で読み出すと次回以降使えなくなるため Peek を使う
@@ -49,15 +50,35 @@ namespace Site.Controllers
                 if (sessionCond != null)
                     model.Cond = System.Text.Json.JsonSerializer.Deserialize<DatabaseSampleCondViewModel>(sessionCond.ToString()!)!;
 
+                // ポイント: 一覧復帰時はページ番号・ソート状態も TempData から復元する
+                //           ページング・ソート操作時はURLパラメータ側の値を優先するため復元しない
+                if (returnList)
+                {
+                    var sessionPage = TempData.Peek(SessionKey.DatabaseSamplePageModel);
+                    if (sessionPage != null)
+                    {
+                        var savedPage = System.Text.Json.JsonSerializer.Deserialize<SearchModelBase>(sessionPage.ToString()!)!;
+                        model.Page      = savedPage.Page;
+                        model.Sort      = savedPage.Sort;
+                        model.SortDir   = savedPage.SortDir;
+                        model.RecordNum = savedPage.RecordNum;
+                    }
+                }
+
                 // Ajax からのページング時は PageRead を上書き
                 if (IsAjaxRequest())
                     model.PageRead = PageRead.Paging;
             }
 
             model = _workerService.GetSampleEntityList(model);
+
             // 検索条件を JSON シリアライズして TempData に保存
             // ページング・ソート時に検索条件を引き継ぐためのセッション代替手段
             TempData[SessionKey.DatabaseSampleCondViewModel] = System.Text.Json.JsonSerializer.Serialize(model.Cond);
+            // ポイント: ページ・ソート状態も TempData に保存する
+            //           一覧復帰時（returnList=true）に同じページ位置を再現するために使用する
+            TempData[SessionKey.DatabaseSamplePageModel] = System.Text.Json.JsonSerializer.Serialize(
+                new SearchModelBase { Page = model.Page, Sort = model.Sort, SortDir = model.SortDir, RecordNum = model.RecordNum });
 
             return View(model);
         }
@@ -71,6 +92,9 @@ namespace Site.Controllers
         {
             model = _workerService.GetSampleEntityList(model);
             TempData[SessionKey.DatabaseSampleCondViewModel] = System.Text.Json.JsonSerializer.Serialize(model.Cond);
+            // ポイント: POST 検索後もページ・ソート状態を更新して一覧復帰時に反映させる
+            TempData[SessionKey.DatabaseSamplePageModel] = System.Text.Json.JsonSerializer.Serialize(
+                new SearchModelBase { Page = model.Page, Sort = model.Sort, SortDir = model.SortDir, RecordNum = model.RecordNum });
 
             // IsAjaxRequest() で X-Requested-With ヘッダーを確認
             // jQuery の $.ajax() / fetch API は自動的にこのヘッダーを付与する
@@ -107,7 +131,7 @@ namespace Site.Controllers
                 // ポイント: PRG パターン (Post-Redirect-Get)
                 //           POST 後に RedirectToAction でリダイレクトすることで
                 //           F5 リロードによる二重送信を防ぐ
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { returnList = true });
             }
             return View(sampleEntity);
         }
@@ -129,7 +153,7 @@ namespace Site.Controllers
             {
                 // IWebHostEnvironment はファイルアップロード先の物理パス解決に使用
                 _workerService.UpdSampleEntity(sampleEntity, _env);
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { returnList = true });
             }
             return View(sampleEntity);
         }
@@ -151,7 +175,7 @@ namespace Site.Controllers
         {
             // 論理削除: データを物理削除せず DelFlag を立てる（サービス内で実装）
             _workerService.DelSampleEntity(id);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { returnList = true });
         }
 
         // ポイント: AutoMapper の前付け名・後付け名マッピング (RecognizeDestinationPrefixes / Postfixes) のサンプル
@@ -218,6 +242,51 @@ namespace Site.Controllers
             string fileName = $"ExportFile_{fromdate}.pdf";
             var memorystream = _workerService.ExportPdf(model);
             return File(memorystream, "application/pdf", fileName);
+        }
+
+        // ─────────────────────────────────────────────
+        // 一括登録・編集
+        // ─────────────────────────────────────────────
+
+        // ポイント: Create と BulkCreate で同一ビュー (BulkEdit.cshtml) を使い回す
+        //           Model.Id が null なら新規登録として扱う
+        public IActionResult BulkCreate()
+        {
+            return View("BulkEdit", new DatabaseSampleBulkEditViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult BulkCreate(DatabaseSampleBulkEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _workerService.BulkInsert(model, User.Identity?.Name);
+                TempData[SessionKey.Message] = LocalUtil.GetCreateAlertMessage("エンティティ（一括）");
+                return RedirectToAction("Index", new { returnList = true });
+            }
+            return View("BulkEdit", model);
+        }
+
+        public IActionResult BulkEdit(int? id)
+        {
+            if (id == null) return BadRequest();
+            var model = _workerService.GetBulkEditModel((long)id);
+            if (model == null) return NotFound();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult BulkEdit(DatabaseSampleBulkEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _workerService.BulkUpdate(model);
+                TempData[SessionKey.Message] = LocalUtil.GetUpdateAlertMessage("エンティティ（一括）");
+                return RedirectToAction("Details", new { id = model.Id });
+            }
+            return View(model);
         }
 
         // ─────────────────────────────────────────────

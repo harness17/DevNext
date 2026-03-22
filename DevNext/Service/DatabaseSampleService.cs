@@ -202,6 +202,125 @@ namespace Site.Service
             if (entity != null) _childRepository.LogicalDelete(entity);
         }
 
+        // ─────────────────────────────────────────────
+        // 一括登録・編集
+        // ─────────────────────────────────────────────
+
+        /// <summary>
+        /// 一括編集用 ViewModel を取得する（親エンティティ + 子一覧）
+        /// </summary>
+        public DatabaseSampleBulkEditViewModel? GetBulkEditModel(long id)
+        {
+            var parent = _sampleRepository.SelectById(id);
+            if (parent == null || parent.DelFlag) return null;
+
+            var mapper = new MapperConfiguration(
+                cfg => cfg.CreateMap<SampleEntity, DatabaseSampleBulkEditViewModel>(),
+                NullLoggerFactory.Instance).CreateMapper();
+
+            var model = mapper.Map<DatabaseSampleBulkEditViewModel>(parent);
+
+            // ポイント: 既存の子エンティティを BulkChildViewModel にマッピングして Children にセットする
+            model.Children = _childRepository.GetChildrenByParentId(id)
+                .Select(c => new DatabaseSampleBulkChildViewModel
+                {
+                    Id         = c.Id,
+                    StringData = c.StringData,
+                    IntData    = c.IntData,
+                    BoolData   = c.BoolData
+                }).ToList();
+
+            return model;
+        }
+
+        /// <summary>
+        /// 親エンティティと子エンティティをまとめて新規登録する
+        /// </summary>
+        public void BulkInsert(DatabaseSampleBulkEditViewModel model, string? userName)
+        {
+            // --- 親エンティティを INSERT ---
+            var parentMapper = new MapperConfiguration(
+                cfg => cfg.CreateMap<DatabaseSampleBulkEditViewModel, SampleEntity>()
+                          .ForMember(d => d.ApplicationUserId, o => o.MapFrom(_ => userName)),
+                NullLoggerFactory.Instance).CreateMapper();
+
+            var parent = parentMapper.Map<SampleEntity>(model);
+            // ポイント: Insert() 内で SetForCreate() が呼ばれるため明示的な呼び出しは不要
+            _sampleRepository.Insert(parent);
+
+            // --- 子エンティティを一括 INSERT ---
+            // ポイント: 親の INSERT 後に parent.Id が確定するので、そのタイミングで SumpleEntityID を設定する
+            foreach (var child in model.Children)
+            {
+                var childEntity = new SampleEntityChild
+                {
+                    SumpleEntityID = parent.Id,
+                    StringData     = child.StringData,
+                    IntData        = child.IntData,
+                    BoolData       = child.BoolData
+                };
+                _childRepository.Insert(childEntity);
+            }
+        }
+
+        /// <summary>
+        /// 親エンティティと子エンティティをまとめて更新する。
+        /// フォームに残っている子は UPDATE または INSERT、フォームから消えた子は論理削除する。
+        /// </summary>
+        public void BulkUpdate(DatabaseSampleBulkEditViewModel model)
+        {
+            // --- 親エンティティを UPDATE ---
+            var parent = _sampleRepository.SelectById(model.Id!)!;
+
+            var parentMapper = new MapperConfiguration(
+                cfg => cfg.CreateMap<DatabaseSampleBulkEditViewModel, SampleEntity>(),
+                NullLoggerFactory.Instance).CreateMapper();
+
+            parent = parentMapper.Map(model, parent);
+            _sampleRepository.Update(parent);
+
+            // --- 子エンティティの差分処理 ---
+            // ポイント: フォームに残っている既存子の Id セットを作成し、
+            //           DB にあって Id セットにない子を「削除された子」として論理削除する
+            var existingChildren = _childRepository.GetChildrenByParentId(model.Id!.Value);
+            var submittedIds = model.Children
+                .Where(c => c.Id != null)
+                .Select(c => c.Id!.Value)
+                .ToHashSet();
+
+            // フォームから消えた既存子を論理削除
+            foreach (var existing in existingChildren.Where(e => !submittedIds.Contains(e.Id)))
+            {
+                _childRepository.LogicalDelete(existing);
+            }
+
+            // フォームに残った子を UPDATE または INSERT
+            foreach (var child in model.Children)
+            {
+                if (child.Id != null)
+                {
+                    // ポイント: Id あり → 既存レコードを取得して更新する
+                    var entity = _childRepository.SelectById(child.Id.Value)!;
+                    entity.StringData = child.StringData;
+                    entity.IntData    = child.IntData;
+                    entity.BoolData   = child.BoolData;
+                    _childRepository.Update(entity);
+                }
+                else
+                {
+                    // ポイント: Id なし → 新規行として INSERT する
+                    var entity = new SampleEntityChild
+                    {
+                        SumpleEntityID = model.Id!.Value,
+                        StringData     = child.StringData,
+                        IntData        = child.IntData,
+                        BoolData       = child.BoolData
+                    };
+                    _childRepository.Insert(entity);
+                }
+            }
+        }
+
         public void InsertFile(ref DatabaseSampleImportViewModel model)
         {
             if (model.ImportDataFile != null)
@@ -423,6 +542,9 @@ namespace Site.Service
             var entity = _sampleRepository.SelectById((long)id);
             if (entity == null) return null;
 
+            // 子エンティティを取得する
+            var children = _childRepository.GetChildrenByParentId((long)id);
+
             // 添付ファイルを画像と非画像に分類する
             // ポイント: HashSet<string> + StringComparer.OrdinalIgnoreCase で拡張子を大文字小文字無視で比較
             var imageExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpeg", ".jpg" };
@@ -495,6 +617,74 @@ namespace Site.Service
                                 .ToList();
                             if (nonImageFiles.Any())
                                 Row("添付ファイル", string.Join("\n", nonImageFiles));
+                        });
+
+                        // ─── 子エンティティ一覧 ───
+                        content.Item().PaddingTop(16).Column(childSection =>
+                        {
+                            childSection.Item()
+                                .PaddingBottom(6)
+                                .Text($"子エンティティ一覧（{children.Count} 件）")
+                                .FontSize(11).Bold();
+
+                            if (children.Count == 0)
+                            {
+                                // 子データなし
+                                childSection.Item()
+                                    .Text("子エンティティはありません。")
+                                    .FontColor(Colors.Grey.Medium);
+                            }
+                            else
+                            {
+                                childSection.Item().Table(childTable =>
+                                {
+                                    childTable.ColumnsDefinition(cols =>
+                                    {
+                                        cols.ConstantColumn(50);  // 子ID
+                                        cols.RelativeColumn(3);   // 文字列データ
+                                        cols.ConstantColumn(70);  // 数値データ
+                                        cols.ConstantColumn(60);  // BoolData
+                                        cols.ConstantColumn(120); // 作成日時
+                                    });
+
+                                    static IContainer HeaderCell(IContainer c) =>
+                                        c.Background(Colors.Grey.Lighten2)
+                                         .Border(1).BorderColor(Colors.Grey.Lighten1)
+                                         .PaddingVertical(5).PaddingHorizontal(6)
+                                         .DefaultTextStyle(x => x.Bold().FontSize(9));
+
+                                    static IContainer DataCell(IContainer c) =>
+                                        c.Border(1).BorderColor(Colors.Grey.Lighten2)
+                                         .PaddingVertical(4).PaddingHorizontal(6)
+                                         .DefaultTextStyle(x => x.FontSize(9));
+
+                                    // ヘッダー行
+                                    childTable.Cell().Element(HeaderCell).Text("子ID");
+                                    childTable.Cell().Element(HeaderCell).Text("文字列データ");
+                                    childTable.Cell().Element(HeaderCell).Text("数値データ");
+                                    childTable.Cell().Element(HeaderCell).Text("BoolData");
+                                    childTable.Cell().Element(HeaderCell).Text("作成日時");
+
+                                    // ポイント: 偶数行に薄い背景色を付けて視認性を高める
+                                    for (int i = 0; i < children.Count; i++)
+                                    {
+                                        var child = children[i];
+                                        IContainer RowCell(IContainer c) =>
+                                            i % 2 == 0
+                                                ? DataCell(c)
+                                                : c.Background(Colors.Grey.Lighten4)
+                                                   .Border(1).BorderColor(Colors.Grey.Lighten2)
+                                                   .PaddingVertical(4).PaddingHorizontal(6)
+                                                   .DefaultTextStyle(x => x.FontSize(9));
+
+                                        childTable.Cell().Element(RowCell).Text(child.Id.ToString());
+                                        childTable.Cell().Element(RowCell).Text(child.StringData);
+                                        childTable.Cell().Element(RowCell).Text(child.IntData.ToString());
+                                        childTable.Cell().Element(RowCell).Text(child.BoolData ? "あり" : "なし");
+                                        childTable.Cell().Element(RowCell).Text(child.CreateDate.ToString("yyyy/MM/dd HH:mm"));
+                                    }
+                                });
+                            }
                         });
 
                         // ポイント: 画像ファイルのみ PDF 内に直接埋め込む

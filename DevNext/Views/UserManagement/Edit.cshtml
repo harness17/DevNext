@@ -40,13 +40,28 @@
                 *@
                 @foreach (var role in Model.AvailableRoles)
                 {
+                    @* ポイント: 初期 Admin ユーザーの Admin ロールは変更不可（disabled + hidden で送信値も保持） *@
+                    var isProtected = Model.Id == Const.SystemAdminUserId && role.Value == "Admin";
+                    var isChecked   = Model.RoleNames.Contains(role.Value ?? "");
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox"
                                name="RoleNames"
                                id="role_@role.Value"
                                value="@role.Value"
-                               @(Model.RoleNames.Contains(role.Value ?? "") ? "checked" : "") />
-                        <label class="form-check-label" for="role_@role.Value">@role.Text</label>
+                               @(isChecked ? "checked" : "")
+                               @(isProtected ? "disabled" : "") />
+                        @* disabled なチェックボックスはフォーム送信に含まれないため hidden で補完する *@
+                        @if (isProtected)
+                        {
+                            <input type="hidden" name="RoleNames" value="@role.Value" />
+                        }
+                        <label class="form-check-label" for="role_@role.Value">
+                            @role.Text
+                            @if (isProtected)
+                            {
+                                <span class="text-muted small ms-1">（変更不可）</span>
+                            }
+                        </label>
                     </div>
                 }
             </div>

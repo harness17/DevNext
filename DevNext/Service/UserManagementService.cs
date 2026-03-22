@@ -126,6 +126,10 @@ namespace Site.Service
             var rolesToRemove = currentRoles.Except(model.RoleNames).ToList();
             var rolesToAdd    = model.RoleNames.Except(currentRoles).ToList();
 
+            // ポイント: 初期 Admin ユーザーは Admin ロールを剥奪できない（システム管理上の制約）
+            if (user.Id == Const.SystemAdminUserId)
+                rolesToRemove.Remove("Admin");
+
             if (rolesToRemove.Any())
             {
                 var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);

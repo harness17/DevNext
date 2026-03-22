@@ -19,6 +19,7 @@ namespace Site.Service
     {
         private readonly DBContext _context;
         private readonly SampleEntityRepository _sampleRepository;
+        private readonly SampleEntityChildRepository _childRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public DatabaseSampleService(DBContext context, IHttpContextAccessor httpContextAccessor)
@@ -27,6 +28,7 @@ namespace Site.Service
             // ポイント: Repository はサービス内で new して使う（DIせず）
             //           Repository 自体が DBContext に依存するため、DI 済みの context を渡して初期化する
             _sampleRepository = new SampleEntityRepository(context);
+            _childRepository = new SampleEntityChildRepository(context);
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -112,10 +114,92 @@ namespace Site.Service
 
         public void DelSampleEntity(int id)
         {
+            // ポイント: 子エンティティを先に論理削除してから親を論理削除する（親→子の順だとFK違反になる可能性）
+            _childRepository.LogicalDeleteByParentId(id);
+
             var entity = _context.SampleEntity.Find((long)id);
             // ポイント: LogicalDelete で DelFlag を true にする論理削除
             //           データを物理的に削除しないため履歴追跡・復元が可能
             if (entity != null) _sampleRepository.LogicalDelete(entity);
+        }
+
+        // ─────────────────────────────────────────────
+        // 子エンティティ CRUD
+        // ─────────────────────────────────────────────
+
+        /// <summary>
+        /// 親エンティティの詳細（親情報 + 子一覧）を取得して返す
+        /// </summary>
+        public DatabaseSampleDetailsViewModel? GetParentDetails(long id)
+        {
+            var parent = _sampleRepository.SelectById(id);
+            if (parent == null || parent.DelFlag) return null;
+
+            return new DatabaseSampleDetailsViewModel
+            {
+                Parent = parent,
+                // ポイント: 子レコードは Id 昇順でソートして返す（Repository 側で実装済み）
+                Children = _childRepository.GetChildrenByParentId(id)
+            };
+        }
+
+        /// <summary>
+        /// 子エンティティを編集 ViewModel に変換して返す
+        /// </summary>
+        public DatabaseSampleChildEditViewModel? GetChildEditModel(long id)
+        {
+            var entity = _childRepository.SelectById(id);
+            if (entity == null || entity.DelFlag) return null;
+
+            var mapper = new MapperConfiguration(
+                cfg => cfg.CreateMap<SampleEntityChild, DatabaseSampleChildEditViewModel>()
+                          // ポイント: SumpleEntityID（FK）を ViewModel の ParentId にマッピングする
+                          .ForMember(d => d.ParentId, o => o.MapFrom(s => s.SumpleEntityID)),
+                NullLoggerFactory.Instance).CreateMapper();
+
+            return mapper.Map<DatabaseSampleChildEditViewModel>(entity);
+        }
+
+        /// <summary>
+        /// 子エンティティを新規作成する
+        /// </summary>
+        public void InsChild(DatabaseSampleChildEditViewModel model)
+        {
+            var mapper = new MapperConfiguration(
+                cfg => cfg.CreateMap<DatabaseSampleChildEditViewModel, SampleEntityChild>()
+                          // ポイント: ViewModel の ParentId を Entity の SumpleEntityID にマッピングする
+                          .ForMember(d => d.SumpleEntityID, o => o.MapFrom(s => s.ParentId)),
+                NullLoggerFactory.Instance).CreateMapper();
+
+            var entity = mapper.Map<SampleEntityChild>(model);
+            _childRepository.Insert(entity);
+        }
+
+        /// <summary>
+        /// 子エンティティを更新する
+        /// </summary>
+        public void UpdChild(DatabaseSampleChildEditViewModel model)
+        {
+            // ポイント: DB から既存エンティティを取得してから Map することで
+            //           ViewModel にないフィールド（CreateDate 等）を上書きしない
+            var entity = _childRepository.SelectById(model.Id!)!;
+
+            var mapper = new MapperConfiguration(
+                cfg => cfg.CreateMap<DatabaseSampleChildEditViewModel, SampleEntityChild>()
+                          .ForMember(d => d.SumpleEntityID, o => o.MapFrom(s => s.ParentId)),
+                NullLoggerFactory.Instance).CreateMapper();
+
+            entity = mapper.Map(model, entity);
+            _childRepository.Update(entity);
+        }
+
+        /// <summary>
+        /// 子エンティティを論理削除する
+        /// </summary>
+        public void DelChild(long id)
+        {
+            var entity = _childRepository.SelectById(id);
+            if (entity != null) _childRepository.LogicalDelete(entity);
         }
 
         public void InsertFile(ref DatabaseSampleImportViewModel model)

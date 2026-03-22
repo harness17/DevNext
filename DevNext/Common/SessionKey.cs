@@ -15,5 +15,7 @@ namespace Site.Common
         public static string WizardSession = "WizardSession";
         // 多段階フォームサンプル一覧の検索条件
         public static string WizardSampleCondViewModel = "WizardSampleCondViewModel";
+
+
     }
 }

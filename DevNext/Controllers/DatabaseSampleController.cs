@@ -79,14 +79,14 @@ namespace Site.Controllers
             return View(model);
         }
 
-        // ポイント: id が null → 400 BadRequest、DB に存在しない → 404 NotFound を返す
-        //           Entity を直接Viewに渡すシンプルな詳細表示パターン
+        // ポイント: 親エンティティの詳細 + 子エンティティ一覧を表示する
+        //           サービス層で親+子を一括取得し DatabaseSampleDetailsViewModel に詰めて返す
         public IActionResult Details(int? id)
         {
             if (id == null) return BadRequest();
-            var sampleEntity = _db.SampleEntity.Find((long)id);
-            if (sampleEntity == null) return NotFound();
-            return View(sampleEntity);
+            var model = _workerService.GetParentDetails((long)id);
+            if (model == null) return NotFound();
+            return View(model);
         }
 
         // ポイント: Create と Edit で同一ビュー (Edit.cshtml) を使い回す
@@ -218,6 +218,80 @@ namespace Site.Controllers
             string fileName = $"ExportFile_{fromdate}.pdf";
             var memorystream = _workerService.ExportPdf(model);
             return File(memorystream, "application/pdf", fileName);
+        }
+
+        // ─────────────────────────────────────────────
+        // 子エンティティ 新規作成
+        // ─────────────────────────────────────────────
+
+        // ポイント: 子作成時は必ず親IDをクエリパラメータで渡して FK を設定できるようにする
+        public IActionResult ChildCreate(int? parentId)
+        {
+            if (parentId == null) return BadRequest();
+            var model = new DatabaseSampleChildEditViewModel { ParentId = parentId.Value };
+            return View("ChildEdit", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChildCreate(DatabaseSampleChildEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _workerService.InsChild(model);
+                TempData[SessionKey.Message] = LocalUtil.GetCreateAlertMessage("子エンティティ");
+                // ポイント: 子の操作後は親の詳細ページへリダイレクトして子一覧を確認できるようにする
+                return RedirectToAction("Details", new { id = model.ParentId });
+            }
+            return View("ChildEdit", model);
+        }
+
+        // ─────────────────────────────────────────────
+        // 子エンティティ 編集
+        // ─────────────────────────────────────────────
+
+        public IActionResult ChildEdit(int? id)
+        {
+            if (id == null) return BadRequest();
+            var model = _workerService.GetChildEditModel(id.Value);
+            if (model == null) return NotFound();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChildEdit(DatabaseSampleChildEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _workerService.UpdChild(model);
+                TempData[SessionKey.Message] = LocalUtil.GetUpdateAlertMessage("子エンティティ");
+                return RedirectToAction("Details", new { id = model.ParentId });
+            }
+            return View(model);
+        }
+
+        // ─────────────────────────────────────────────
+        // 子エンティティ 削除
+        // ─────────────────────────────────────────────
+
+        public IActionResult ChildDelete(int? id)
+        {
+            if (id == null) return BadRequest();
+            var model = _workerService.GetChildEditModel(id.Value);
+            if (model == null) return NotFound();
+            return View(model);
+        }
+
+        // ポイント: [ActionName("ChildDelete")] でアクション名を統一しつつ
+        //           メソッド名を ChildDeleteConfirmed にして C# のシグネチャ重複エラーを回避する
+        [HttpPost, ActionName("ChildDelete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChildDeleteConfirmed(int id, long parentId)
+        {
+            _workerService.DelChild(id);
+            TempData[SessionKey.Message] = LocalUtil.GetDeleteAlertMessage("子エンティティ");
+            return RedirectToAction("Details", new { id = parentId });
         }
 
         // ポイント: Ajax リクエストの判定ヘルパー

@@ -115,6 +115,45 @@ namespace Site.Models
         public List<DatabaseMapperUsageSampleDataModel> Data { get; set; } = new();
     }
 
+    // ─────────────────────────────────────────────
+    // 詳細画面用 ViewModel（親エンティティ + 子一覧）
+    // ─────────────────────────────────────────────
+
+    // ポイント: DBサンプルの詳細ページで親エンティティと紐づく子エンティティ一覧を同時に扱うための ViewModel
+    public class DatabaseSampleDetailsViewModel
+    {
+        /// <summary>親エンティティ</summary>
+        public SampleEntity Parent { get; set; } = new();
+
+        /// <summary>子エンティティ一覧（論理削除済み除く）</summary>
+        public List<SampleEntityChild> Children { get; set; } = new();
+    }
+
+    // ─────────────────────────────────────────────
+    // 子エンティティ 新規作成・編集用 ViewModel
+    // ─────────────────────────────────────────────
+
+    // ポイント: Id が null → 新規作成、値あり → 編集 として Controller/View で判定する
+    public class DatabaseSampleChildEditViewModel
+    {
+        public long? Id { get; set; }
+
+        /// <summary>親エンティティのID（SumpleEntityID に対応）</summary>
+        [Required]
+        public long ParentId { get; set; }
+
+        [Display(Name = "文字列データ")]
+        [Required(ErrorMessage = "文字列データは必須です。")]
+        [MaxLength(200)]
+        public string StringData { get; set; } = "";
+
+        [Display(Name = "数値データ")]
+        public int IntData { get; set; }
+
+        [Display(Name = "BoolData")]
+        public bool BoolData { get; set; }
+    }
+
     public class DatabaseMapperUsageSampleDataModel
     {
         public string? ApplicationUserId { get; set; }

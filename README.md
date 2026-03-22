@@ -144,6 +144,13 @@ dotnet test
 - SMTP 設定（`appsettings.json` で管理）
 - smtp4dev による開発時の擬似送受信
 
+### ユーザー・ロール管理（Admin限定）
+
+- ユーザー一覧表示（検索・ページング）
+- ユーザー情報編集（メールアドレス・ユーザー名）
+- ユーザー削除（初期 Admin ユーザーは削除不可）
+- ロールの付与・剥奪（Admin / Member）
+
 ### 多段階フォーム（ウィザード）
 
 - セッションを利用したステップ間データ保持
@@ -179,6 +186,7 @@ DevNext/
 │   ├── MailSampleController.cs      # メール送信サンプル
 │   ├── WizardSampleController.cs    # 多段階フォーム
 │   ├── ViewSampleController.cs      # UIパターンサンプル
+│   ├── UserManagementController.cs  # ユーザー・ロール管理（Admin限定）
 │   └── RootErrorController.cs       # エラーハンドリング
 ├── Entity/                       # エンティティ定義
 ├── Models/                       # ビューモデル
@@ -187,6 +195,7 @@ DevNext/
 │   ├── FileManagementService.cs  # ファイル管理
 │   ├── MailSampleService.cs      # メール送信
 │   ├── WizardSampleService.cs    # 多段階フォーム
+│   ├── UserManagementService.cs  # ユーザー・ロール管理
 │   └── CommonService.cs          # 共通サービス
 ├── Repository/                   # データアクセス層
 │   ├── SampleEntityRepository.cs

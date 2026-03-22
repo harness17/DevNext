@@ -18,6 +18,9 @@ namespace Site.Common
         // 多段階フォームサンプル一覧の検索条件
         public static string WizardSampleCondViewModel = "WizardSampleCondViewModel";
 
+        // ユーザー・ロール管理
+        public static string UserManagementCondViewModel = "UserManagementCondViewModel";
+        public static string UserManagementPageModel     = "UserManagementPageModel";
 
     }
 }

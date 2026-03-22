@@ -1,0 +1,44 @@
+@model UserManagementEditViewModel
+@{
+    ViewData["Title"] = "ユーザー削除";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle me-2"></i>以下のユーザーを削除します。この操作は取り消せません。
+</div>
+
+<div class="card mb-3" style="max-width: 500px;">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-4">ユーザー名</dt>
+            <dd class="col-sm-8">@Model.UserName</dd>
+            <dt class="col-sm-4">メールアドレス</dt>
+            <dd class="col-sm-8">@Model.Email</dd>
+            <dt class="col-sm-4">ロール</dt>
+            <dd class="col-sm-8">
+                @if (Model.RoleNames.Any())
+                {
+                    @foreach (var role in Model.RoleNames)
+                    {
+                        <span class="badge bg-primary me-1">@role</span>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">なし</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-controller="UserManagement" asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-danger">
+        <i class="fas fa-trash me-1"></i>削除する
+    </button>
+    <a asp-action="Index" asp-route-returnList="true" class="btn btn-secondary ms-2">キャンセル</a>
+</form>

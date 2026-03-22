@@ -62,4 +62,17 @@
             </div>
         </div>
     </div>
+    @* ポイント: Admin ロールのみ表示する管理機能カード *@
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-warning">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users-cog me-2"></i>ユーザー・ロール管理</h5>
+                    <p class="card-text">ユーザーの一覧・編集・削除、ロールの付与・剥奪ができます。（Admin限定）</p>
+                    <a asp-controller="UserManagement" asp-action="Index" class="btn btn-warning">一覧へ</a>
+                </div>
+            </div>
+        </div>
+    }
 </div>

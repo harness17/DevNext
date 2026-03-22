@@ -72,6 +72,9 @@ builder.Services.AddScoped<Site.Service.FileManagementService>();
 // 多段階フォームサンプル
 builder.Services.AddScoped<Site.Service.WizardSampleService>();
 
+// ユーザー・ロール管理
+builder.Services.AddScoped<Site.Service.UserManagementService>();
+
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 

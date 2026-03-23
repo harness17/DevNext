@@ -9,8 +9,6 @@
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
     <!-- サテライトアセンブリを英語のみに限定して I/O を削減 -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <!-- Debug ビルドでは Deterministic を無効化 -->
-    <Deterministic Condition="'$(Configuration)' == 'Debug'">false</Deterministic>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

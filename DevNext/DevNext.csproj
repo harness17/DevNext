@@ -15,11 +15,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
-    <PackageReference Include="bootstrap" Version="5.3.8">
-      <!-- wwwroot/css, wwwroot/js に Bootstrap ファイルを手動管理しているため NuGet コンテンツファイルは除外 -->
-      <ExcludeAssets>contentFiles</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <!-- Bootstrap は wwwroot に手動配置するため NuGet 参照不要 -->
+<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
     <!-- EF Core Tools は設計時のみ使用 — PrivateAssets で依存ライブラリに含めない -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">

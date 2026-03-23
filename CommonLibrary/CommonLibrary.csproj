@@ -7,6 +7,8 @@
     <AssemblyName>Dev.CommonLibrary</AssemblyName>
     <!-- Debug ビルドではアナライザーを無効化してビルド時間を短縮 -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
+    <!-- AssemblyInfo.cs の動的生成を無効化 -->
+    <GenerateAssemblyInfo Condition="'$(Configuration)' == 'Debug'">false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

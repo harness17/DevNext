@@ -16,6 +16,8 @@
     <RazorCompileOnPublish Condition="'$(Configuration)' == 'Debug'">false</RazorCompileOnPublish>
     <!-- Razor source generator も明示的に無効化 -->
     <UseRazorSourceGenerator Condition="'$(Configuration)' == 'Debug'">false</UseRazorSourceGenerator>
+    <!-- Debug では参照アセンブリ生成をスキップ（差分ビルドより速度優先） -->
+    <ProduceReferenceAssembly Condition="'$(Configuration)' == 'Debug'">false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />

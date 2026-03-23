@@ -11,6 +11,9 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <!-- Debug ビルドでは Static Web Assets マニフェスト生成をスキップ -->
     <StaticWebAssetsEnabled Condition="'$(Configuration)' == 'Debug'">false</StaticWebAssetsEnabled>
+    <!-- Debug では Razor のビルドタスクをスキップ（RuntimeCompilation が実行時にコンパイル） -->
+    <RazorCompileOnBuild Condition="'$(Configuration)' == 'Debug'">false</RazorCompileOnBuild>
+    <RazorCompileOnPublish Condition="'$(Configuration)' == 'Debug'">false</RazorCompileOnPublish>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />

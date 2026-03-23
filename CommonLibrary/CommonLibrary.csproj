@@ -9,8 +9,6 @@
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
     <!-- サテライトアセンブリを英語のみに限定して I/O を削減 -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <!-- Debug では参照アセンブリ生成をスキップ -->
-    <ProduceReferenceAssembly Condition="'$(Configuration)' == 'Debug'">false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

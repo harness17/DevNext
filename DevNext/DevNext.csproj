@@ -11,8 +11,6 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <!-- Debug ビルドでは Static Web Assets マニフェスト生成をスキップ -->
     <StaticWebAssetsEnabled Condition="'$(Configuration)' == 'Debug'">false</StaticWebAssetsEnabled>
-    <!-- DLL コピーをハードリンクで高速化 — NTFS ではコピーと違いほぼゼロコスト -->
-    <CreateHardLinksForCopyLocalIfPossible>true</CreateHardLinksForCopyLocalIfPossible>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />

@@ -216,6 +216,27 @@ CommonLibrary/
 
 ---
 
+## ビルドパフォーマンス
+
+Debug ビルドでは以下の最適化が適用されており、ビルド時間を大幅に短縮しています。
+
+| 設定 | 効果 |
+|---|---|
+| `RunAnalyzers=false` | Roslyn アナライザー・ソースジェネレーター無効化（最大の効果） |
+| `StaticWebAssetsEnabled=false` | Static Web Assets マニフェスト生成スキップ |
+| `RazorCompileOnBuild=false` | Razor ビルドタスクスキップ（RuntimeCompilation が実行時コンパイル） |
+| `SatelliteResourceLanguages=en` | 多言語サテライトアセンブリ生成を英語のみに限定 |
+
+**Release ビルドはすべての最適化が無効** になり、通常のビルドが実行されます。
+
+| ビルド種別 | 所要時間（目安） |
+|---|---|
+| Debug クリーンビルド | 約 1.7 秒 |
+| Debug 差分ビルド（変更なし） | 約 1.1 秒 |
+| ベースライン（最適化前） | 約 11 秒 |
+
+---
+
 ## 注意事項
 
 ### ServiceFilter の DI 登録

@@ -7,6 +7,8 @@
     <AssemblyName>Dev.CommonLibrary</AssemblyName>
     <!-- Debug ビルドではアナライザーを無効化してビルド時間を短縮 -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
+    <!-- Debug ビルドではコードスタイル強制をスキップ -->
+    <EnforceCodeStyleInBuild Condition="'$(Configuration)' == 'Debug'">false</EnforceCodeStyleInBuild>
     <!-- サテライトアセンブリを英語のみに限定して I/O を削減 -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>

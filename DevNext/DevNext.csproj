@@ -14,6 +14,8 @@
     <!-- Debug では Razor のビルドタスクをスキップ（RuntimeCompilation が実行時にコンパイル） -->
     <RazorCompileOnBuild Condition="'$(Configuration)' == 'Debug'">false</RazorCompileOnBuild>
     <RazorCompileOnPublish Condition="'$(Configuration)' == 'Debug'">false</RazorCompileOnPublish>
+    <!-- Razor source generator も明示的に無効化 -->
+    <UseRazorSourceGenerator Condition="'$(Configuration)' == 'Debug'">false</UseRazorSourceGenerator>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />

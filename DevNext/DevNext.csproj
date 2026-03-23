@@ -16,6 +16,8 @@
     <RazorCompileOnPublish Condition="'$(Configuration)' == 'Debug'">false</RazorCompileOnPublish>
     <!-- Razor source generator も明示的に無効化 -->
     <UseRazorSourceGenerator Condition="'$(Configuration)' == 'Debug'">false</UseRazorSourceGenerator>
+    <!-- Debug では Site.exe を生成しない（dotnet Site.dll で起動可能） -->
+    <UseAppHost Condition="'$(Configuration)' == 'Debug'">false</UseAppHost>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />

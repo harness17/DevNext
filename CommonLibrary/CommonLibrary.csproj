@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <!-- Nullable は Release ビルドのみ有効 — Debug では解析コストをスキップ -->
-    <Nullable Condition="'$(Configuration)' != 'Debug'">enable</Nullable>
-    <Nullable Condition="'$(Configuration)' == 'Debug'">disable</Nullable>
+    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Dev.CommonLibrary</RootNamespace>
     <AssemblyName>Dev.CommonLibrary</AssemblyName>

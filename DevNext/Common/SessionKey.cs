@@ -20,7 +20,7 @@ namespace Site.Common
 
         // ユーザー・ロール管理
         public static string UserManagementCondViewModel = "UserManagementCondViewModel";
-        public static string UserManagementPageModel     = "UserManagementPageModel";
+        public static string UserManagementPageModel = "UserManagementPageModel";
 
     }
 }

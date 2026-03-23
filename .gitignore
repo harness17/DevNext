@@ -366,6 +366,7 @@ MigrationBackup/
 FodyWeavers.xsd
 /.claude
 CLAUDE.md
+CLAUDE.local.md
 サンプルベース/
 
 # ===== DevNext プロジェクト固有 =====

@@ -48,6 +48,9 @@ namespace Site.Common
         // 多段階フォームサンプル
         public DbSet<WizardEntity> WizardEntity { get; set; }
 
+        // メール送信ログ
+        public DbSet<MailLogEntity> MailLog { get; set; }
+
         #endregion
     }
 }

@@ -22,5 +22,9 @@ namespace Site.Common
         public static string UserManagementCondViewModel = "UserManagementCondViewModel";
         public static string UserManagementPageModel = "UserManagementPageModel";
 
+        // メール送信ログ
+        public static string MailLogCondViewModel = "MailLogCondViewModel";
+        public static string MailLogPageModel = "MailLogPageModel";
+
     }
 }

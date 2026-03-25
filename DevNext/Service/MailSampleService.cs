@@ -1,5 +1,7 @@
 using Site.Common;
+using Site.Entity;
 using Site.Models;
+using Site.Repository;
 
 namespace Site.Service
 {
@@ -10,15 +12,18 @@ namespace Site.Service
     {
         private readonly IConfiguration _config;
         private readonly IWebHostEnvironment _env;
+        private readonly MailLogRepository _mailLogRepository;
 
-        public MailSampleService(IConfiguration config, IWebHostEnvironment env)
+        public MailSampleService(IConfiguration config, IWebHostEnvironment env, DBContext context)
         {
             _config = config;
             _env = env;
+            // RepositoryはDBContextを受け取って内部で生成するパターン
+            _mailLogRepository = new MailLogRepository(context);
         }
 
         /// <summary>
-        /// お問い合わせメールを送信する。
+        /// お問い合わせメールを送信し、送信ログをDBに保存する。
         /// wwwroot/Templates/Mail/Contact.txt をテンプレートとして使用し、
         /// プレースホルダ ({Name} 等) をフォーム入力値で置換して送信する。
         /// </summary>
@@ -58,7 +63,34 @@ namespace Site.Service
             if (!string.IsNullOrEmpty(adminAddress))
                 mail.BccList.Add(adminAddress);
 
-            return mail.SendMail() == Email.SendMailResult.Success;
+            var result = mail.SendMail();
+            bool isSuccess = result == Email.SendMailResult.Success;
+
+            // 送信結果をDBに記録する
+            SaveMailLog(model, isSuccess, mail.ErrorMessage);
+
+            return isSuccess;
+        }
+
+        /// <summary>
+        /// メール送信ログをDBに保存する
+        /// </summary>
+        /// <param name="model">フォーム入力内容</param>
+        /// <param name="isSuccess">送信成功フラグ</param>
+        /// <param name="errorMessage">エラーメッセージ（失敗時）</param>
+        private void SaveMailLog(MailSampleViewModel model, bool isSuccess, string? errorMessage)
+        {
+            var log = new MailLogEntity
+            {
+                SenderName = model.Name,
+                SenderEmail = model.Email,
+                Subject = model.Subject,
+                Body = model.Body,
+                IsSuccess = isSuccess,
+                ErrorMessage = isSuccess ? null : errorMessage
+            };
+            log.SetForCreate();
+            _mailLogRepository.Insert(log);
         }
     }
 }

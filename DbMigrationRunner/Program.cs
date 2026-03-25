@@ -144,6 +144,28 @@ namespace DbMigrationRunner
                         CONSTRAINT [PK_WizardEntity] PRIMARY KEY ([Id])
                     )
                 END");
+
+            // ─── MailLog ──────────────────────────────────────────────────
+            Console.WriteLine("  テーブル [MailLog] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'MailLog')
+                BEGIN
+                    CREATE TABLE [MailLog] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [SenderName]                nvarchar(100)   NOT NULL,
+                        [SenderEmail]               nvarchar(256)   NOT NULL,
+                        [Subject]                   nvarchar(200)   NOT NULL,
+                        [Body]                      nvarchar(2000)  NOT NULL,
+                        [IsSuccess]                 bit             NOT NULL,
+                        [ErrorMessage]              nvarchar(1000)  NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_MailLog] PRIMARY KEY ([Id])
+                    )
+                END");
         }
 
         static async Task SeedAsync(DBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)

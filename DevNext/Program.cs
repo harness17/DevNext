@@ -65,6 +65,8 @@ builder.Services.AddScoped<Dev.CommonLibrary.Attributes.AccessLogAttribute>();
 
 // メール送信サンプル
 builder.Services.AddScoped<Site.Service.MailSampleService>();
+// メール送信ログ一覧
+builder.Services.AddScoped<Site.Service.MailLogService>();
 
 // ファイル管理サンプル
 builder.Services.AddScoped<Site.Service.FileManagementService>();

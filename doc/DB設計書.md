@@ -30,6 +30,7 @@
    - [SampleEntityChildHistory](#312-sampleentitychildhistory)
    - [FileEntity](#313-fileentity)
    - [WizardEntity](#314-wizardentity)
+   - [MailLog](#315-maillog)
 4. [ER 図](#4-er-図)
 5. [Enum 定義](#5-enum-定義)
 6. [初期データ](#6-初期データ)
@@ -55,6 +56,7 @@
 | 12 | SampleEntityChildHistory | SampleEntityChild 履歴 | アプリ |
 | 13 | FileEntity | ファイルメタ情報 | アプリ |
 | 14 | WizardEntity | 多段階フォームデータ | アプリ |
+| 15 | MailLog | メール送信ログ | アプリ |
 
 ---
 
@@ -329,6 +331,28 @@ SampleEntityChild の変更履歴テーブル。
 
 ---
 
+### 3.15 MailLog
+
+お問い合わせフォームからのメール送信結果を記録するログテーブル。
+ログデータのため論理削除・履歴テーブルは持たない。
+
+| カラム名 | 型 | NULL | 制約 | 説明 |
+|---------|---|------|------|------|
+| `Id` | bigint | NOT NULL | PK, IDENTITY | ログ ID |
+| `SenderName` | nvarchar(100) | NOT NULL | - | 送信者名（フォーム入力値） |
+| `SenderEmail` | nvarchar(256) | NOT NULL | - | 送信者メールアドレス（フォーム入力値） |
+| `Subject` | nvarchar(200) | NOT NULL | - | 件名（フォーム入力値） |
+| `Body` | nvarchar(2000) | NOT NULL | - | 本文（フォーム入力値） |
+| `IsSuccess` | bit | NOT NULL | - | 送信成功フラグ（1: 成功、0: 失敗） |
+| `ErrorMessage` | nvarchar(1000) | NULL | - | エラーメッセージ（送信失敗時のみセット） |
+| `DelFlag` | bit | NOT NULL | - | 論理削除フラグ（ログのため通常は false） |
+| `CreateDate` | datetime2 | NOT NULL | - | 送信日時（＝レコード作成日時） |
+| `UpdateDate` | datetime2 | NOT NULL | - | 最終更新日時 |
+| `CreateApplicationUserId` | nvarchar(max) | NULL | - | 作成者ユーザー ID |
+| `UpdateApplicationUserId` | nvarchar(max) | NULL | - | 最終更新者ユーザー ID |
+
+---
+
 ## 4. ER 図
 
 ```
@@ -349,6 +373,8 @@ SampleEntity ────── SampleEntityChild
 FileEntity（独立）
 
 WizardEntity（独立）
+
+MailLog（独立）
 ```
 
 ### 関連詳細

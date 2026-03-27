@@ -18,14 +18,16 @@ namespace Site.Service
         private readonly DBContext _context;
         private readonly ApprovalRequestRepository _repo;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly NotificationService _notificationService;
 
-        public ApprovalWorkflowService(DBContext context, UserManager<ApplicationUser> userManager)
+        public ApprovalWorkflowService(DBContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
         {
             _context = context;
             // ポイント: Repository はサービス内で new して使う（DIせず）
             //           Repository 自体が DBContext に依存するため、DI 済みの context を渡して初期化する
             _repo = new ApprovalRequestRepository(context);
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         // ─── 一覧取得 ─────────────────────────────────────────────────────────
@@ -76,7 +78,7 @@ namespace Site.Service
         /// <summary>
         /// 申請を新規作成する。SubmitRequest=true の場合は即座に申請中（Pending）にする。
         /// </summary>
-        public void Create(ApprovalRequestFormViewModel vm, string currentUserId)
+        public async Task CreateAsync(ApprovalRequestFormViewModel vm, string currentUserId)
         {
             var entity = new ApprovalRequestEntity
             {
@@ -91,6 +93,17 @@ namespace Site.Service
 
             entity.SetForCreate();
             _repo.Insert(entity);
+
+            // ポイント: 申請時（Draft → Pending）は Admin ロール全ユーザーに通知する
+            if (vm.SubmitRequest)
+            {
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                var requester = await _userManager.FindByIdAsync(currentUserId);
+                var requesterName = requester?.UserName ?? currentUserId;
+                var message = $"{requesterName} さんから申請「{vm.Title}」が届きました";
+                var relatedUrl = $"/ApprovalRequest/Detail/{entity.Id}";
+                await _notificationService.CreateForMultipleAsync(admins.Select(a => a.Id), message, relatedUrl);
+            }
         }
 
         // ─── 編集用データ取得 ─────────────────────────────────────────────────
@@ -121,7 +134,7 @@ namespace Site.Service
         /// 申請を更新する（Draft → Draft / Draft → Pending）。
         /// 申請者本人かつ Draft のみ更新可能。
         /// </summary>
-        public bool Update(ApprovalRequestFormViewModel vm, string currentUserId)
+        public async Task<bool> UpdateAsync(ApprovalRequestFormViewModel vm, string currentUserId)
         {
             var entity = _repo.SelectById(vm.Id);
             if (entity == null) return false;
@@ -139,6 +152,18 @@ namespace Site.Service
 
             entity.SetForUpdate();
             _repo.Update(entity);
+
+            // ポイント: 申請時（Draft → Pending）は Admin ロール全ユーザーに通知する
+            if (vm.SubmitRequest)
+            {
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                var requester = await _userManager.FindByIdAsync(currentUserId);
+                var requesterName = requester?.UserName ?? currentUserId;
+                var message = $"{requesterName} さんから申請「{vm.Title}」が届きました";
+                var relatedUrl = $"/ApprovalRequest/Detail/{entity.Id}";
+                await _notificationService.CreateForMultipleAsync(admins.Select(a => a.Id), message, relatedUrl);
+            }
+
             return true;
         }
 
@@ -147,7 +172,7 @@ namespace Site.Service
         /// <summary>
         /// 申請を承認する（Pending → Approved）。Admin のみ実行可能。
         /// </summary>
-        public bool Approve(long id, string? comment)
+        public async Task<bool> ApproveAsync(long id, string? comment)
         {
             var entity = _repo.SelectById(id);
             if (entity == null || entity.Status != ApprovalStatus.Pending) return false;
@@ -157,13 +182,19 @@ namespace Site.Service
             entity.ApprovedDate = DateTime.Now;
             entity.SetForUpdate();
             _repo.Update(entity);
+
+            // ポイント: 承認時（Pending → Approved）は申請者に通知する
+            var message = $"申請「{entity.Title}」が承認されました";
+            var relatedUrl = $"/ApprovalRequest/Detail/{entity.Id}";
+            await _notificationService.CreateAsync(entity.RequesterUserId, message, relatedUrl);
+
             return true;
         }
 
         /// <summary>
         /// 申請を却下する（Pending → Rejected）。Admin のみ実行可能。
         /// </summary>
-        public bool Reject(long id, string? comment)
+        public async Task<bool> RejectAsync(long id, string? comment)
         {
             var entity = _repo.SelectById(id);
             if (entity == null || entity.Status != ApprovalStatus.Pending) return false;
@@ -173,6 +204,12 @@ namespace Site.Service
             entity.ApprovedDate = DateTime.Now;
             entity.SetForUpdate();
             _repo.Update(entity);
+
+            // ポイント: 却下時（Pending → Rejected）は申請者に通知する
+            var message = $"申請「{entity.Title}」が却下されました";
+            var relatedUrl = $"/ApprovalRequest/Detail/{entity.Id}";
+            await _notificationService.CreateAsync(entity.RequesterUserId, message, relatedUrl);
+
             return true;
         }
 

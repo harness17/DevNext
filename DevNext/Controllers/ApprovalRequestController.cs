@@ -46,9 +46,9 @@ namespace Site.Controllers
                     if (sessionPage != null)
                     {
                         var savedPage = System.Text.Json.JsonSerializer.Deserialize<SearchModelBase>(sessionPage.ToString()!)!;
-                        model.Page      = savedPage.Page;
-                        model.Sort      = savedPage.Sort;
-                        model.SortDir   = savedPage.SortDir;
+                        model.Page = savedPage.Page;
+                        model.Sort = savedPage.Sort;
+                        model.SortDir = savedPage.SortDir;
                         model.RecordNum = savedPage.RecordNum;
                     }
                 }
@@ -91,11 +91,11 @@ namespace Site.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(ApprovalRequestFormViewModel model)
+        public async Task<IActionResult> Create(ApprovalRequestFormViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
-            _service.Create(model, GetCurrentUserId());
+            await _service.CreateAsync(model, GetCurrentUserId());
             TempData[SessionKey.Message] = model.SubmitRequest ? "申請しました。" : "下書きを保存しました。";
             return RedirectToAction(nameof(Index), new { returnList = true });
         }
@@ -112,11 +112,11 @@ namespace Site.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(ApprovalRequestFormViewModel model)
+        public async Task<IActionResult> Edit(ApprovalRequestFormViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
-            bool updated = _service.Update(model, GetCurrentUserId());
+            bool updated = await _service.UpdateAsync(model, GetCurrentUserId());
             if (!updated) return RedirectToAction(nameof(Index));
 
             TempData[SessionKey.Message] = model.SubmitRequest ? "申請しました。" : "下書きを保存しました。";
@@ -137,9 +137,9 @@ namespace Site.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public IActionResult Approve(long id, string? actionComment)
+        public async Task<IActionResult> Approve(long id, string? actionComment)
         {
-            _service.Approve(id, actionComment);
+            await _service.ApproveAsync(id, actionComment);
             TempData[SessionKey.Message] = "申請を承認しました。";
             return RedirectToAction(nameof(Detail), new { id });
         }
@@ -148,9 +148,9 @@ namespace Site.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public IActionResult Reject(long id, string? actionComment)
+        public async Task<IActionResult> Reject(long id, string? actionComment)
         {
-            _service.Reject(id, actionComment);
+            await _service.RejectAsync(id, actionComment);
             TempData[SessionKey.Message] = "申請を却下しました。";
             return RedirectToAction(nameof(Detail), new { id });
         }

@@ -54,6 +54,9 @@ namespace Site.Common
         // 承認ワークフロー
         public DbSet<ApprovalRequestEntity> ApprovalRequest { get; set; }
 
+        // 通知
+        public DbSet<NotificationEntity> Notification { get; set; }
+
         #endregion
     }
 }

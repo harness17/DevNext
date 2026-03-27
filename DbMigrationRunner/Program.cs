@@ -189,6 +189,26 @@ namespace DbMigrationRunner
                         CONSTRAINT [PK_ApprovalRequest] PRIMARY KEY ([Id])
                     )
                 END");
+
+            // ─── Notification ─────────────────────────────────────────────
+            Console.WriteLine("  テーブル [Notification] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Notification')
+                BEGIN
+                    CREATE TABLE [Notification] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [RecipientUserId]           nvarchar(450)   NOT NULL,
+                        [Message]                   nvarchar(500)   NOT NULL,
+                        [IsRead]                    bit             NOT NULL,
+                        [RelatedUrl]                nvarchar(500)   NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_Notification] PRIMARY KEY ([Id])
+                    )
+                END");
         }
 
         static async Task SeedAsync(DBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)

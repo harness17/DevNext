@@ -83,6 +83,9 @@ builder.Services.AddScoped<Site.Service.DashboardService>();
 // 承認ワークフロー
 builder.Services.AddScoped<Site.Service.ApprovalWorkflowService>();
 
+// 通知
+builder.Services.AddScoped<Site.Service.NotificationService>();
+
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 

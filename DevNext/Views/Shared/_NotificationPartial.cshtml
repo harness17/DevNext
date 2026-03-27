@@ -1,0 +1,23 @@
+@* ポイント: 認証済みユーザーのみ表示。ナビバーに埋め込むパーシャル（HTML のみ）。
+           JS は _Layout.cshtml の jQuery 読み込み後に記述する。 *@
+
+<li class="nav-item dropdown">
+    <a class="nav-link text-white position-relative" href="#" id="notificationBell" role="button"
+       data-bs-toggle="dropdown" aria-expanded="false" title="通知">
+        <i class="fa-solid fa-bell"></i>
+        @* ポイント: 未読 0 件のときはバッジを非表示にする（JS で制御） *@
+        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style="display:none; font-size: 0.6rem;">0</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationBell" style="min-width: 340px; max-height: 420px; overflow-y: auto;">
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom sticky-top bg-white">
+            <span class="fw-bold small">通知</span>
+            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-secondary" id="markAllReadBtn">
+                すべて既読にする
+            </button>
+        </div>
+        <div id="notificationList">
+            <div class="px-3 py-3 text-muted small text-center">読み込み中...</div>
+        </div>
+    </div>
+</li>

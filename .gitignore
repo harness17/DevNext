@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Git worktrees（ローカル作業用、コミット対象外）
+.worktrees/
+
 # Data Protection Keys (IIS用暗号化キー、環境ごとに生成されるため除外)
 **/DataProtectionKeys/
 

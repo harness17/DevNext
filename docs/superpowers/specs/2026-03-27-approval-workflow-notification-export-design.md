@@ -192,7 +192,9 @@ Views/Shared/
 | 形式 | ライブラリ | 備考 |
 |------|----------|------|
 | CSV | 標準ライブラリのみ（System.Text） | 外部依存なし |
-| Excel (.xlsx) | ClosedXML | 列幅・ヘッダー書式対応 |
+| Excel (.xlsx) | EPPlus | 既存の DatabaseSample の Excel 出力実装に準拠する |
+
+> **注意：** `DatabaseSampleService.cs` に EPPlus による Excel 出力実装があるため、それを踏襲すること。ClosedXML は使用しない。
 
 ### エクスポート項目
 

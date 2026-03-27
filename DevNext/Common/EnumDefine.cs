@@ -86,4 +86,17 @@ namespace Site.Common
         [Display(Name = "その他")]
         Other = 4,
     }
+
+    /// <summary>承認申請の状態</summary>
+    public enum ApprovalStatus
+    {
+        [Display(Name = "下書き")]
+        Draft = 1,
+        [Display(Name = "申請中")]
+        Pending = 2,
+        [Display(Name = "承認済み")]
+        Approved = 3,
+        [Display(Name = "却下")]
+        Rejected = 4,
+    }
 }

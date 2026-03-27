@@ -3,7 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Dev.CommonLibrary.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging.Abstractions;
-using OfficeOpenXml;
+using ClosedXML.Excel;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -331,40 +331,39 @@ namespace Site.Service
             }
         }
 
-        // ポイント: EPPlus を使用した Excel ファイルのインポート処理
-        //           LicenseContext.NonCommercial は非商用利用の際に必要な設定（商用利用は Commercial を指定）
+        // ポイント: ClosedXML を使用した Excel ファイルのインポート処理
+        //           MIT ライセンスのため商用利用も無償で可能（EPPlus は非商用のみ無償）
         private List<string> ImportXlsxSample(Stream fileStream)
         {
             var returnlist = new List<string>();
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            using (var excelPackage = new ExcelPackage(fileStream))
+            using (var workbook = new XLWorkbook(fileStream))
             {
-                var worksheet = excelPackage.Workbook.Worksheets.First();
-                // Dimension が null = シートが空の場合は早期リターン
-                if (worksheet.Dimension == null) return returnlist;
+                var worksheet = workbook.Worksheets.First();
+                var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 0;
+                // 2行目以降にデータがない場合は早期リターン
+                if (lastRow < 2) return returnlist;
 
-                var rowCount = worksheet.Dimension.Rows;
                 var entityList = new List<SampleEntity>();
 
                 // ポイント: 1行目はヘッダー行と想定し2行目からループ
-                for (int row = 2; row <= rowCount; row++)
+                for (int row = 2; row <= lastRow; row++)
                 {
                     int col = 3;
                     var tempEntity = new SampleEntity();
-                    tempEntity.StringData = worksheet.Cells[row, col].Value?.ToString()?.Trim() ?? "";
+                    tempEntity.StringData = worksheet.Cell(row, col).GetValue<string>()?.Trim() ?? "";
                     col++;
-                    if (worksheet.Cells[row, col].Value != null)
-                        int.TryParse(worksheet.Cells[row, col].Value.ToString(), out int intData);
+                    if (!worksheet.Cell(row, col).IsEmpty())
+                        int.TryParse(worksheet.Cell(row, col).GetValue<string>(), out int intData);
                     col++;
-                    if (worksheet.Cells[row, col].Value != null)
-                        bool.TryParse(worksheet.Cells[row, col].Value.ToString(), out bool boolData);
+                    if (!worksheet.Cell(row, col).IsEmpty())
+                        bool.TryParse(worksheet.Cell(row, col).GetValue<string>(), out bool boolData);
                     col++;
                     // ポイント: Enum.TryParse で文字列から Enum 値に変換（変換失敗時はデフォルト値になる）
-                    Enum.TryParse(worksheet.Cells[row, col].Value as string, out SampleEnum sampleEnum);
+                    Enum.TryParse(worksheet.Cell(row, col).GetValue<string>(), out SampleEnum sampleEnum);
                     tempEntity.EnumData = sampleEnum;
                     col++;
-                    Enum.TryParse(worksheet.Cells[row, col].Value as string, out SampleEnum2 sampleEnum2);
+                    Enum.TryParse(worksheet.Cell(row, col).GetValue<string>(), out SampleEnum2 sampleEnum2);
                     tempEntity.EnumData2 = sampleEnum2;
                     tempEntity.SetForCreate();
                     entityList.Add(tempEntity);
@@ -378,7 +377,8 @@ namespace Site.Service
             return returnlist;
         }
 
-        // ポイント: EPPlus を使用した Excel エクスポート
+        // ポイント: ClosedXML を使用した Excel エクスポート
+        //           MIT ライセンスのため商用利用も無償で可能（EPPlus は非商用のみ無償）
         //           テンプレートファイルが存在する場合は読み込んで使用（書式・ヘッダー等をテンプレートで管理できる）
         //           MemoryStream でメモリ上に出力してコントローラーへ返す（ディスク保存なし）
         public MemoryStream ExportFile(DatabaseSampleViewModel model, IWebHostEnvironment env)
@@ -386,34 +386,33 @@ namespace Site.Service
             var rowData = _sampleRepository.GetBaseQuery(_sampleRepository.GetCondModel(model.Cond)).ToList();
             var templatePath = Path.Combine(env.WebRootPath, "Templates", "Excel", "SampleEntityTemplate.xlsx");
 
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             var memorystream = new MemoryStream();
 
-            ExcelPackage pck;
-            // ポイント: テンプレートファイルがあれば読み込む、なければ空の ExcelPackage を生成
+            XLWorkbook workbook;
+            // ポイント: テンプレートファイルがあれば読み込む、なければ空の XLWorkbook を生成
             if (File.Exists(templatePath))
-                pck = new ExcelPackage(new FileInfo(templatePath));
+                workbook = new XLWorkbook(templatePath);
             else
-                pck = new ExcelPackage();
+                workbook = new XLWorkbook();
 
-            using (pck)
+            using (workbook)
             {
                 // FirstOrDefault でシートが存在しない場合は新規作成
-                var ws = pck.Workbook.Worksheets.FirstOrDefault() ?? pck.Workbook.Worksheets.Add("Sheet1");
+                var ws = workbook.Worksheets.FirstOrDefault() ?? workbook.Worksheets.Add("Sheet1");
                 int intBaseRow = 2;  // 2行目からデータ書き込み（1行目はテンプレートのヘッダー行）
                 foreach (var row in rowData)
                 {
                     int intCol = 1;
-                    ws.Cells[intBaseRow, intCol++].Value = row.Id;
-                    ws.Cells[intBaseRow, intCol++].Value = row.ApplicationUserId;
-                    ws.Cells[intBaseRow, intCol++].Value = row.StringData;
-                    ws.Cells[intBaseRow, intCol++].Value = row.IntData;
-                    ws.Cells[intBaseRow, intCol++].Value = row.BoolData;
-                    ws.Cells[intBaseRow, intCol++].Value = row.EnumData.ToString();
-                    ws.Cells[intBaseRow, intCol++].Value = row.EnumData2.ToString();
+                    ws.Cell(intBaseRow, intCol++).Value = row.Id;
+                    ws.Cell(intBaseRow, intCol++).Value = row.ApplicationUserId;
+                    ws.Cell(intBaseRow, intCol++).Value = row.StringData;
+                    ws.Cell(intBaseRow, intCol++).Value = row.IntData;
+                    ws.Cell(intBaseRow, intCol++).Value = row.BoolData;
+                    ws.Cell(intBaseRow, intCol++).Value = row.EnumData.ToString();
+                    ws.Cell(intBaseRow, intCol++).Value = row.EnumData2.ToString();
                     intBaseRow++;
                 }
-                pck.SaveAs(memorystream);
+                workbook.SaveAs(memorystream);
                 // ポイント: SaveAs 後は Position が末尾にあるため 0 にリセットしないと読み取れない
                 memorystream.Position = 0;
             }

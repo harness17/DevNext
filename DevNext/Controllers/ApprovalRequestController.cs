@@ -17,10 +17,12 @@ namespace Site.Controllers
     public class ApprovalRequestController : Controller
     {
         private readonly ApprovalWorkflowService _service;
+        private readonly ExportService _exportService;
 
-        public ApprovalRequestController(ApprovalWorkflowService service)
+        public ApprovalRequestController(ApprovalWorkflowService service, ExportService exportService)
         {
             _service = service;
+            _exportService = exportService;
         }
 
         // ─── 一覧 ──────────────────────────────────────────────────────────────
@@ -174,7 +176,43 @@ namespace Site.Controllers
             return RedirectToAction(nameof(Index), new { returnList = true });
         }
 
+        // ─── エクスポート ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// GET: 現在の検索条件で CSV ダウンロード。
+        /// ポイント: TempData.Peek で検索条件を読み取り（消費しない）、全件を CSV に変換する。
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ExportCsv()
+        {
+            var condVm = GetCondFromTempData();
+            var bytes = await _exportService.ExportCsvAsync(condVm, GetCurrentUserId(), User.IsInRole("Admin"));
+            return File(bytes, "text/csv", $"申請一覧_{DateTime.Now:yyyyMMdd}.csv");
+        }
+
+        /// <summary>
+        /// GET: 現在の検索条件で Excel ダウンロード。
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel()
+        {
+            var condVm = GetCondFromTempData();
+            var bytes = await _exportService.ExportExcelAsync(condVm, GetCurrentUserId(), User.IsInRole("Admin"));
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"申請一覧_{DateTime.Now:yyyyMMdd}.xlsx");
+        }
+
         // ─── 内部ユーティリティ ───────────────────────────────────────────────
+
+        /// <summary>
+        /// TempData から検索条件を Peek（消費せずに）取得する。
+        /// エクスポート時に検索条件を維持したままファイルダウンロードできるようにする。
+        /// </summary>
+        private ApprovalRequestCondViewModel? GetCondFromTempData()
+        {
+            var sessionCond = TempData.Peek(SessionKey.ApprovalRequestCondViewModel);
+            if (sessionCond == null) return null;
+            return System.Text.Json.JsonSerializer.Deserialize<ApprovalRequestCondViewModel>(sessionCond.ToString()!);
+        }
 
         private string GetCurrentUserId()
             => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";

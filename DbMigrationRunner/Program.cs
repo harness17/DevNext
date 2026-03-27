@@ -166,6 +166,29 @@ namespace DbMigrationRunner
                         CONSTRAINT [PK_MailLog] PRIMARY KEY ([Id])
                     )
                 END");
+
+            // ─── ApprovalRequest ──────────────────────────────────────────
+            Console.WriteLine("  テーブル [ApprovalRequest] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ApprovalRequest')
+                BEGIN
+                    CREATE TABLE [ApprovalRequest] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [Title]                     nvarchar(200)   NOT NULL,
+                        [Content]                   nvarchar(2000)  NOT NULL,
+                        [Status]                    int             NOT NULL,
+                        [RequesterUserId]           nvarchar(450)   NOT NULL,
+                        [ApproverComment]           nvarchar(1000)  NULL,
+                        [RequestedDate]             datetime2(7)    NULL,
+                        [ApprovedDate]              datetime2(7)    NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_ApprovalRequest] PRIMARY KEY ([Id])
+                    )
+                END");
         }
 
         static async Task SeedAsync(DBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)

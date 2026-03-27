@@ -1,0 +1,53 @@
+@model ApprovalRequestFormViewModel
+@{
+    ViewData["Title"] = "申請編集";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            @* ポイント: 編集時は Id を hidden で保持してサーバーに送信する *@
+            <input asp-for="Id" type="hidden" />
+            <input asp-for="SubmitRequest" type="hidden" />
+
+            <div class="card">
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Content" class="form-label"></label>
+                        <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary me-2"><i class="fas fa-arrow-left me-1"></i>戻る</a>
+                    <button type="submit" class="btn btn-secondary me-2" onclick="setSubmitRequest(false)">
+                        <i class="fas fa-save me-1"></i>下書き保存
+                    </button>
+                    <button type="submit" class="btn btn-primary" onclick="setSubmitRequest(true)">
+                        <i class="fas fa-paper-plane me-1"></i>申請する
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function setSubmitRequest(val) {
+            $('#SubmitRequest').val(val.toString());
+        }
+    </script>
+}

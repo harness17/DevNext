@@ -26,5 +26,9 @@ namespace Site.Common
         public static string MailLogCondViewModel = "MailLogCondViewModel";
         public static string MailLogPageModel = "MailLogPageModel";
 
+        // 承認ワークフロー
+        public static string ApprovalRequestCondViewModel = "ApprovalRequestCondViewModel";
+        public static string ApprovalRequestPageModel = "ApprovalRequestPageModel";
+
     }
 }

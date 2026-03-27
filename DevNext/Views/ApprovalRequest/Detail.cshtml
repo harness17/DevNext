@@ -1,0 +1,116 @@
+@model ApprovalRequestDetailViewModel
+@using Site.Common
+@{
+    ViewData["Title"] = "申請詳細";
+    bool isAdmin = User.IsInRole("Admin");
+
+    // ポイント: 状態バッジのクラスと表示文字列を状態に応じて切り替える
+    var badgeClass = Model.Status switch
+    {
+        ApprovalStatus.Draft    => "bg-secondary",
+        ApprovalStatus.Pending  => "bg-warning text-dark",
+        ApprovalStatus.Approved => "bg-success",
+        ApprovalStatus.Rejected => "bg-danger",
+        _                       => "bg-secondary"
+    };
+    var statusLabel = Model.Status switch
+    {
+        ApprovalStatus.Draft    => "下書き",
+        ApprovalStatus.Pending  => "申請中",
+        ApprovalStatus.Approved => "承認済み",
+        ApprovalStatus.Rejected => "却下",
+        _                       => Model.Status.ToString()
+    };
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>申請情報</span>
+                <span class="badge @badgeClass">@statusLabel</span>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">ID</dt>
+                    <dd class="col-sm-9">@Model.Id</dd>
+
+                    <dt class="col-sm-3">タイトル</dt>
+                    <dd class="col-sm-9">@Model.Title</dd>
+
+                    <dt class="col-sm-3">申請内容</dt>
+                    @* ポイント: 改行を <br> に変換して表示する *@
+                    <dd class="col-sm-9" style="white-space:pre-wrap;">@Model.Content</dd>
+
+                    <dt class="col-sm-3">申請者</dt>
+                    <dd class="col-sm-9">@Model.RequesterName</dd>
+
+                    <dt class="col-sm-3">申請日</dt>
+                    <dd class="col-sm-9">@(Model.RequestedDate?.ToString("yyyy/MM/dd HH:mm") ?? "-")</dd>
+
+                    @if (Model.ApproverComment != null || Model.ApprovedDate != null)
+                    {
+                        <dt class="col-sm-3">承認・却下日</dt>
+                        <dd class="col-sm-9">@(Model.ApprovedDate?.ToString("yyyy/MM/dd HH:mm") ?? "-")</dd>
+
+                        <dt class="col-sm-3">コメント</dt>
+                        <dd class="col-sm-9" style="white-space:pre-wrap;">@(Model.ApproverComment ?? "-")</dd>
+                    }
+
+                    <dt class="col-sm-3">作成日</dt>
+                    <dd class="col-sm-9">@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+
+        @* ポイント: Admin かつ Pending の場合のみ承認・却下フォームを表示する *@
+        @if (isAdmin && Model.Status == ApprovalStatus.Pending)
+        {
+            <div class="card mb-3 border-warning">
+                <div class="card-header bg-warning text-dark">承認・却下操作</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="ActionComment" class="form-label"></label>
+                        <textarea asp-for="ActionComment" class="form-control" rows="3"
+                                  placeholder="コメントは省略可能です"></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        @* ポイント: 承認・却下は別々の form で POST する（hidden で id とコメントを送信） *@
+                        <form asp-action="Approve" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="actionComment" id="approveComment" />
+                            <button type="submit" class="btn btn-success"
+                                    onclick="document.getElementById('approveComment').value = document.querySelector('[name=ActionComment]').value">
+                                <i class="fas fa-check me-1"></i>承認する
+                            </button>
+                        </form>
+                        <form asp-action="Reject" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="actionComment" id="rejectComment" />
+                            <button type="submit" class="btn btn-danger"
+                                    onclick="document.getElementById('rejectComment').value = document.querySelector('[name=ActionComment]').value">
+                                <i class="fas fa-times me-1"></i>却下する
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="text-start">
+            <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>一覧に戻る</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,180 @@
+@model ApprovalRequestIndexViewModel
+@using Site.Common
+@{
+    var summary = Model.RowData?.Summary;
+    var currentPage = summary?.CurrentPage ?? 1;
+    var totalRecords = summary?.TotalRecords ?? 0;
+    var recordNum = Model.RecordNum > 0 ? Model.RecordNum : 10;
+    // ポイント: Math.Ceiling で切り上げて総ページ数を算出する
+    //           データが0件でもページ数は1とすることでページングが壊れない
+    var totalPage = totalRecords > 0 ? (int)Math.Ceiling((double)totalRecords / recordNum) : 1;
+
+    // ポイント: IsAdmin フラグをビューバッグ経由で判定し、Admin 専用列を表示制御する
+    bool isAdmin = User.IsInRole("Admin");
+}
+
+@* ポイント: パーシャルビューはこの div の中身として Ajax で差し替えられる *@
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        全 <strong>@totalRecords</strong> 件
+    </div>
+    <div class="d-flex align-items-center">
+        <span class="me-2">表示件数：</span>
+        @* ポイント: onchange で funcRecordNumber() を呼び出して表示件数を動的に変更する *@
+        <select onchange="funcRecordNumber(value)" class="form-select form-select-sm" style="width:auto;">
+            @foreach (var item in Model.RecoedNumberList)
+            {
+                <option value="@item.Value" selected="@(item.Value == Model.RecordNum.ToString())">@item.Text</option>
+            }
+        </select>
+    </div>
+</div>
+
+@if (Model.RowData?.Rows == null || !Model.RowData.Rows.Any())
+{
+    <div class="alert alert-info">データなし</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:60px;">
+                        @* ポイント: ソート可能な列ヘッダーは onclick="funcSort('列名')" で実装する *@
+                        <a href="javascript:void(0)" onclick="funcSort('Id')" class="text-white text-decoration-none">
+                            ID
+                            @if (Model.Sort == "Id")
+                            {
+                                <i class="fas fa-sort-@(Model.SortDir == "ASC" ? "up" : "down") ms-1"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>
+                        <a href="javascript:void(0)" onclick="funcSort('Title')" class="text-white text-decoration-none">
+                            タイトル
+                            @if (Model.Sort == "Title")
+                            {
+                                <i class="fas fa-sort-@(Model.SortDir == "ASC" ? "up" : "down") ms-1"></i>
+                            }
+                        </a>
+                    </th>
+                    <th style="width:110px;">
+                        <a href="javascript:void(0)" onclick="funcSort('Status')" class="text-white text-decoration-none">
+                            状態
+                            @if (Model.Sort == "Status")
+                            {
+                                <i class="fas fa-sort-@(Model.SortDir == "ASC" ? "up" : "down") ms-1"></i>
+                            }
+                        </a>
+                    </th>
+                    <th style="width:130px;">
+                        <a href="javascript:void(0)" onclick="funcSort('RequestedDate')" class="text-white text-decoration-none">
+                            申請日
+                            @if (Model.Sort == "RequestedDate")
+                            {
+                                <i class="fas fa-sort-@(Model.SortDir == "ASC" ? "up" : "down") ms-1"></i>
+                            }
+                        </a>
+                    </th>
+                    @* ポイント: Admin には申請者列を追加表示する *@
+                    @if (isAdmin)
+                    {
+                        <th>申請者</th>
+                    }
+                    <th style="width:160px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.RowData.Rows)
+                {
+                    <tr>
+                        <td>@row.Id</td>
+                        <td>@row.Title</td>
+                        <td>
+                            @* ポイント: 状態に応じて Bootstrap バッジの色を切り替える *@
+                            @{
+                                var badgeClass = row.Status switch
+                                {
+                                    ApprovalStatus.Draft    => "bg-secondary",
+                                    ApprovalStatus.Pending  => "bg-warning text-dark",
+                                    ApprovalStatus.Approved => "bg-success",
+                                    ApprovalStatus.Rejected => "bg-danger",
+                                    _                       => "bg-secondary"
+                                };
+                                var statusLabel = row.Status switch
+                                {
+                                    ApprovalStatus.Draft    => "下書き",
+                                    ApprovalStatus.Pending  => "申請中",
+                                    ApprovalStatus.Approved => "承認済み",
+                                    ApprovalStatus.Rejected => "却下",
+                                    _                       => row.Status.ToString()
+                                };
+                            }
+                            <span class="badge @badgeClass">@statusLabel</span>
+                        </td>
+                        <td>@(row.RequestedDate?.ToString("yyyy/MM/dd") ?? "-")</td>
+                        @if (isAdmin)
+                        {
+                            <td>@row.RequesterUserId</td>
+                        }
+                        <td>
+                            @* ポイント: 詳細は常に表示。編集・削除は Draft のみ表示する *@
+                            <a asp-action="Detail" asp-route-id="@row.Id" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
+                            @if (row.Status == ApprovalStatus.Draft)
+                            {
+                                <a asp-action="Edit" asp-route-id="@row.Id" class="btn btn-sm btn-primary ms-1"><i class="fas fa-edit"></i></a>
+                                <a asp-action="Delete" asp-route-id="@row.Id" class="btn btn-sm btn-danger ms-1"><i class="fas fa-trash"></i></a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @* ポイント: ページネーション
+               現在ページの前後2ページ分（最大5ページ）のリンクを表示する
+               Math.Max / Math.Min で表示範囲を1〜totalPage に収める *@
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @if (currentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0)" onclick="funcPage(@(currentPage - 1))">前へ</a>
+                </li>
+            }
+            else
+            {
+                @* ポイント: disabled クラスで最初のページでは「前へ」をクリック不可にする *@
+                <li class="page-item disabled">
+                    <span class="page-link">前へ</span>
+                </li>
+            }
+
+            @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPage, currentPage + 2); i++)
+            {
+                @* ポイント: active クラスで現在ページを強調表示する *@
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="javascript:void(0)" onclick="funcPage(@i)">@i</a>
+                </li>
+            }
+
+            @if (currentPage < totalPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0)" onclick="funcPage(@(currentPage + 1))">次へ</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">次へ</span>
+                </li>
+            }
+        </ul>
+    </nav>
+    <div class="text-center text-muted">
+        @currentPage / @totalPage ページ
+    </div>
+}

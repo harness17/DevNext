@@ -13,6 +13,10 @@ namespace Site.Models
     {
         public ApprovalRequestCondViewModel? Cond { get; set; }
         public ApprovalRequestListData? RowData { get; set; }
+
+        /// <summary>表示件数ドロップダウン用の選択肢リスト</summary>
+        public IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> RecoedNumberList { get; }
+            = LocalUtil.SetRecoedNumberList();
     }
 
     /// <summary>申請一覧の検索条件（View 用）</summary>

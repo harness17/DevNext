@@ -1,0 +1,44 @@
+@model ApprovalRequestDeleteViewModel
+@using Site.Common
+@{
+    ViewData["Title"] = "申請削除確認";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">削除確認</div>
+            <div class="card-body">
+                <p class="mb-3">以下の申請を削除します。この操作は取り消せません。</p>
+                <dl class="row">
+                    <dt class="col-sm-4">ID</dt>
+                    <dd class="col-sm-8">@Model.Id</dd>
+
+                    <dt class="col-sm-4">タイトル</dt>
+                    <dd class="col-sm-8">@Model.Title</dd>
+
+                    <dt class="col-sm-4">状態</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-secondary">下書き</span>
+                    </dd>
+
+                    <dt class="col-sm-4">作成日</dt>
+                    <dd class="col-sm-8">@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")</dd>
+                </dl>
+            </div>
+            <div class="card-footer text-end">
+                <a asp-action="Index" class="btn btn-outline-secondary me-2"><i class="fas fa-arrow-left me-1"></i>キャンセル</a>
+                @* ポイント: 削除確認は DeleteConfirmed アクションに POST する *@
+                <form asp-action="DeleteConfirmed" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>削除する
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -51,6 +51,9 @@ namespace Site.Common
         // メール送信ログ
         public DbSet<MailLogEntity> MailLog { get; set; }
 
+        // 承認ワークフロー
+        public DbSet<ApprovalRequestEntity> ApprovalRequest { get; set; }
+
         #endregion
     }
 }

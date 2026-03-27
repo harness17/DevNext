@@ -40,6 +40,7 @@ DevNext/
 | PDF生成 | QuestPDF | 2026.2.3 |
 | JSON | Newtonsoft.Json | 13.0.3 |
 | テスト | xUnit / Moq | 2.9.3 / 4.20.72 |
+| グラフ描画 | Chart.js | 4.4.7 |
 
 ---
 
@@ -151,6 +152,13 @@ dotnet test
 - ユーザー削除（初期 Admin ユーザーは削除不可）
 - ロールの付与・剥奪（Admin / Member）
 
+### ダッシュボード
+
+- サマリーカード（DBサンプル / メール / ファイル / 多段階フォームの件数）
+- Chart.js による5種のグラフ（折れ線・ドーナツ・棒・横棒）
+- 直近30日のメール送信数推移、送信成功/失敗比率、EnumData分布、ファイル種別分布、Wizardカテゴリ分布
+- 30秒間隔の Ajax ポーリングによるリアルタイム更新
+
 ### 多段階フォーム（ウィザード）
 
 - セッションを利用したステップ間データ保持
@@ -186,6 +194,7 @@ DevNext/
 │   ├── MailSampleController.cs      # メール送信サンプル
 │   ├── WizardSampleController.cs    # 多段階フォーム
 │   ├── ViewSampleController.cs      # UIパターンサンプル
+│   ├── DashboardController.cs        # ダッシュボード・グラフデータ API
 │   ├── UserManagementController.cs  # ユーザー・ロール管理（Admin限定）
 │   └── RootErrorController.cs       # エラーハンドリング
 ├── Entity/                       # エンティティ定義
@@ -195,6 +204,7 @@ DevNext/
 │   ├── FileManagementService.cs  # ファイル管理
 │   ├── MailSampleService.cs      # メール送信
 │   ├── WizardSampleService.cs    # 多段階フォーム
+│   ├── DashboardService.cs        # ダッシュボード集計
 │   ├── UserManagementService.cs  # ユーザー・ロール管理
 │   └── CommonService.cs          # 共通サービス
 ├── Repository/                   # データアクセス層

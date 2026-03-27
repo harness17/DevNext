@@ -1,0 +1,299 @@
+@model Site.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "ダッシュボード";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="fas fa-chart-line me-2"></i>ダッシュボード</h2>
+    <small class="text-muted">最終更新: <span id="lastUpdated">読み込み中...</span></small>
+</div>
+
+@* ─── サマリーカード ─────────────────────────────────────────────────── *@
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-1 fw-bold" id="summarySample">-</div>
+                        <div>DBサンプル</div>
+                    </div>
+                    <i class="fas fa-database fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-1 fw-bold" id="summaryMail">-</div>
+                        <div>メール送信</div>
+                    </div>
+                    <i class="fas fa-envelope fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-1 fw-bold" id="summaryFile">-</div>
+                        <div>ファイル</div>
+                    </div>
+                    <i class="fas fa-folder-open fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-1 fw-bold" id="summaryWizard">-</div>
+                        <div>多段階フォーム</div>
+                    </div>
+                    <i class="fas fa-list-ol fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ─── グラフ行 1: 折れ線（幅広）+ ドーナツ ──────────────────────────── *@
+<div class="row g-3 mb-3">
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-line me-1"></i>直近30日のメール送信数推移</div>
+            <div class="card-body" style="height: 280px;">
+                <canvas id="chartMailTrend"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-circle-half-stroke me-1"></i>メール送信 成功 / 失敗</div>
+            <div class="card-body" style="height: 280px;">
+                <canvas id="chartMailSuccess"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ─── グラフ行 2: 棒 × 2 + 横棒 ────────────────────────────────────── *@
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-chart-bar me-1"></i>DBサンプル EnumData 分布</div>
+            <div class="card-body" style="height: 280px;">
+                <canvas id="chartSampleEnum"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-file me-1"></i>ファイル種別 分布</div>
+            <div class="card-body" style="height: 280px;">
+                <canvas id="chartFileType"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-list-ol me-1"></i>ウィザード カテゴリ分布</div>
+            <div class="card-body" style="height: 280px;">
+                <canvas id="chartWizardCategory"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        // チャートインスタンスをスコープで保持する（update() で差分更新するため destroy() 不要）
+        let chartMailTrend, chartMailSuccess, chartSampleEnum, chartFileType, chartWizardCategory;
+
+        // Chart.js 全グラフ共通オプション
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+        };
+
+        // グラフ色パレット
+        const COLORS = ['#0d6efd', '#198754', '#0dcaf0', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'];
+
+        // ─── チャート初期化（初回のみ） ──────────────────────────────────
+
+        function initCharts(data) {
+
+            // 折れ線グラフ: メール日別送信数
+            chartMailTrend = new Chart(document.getElementById('chartMailTrend'), {
+                type: 'line',
+                data: buildTrendData(data.mailDailyTrend),
+                options: {
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } },
+                    },
+                },
+            });
+
+            // ドーナツグラフ: メール成功/失敗
+            chartMailSuccess = new Chart(document.getElementById('chartMailSuccess'), {
+                type: 'doughnut',
+                data: buildSuccessData(data.mailSuccessRatio),
+                options: {
+                    ...commonOptions,
+                    plugins: { legend: { position: 'bottom' } },
+                },
+            });
+
+            // 棒グラフ: SampleEnum 分布
+            chartSampleEnum = new Chart(document.getElementById('chartSampleEnum'), {
+                type: 'bar',
+                data: buildChartItemData(data.sampleEnumDistribution),
+                options: {
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                },
+            });
+
+            // 棒グラフ: ファイル種別分布
+            chartFileType = new Chart(document.getElementById('chartFileType'), {
+                type: 'bar',
+                data: buildChartItemData(data.fileTypeDistribution),
+                options: {
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                },
+            });
+
+            // 横棒グラフ: Wizard カテゴリ（indexAxis: 'y' で横棒に）
+            chartWizardCategory = new Chart(document.getElementById('chartWizardCategory'), {
+                type: 'bar',
+                data: buildChartItemData(data.wizardCategoryDistribution),
+                options: {
+                    ...commonOptions,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                },
+            });
+        }
+
+        // ─── チャート更新（2回目以降） ────────────────────────────────────
+
+        function updateCharts(data) {
+            updateTrendChart(chartMailTrend, data.mailDailyTrend);
+            updateSuccessChart(chartMailSuccess, data.mailSuccessRatio);
+            updateChartItemChart(chartSampleEnum, data.sampleEnumDistribution);
+            updateChartItemChart(chartFileType, data.fileTypeDistribution);
+            updateChartItemChart(chartWizardCategory, data.wizardCategoryDistribution);
+        }
+
+        // ─── データ構築ヘルパー ───────────────────────────────────────────
+
+        function buildTrendData(items) {
+            return {
+                labels: items.map(x => x.date),
+                datasets: [{
+                    label: '送信件数',
+                    data: items.map(x => x.count),
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                }],
+            };
+        }
+
+        function buildSuccessData(ratio) {
+            return {
+                labels: ['成功', '失敗'],
+                datasets: [{
+                    data: [ratio.successCount, ratio.failureCount],
+                    backgroundColor: ['#198754', '#dc3545'],
+                }],
+            };
+        }
+
+        function buildChartItemData(items) {
+            return {
+                labels: items.map(x => x.label),
+                datasets: [{
+                    data: items.map(x => x.count),
+                    backgroundColor: COLORS.slice(0, items.length),
+                }],
+            };
+        }
+
+        // ─── 差分更新ヘルパー ─────────────────────────────────────────────
+
+        function updateTrendChart(chart, items) {
+            chart.data.labels = items.map(x => x.date);
+            chart.data.datasets[0].data = items.map(x => x.count);
+            chart.update();
+        }
+
+        function updateSuccessChart(chart, ratio) {
+            chart.data.datasets[0].data = [ratio.successCount, ratio.failureCount];
+            chart.update();
+        }
+
+        function updateChartItemChart(chart, items) {
+            chart.data.labels = items.map(x => x.label);
+            chart.data.datasets[0].data = items.map(x => x.count);
+            chart.update();
+        }
+
+        // ─── サマリーカード更新 ───────────────────────────────────────────
+
+        function updateSummary(summary) {
+            document.getElementById('summarySample').textContent = summary.sampleCount;
+            document.getElementById('summaryMail').textContent   = summary.mailLogCount;
+            document.getElementById('summaryFile').textContent   = summary.fileCount;
+            document.getElementById('summaryWizard').textContent = summary.wizardCount;
+        }
+
+        // ─── データ取得・更新メイン処理 ───────────────────────────────────
+
+        const chartDataUrl = '@Model.ChartDataUrl';
+        let isFirstLoad = true;
+
+        function fetchAndUpdate() {
+            $.getJSON(chartDataUrl)
+                .done(function (data) {
+                    updateSummary(data.summary);
+                    if (isFirstLoad) {
+                        initCharts(data);
+                        isFirstLoad = false;
+                    } else {
+                        updateCharts(data);
+                    }
+                    document.getElementById('lastUpdated').textContent =
+                        new Date().toLocaleTimeString('ja-JP');
+                })
+                .fail(function () {
+                    // 初回失敗時のみエラー表示。次のポーリングで自動回復する
+                    if (isFirstLoad) {
+                        document.getElementById('lastUpdated').textContent = '取得失敗';
+                    }
+                    console.error('ダッシュボードデータの取得に失敗しました');
+                });
+        }
+
+        $(function () {
+            fetchAndUpdate();                    // 初回即時実行
+            setInterval(fetchAndUpdate, 30000); // 30秒ごとにポーリング
+        });
+    </script>
+}

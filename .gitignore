@@ -419,3 +419,5 @@ DevNext/wwwroot/js/bootstrap*
 /.letta/claude
 /.understand-anything
 /doc/tmp_gen
+/tmp/playwright
+/playwright-config.json

@@ -77,6 +77,9 @@ builder.Services.AddScoped<Site.Service.WizardSampleService>();
 // ユーザー・ロール管理
 builder.Services.AddScoped<Site.Service.UserManagementService>();
 
+// ダッシュボード
+builder.Services.AddScoped<Site.Service.DashboardService>();
+
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 

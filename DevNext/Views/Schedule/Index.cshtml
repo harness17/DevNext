@@ -186,14 +186,18 @@
     // ─── 削除 ────────────────────────────────────────────────────────────────
     function deleteEvent(eventId, modal) {
         if (!confirm('この予定を削除しますか？')) return;
-        var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        var token = getAntiForgeryToken();
         fetch('/Schedule/Delete/' + eventId, {
             method: 'POST',
-            headers: { 'RequestVerificationToken': token, 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: '__RequestVerificationToken=' + encodeURIComponent(token) + '&id=' + eventId
         })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (!res.ok) { alert('削除に失敗しました。（' + res.status + '）'); return null; }
+            return res.json();
+        })
         .then(function(data) {
+            if (!data) return;
             if (data.success) { modal.hide(); calendar.refetchEvents(); }
             else { alert(data.error || '削除に失敗しました。'); }
         });
@@ -201,18 +205,29 @@
 
     // ─── 参加ステータス更新 ───────────────────────────────────────────────────
     function updateStatus(eventId, status, btn) {
-        var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        var token = getAntiForgeryToken();
         fetch('/Schedule/UpdateParticipantStatus', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: '__RequestVerificationToken=' + encodeURIComponent(token) +
                   '&eventId=' + eventId + '&status=' + status
         })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            if (!res.ok) { alert('更新に失敗しました。（' + res.status + '）'); return null; }
+            return res.json();
+        })
         .then(function(data) {
+            if (!data) return;
             if (data.success) { btn.textContent += ' ✓'; btn.disabled = true; }
             else { alert(data.error || '更新に失敗しました。'); }
         });
+    }
+
+    // ─── AntiForgeryToken 取得ヘルパー ──────────────────────────────────────
+    // #scheduleTokenContainer 配下のトークンを取得する（モーダルのトークンと混在させないため）
+    function getAntiForgeryToken() {
+        var el = document.querySelector('#scheduleTokenContainer input[name="__RequestVerificationToken"]');
+        return el ? el.value : '';
     }
 
     // ─── ユーティリティ ──────────────────────────────────────────────────────
@@ -233,6 +248,6 @@
         return label;
     }
 </script>
-@* CSRF トークン（JS からの POST で使用） *@
-@Html.AntiForgeryToken()
+@* CSRF トークン（deleteEvent / updateStatus の fetch POST で使用。ID で一意に特定する） *@
+<div id="scheduleTokenContainer">@Html.AntiForgeryToken()</div>
 }

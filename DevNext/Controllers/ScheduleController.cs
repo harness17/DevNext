@@ -60,7 +60,8 @@ namespace Site.Controllers
         [HttpGet]
         public async Task<IActionResult> Detail(long id)
         {
-            var detail = await _service.GetDetailAsync(id);
+            // 閲覧権限チェック込みで取得（他人の個人予定は null）
+            var detail = await _service.GetDetailAsync(id, GetCurrentUserId());
             if (detail == null)
                 return Json(new { error = "予定が見つかりませんでした。" });
             return Json(detail);

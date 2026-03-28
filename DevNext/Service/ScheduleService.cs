@@ -69,11 +69,17 @@ namespace Site.Service
 
         /// <summary>
         /// 予定の詳細を取得する（モーダル表示用 JSON）。
+        /// 閲覧権限がない場合（他人の個人予定）は null を返す。
         /// </summary>
-        public async Task<ScheduleEventDetailDto?> GetDetailAsync(long id)
+        public async Task<ScheduleEventDetailDto?> GetDetailAsync(long id, string currentUserId)
         {
             var entity = _repo.SelectById(id);
             if (entity == null) return null;
+
+            // 閲覧権限チェック: 共有予定 OR 自分の予定 OR 自分が参加者 であること
+            var isParticipant = _repo.GetParticipant(id, currentUserId) != null;
+            if (!entity.IsShared && entity.OwnerId != currentUserId && !isParticipant)
+                return null;
 
             var owner = await _userManager.FindByIdAsync(entity.OwnerId);
             var participants = _repo.GetParticipants(id);
@@ -230,16 +236,22 @@ namespace Site.Service
             entity.SetForUpdate();
             _repo.Update(entity);
 
-            // 参加者を洗い替えする（既存を全削除して再登録）
+            // 参加者を洗い替えする。既存のステータスは引き継ぎ、新規追加分のみ Invited とする。
+            var existingParticipants = _repo.GetParticipants(entity.Id)
+                .ToDictionary(p => p.UserId);
             _repo.DeleteParticipantsByEventId(entity.Id);
             foreach (var userId in vm.ParticipantUserIds.Distinct())
             {
                 if (userId == currentUserId) continue;
+                // 既存参加者はステータスを引き継ぐ、新規追加は Invited
+                var existingStatus = existingParticipants.TryGetValue(userId, out var ep)
+                    ? ep.Status
+                    : ParticipantStatus.Invited;
                 var participant = new ScheduleEventParticipantEntity
                 {
                     EventId = entity.Id,
                     UserId  = userId,
-                    Status  = ParticipantStatus.Invited,
+                    Status  = existingStatus,
                 };
                 participant.SetForCreate();
                 _repo.InsertParticipant(participant);
@@ -298,11 +310,16 @@ namespace Site.Service
             return string.Join(",", vm.SelectedDaysOfWeek.Distinct().OrderBy(d => d));
         }
 
-        /// <summary>カンマ区切り文字列を int リストに変換する。</summary>
+        /// <summary>カンマ区切り文字列を int リストに変換する。無効な値は除外する。</summary>
         private static List<int> ParseDaysOfWeek(string? daysOfWeek)
         {
             if (string.IsNullOrEmpty(daysOfWeek)) return new List<int>();
-            return daysOfWeek.Split(',').Select(int.Parse).ToList();
+            // DB の不整合データに備え、int.TryParse で無効値をスキップする
+            return daysOfWeek.Split(',')
+                .Select(s => s.Trim())
+                .Where(s => int.TryParse(s, out _))
+                .Select(int.Parse)
+                .ToList();
         }
 
         /// <summary>

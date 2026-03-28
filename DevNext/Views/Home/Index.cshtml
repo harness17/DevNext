@@ -81,6 +81,15 @@
             </div>
         </div>
     </div>
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-calendar-alt me-2"></i>スケジュール</h5>
+                <p class="card-text">個人・共有の予定管理と繰り返しスケジュール、参加者招待機能のサンプルです。</p>
+                <a asp-controller="Schedule" asp-action="Index" class="btn btn-primary">カレンダーへ</a>
+            </div>
+        </div>
+    </div>
     @* ポイント: Admin ロールのみ表示する管理機能カード *@
     @if (User.IsInRole("Admin"))
     {

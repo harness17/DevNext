@@ -209,6 +209,80 @@ namespace DbMigrationRunner
                         CONSTRAINT [PK_Notification] PRIMARY KEY ([Id])
                     )
                 END");
+
+            // ─── ScheduleEvent ────────────────────────────────────────────────
+            Console.WriteLine("  テーブル [ScheduleEvent] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ScheduleEvent')
+                BEGIN
+                    CREATE TABLE [ScheduleEvent] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [Title]                     nvarchar(200)   NOT NULL,
+                        [Description]               nvarchar(2000)  NULL,
+                        [StartDate]                 datetime2(7)    NOT NULL,
+                        [EndDate]                   datetime2(7)    NOT NULL,
+                        [IsAllDay]                  bit             NOT NULL,
+                        [IsShared]                  bit             NOT NULL,
+                        [OwnerId]                   nvarchar(450)   NOT NULL,
+                        [RecurrenceType]            int             NOT NULL,
+                        [RecurrenceInterval]        int             NOT NULL,
+                        [RecurrenceEndDate]         datetime2(7)    NULL,
+                        [RecurrenceDaysOfWeek]      nvarchar(20)    NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_ScheduleEvent] PRIMARY KEY ([Id])
+                    )
+                END");
+
+            // ─── ScheduleEventHistory ─────────────────────────────────────────
+            Console.WriteLine("  テーブル [ScheduleEventHistory] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ScheduleEventHistory')
+                BEGIN
+                    CREATE TABLE [ScheduleEventHistory] (
+                        [HistoryId]                 bigint          NOT NULL IDENTITY(1,1),
+                        [Id]                        bigint          NOT NULL,
+                        [Title]                     nvarchar(200)   NOT NULL,
+                        [Description]               nvarchar(2000)  NULL,
+                        [StartDate]                 datetime2(7)    NOT NULL,
+                        [EndDate]                   datetime2(7)    NOT NULL,
+                        [IsAllDay]                  bit             NOT NULL,
+                        [IsShared]                  bit             NOT NULL,
+                        [OwnerId]                   nvarchar(450)   NOT NULL,
+                        [RecurrenceType]            int             NOT NULL,
+                        [RecurrenceInterval]        int             NOT NULL,
+                        [RecurrenceEndDate]         datetime2(7)    NULL,
+                        [RecurrenceDaysOfWeek]      nvarchar(20)    NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_ScheduleEventHistory] PRIMARY KEY ([HistoryId])
+                    )
+                END");
+
+            // ─── ScheduleEventParticipant ─────────────────────────────────────
+            Console.WriteLine("  テーブル [ScheduleEventParticipant] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ScheduleEventParticipant')
+                BEGIN
+                    CREATE TABLE [ScheduleEventParticipant] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [EventId]                   bigint          NOT NULL,
+                        [UserId]                    nvarchar(450)   NOT NULL,
+                        [Status]                    int             NOT NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_ScheduleEventParticipant] PRIMARY KEY ([Id])
+                    )
+                END");
         }
 
         static async Task SeedAsync(DBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)

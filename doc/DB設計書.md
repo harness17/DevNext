@@ -33,6 +33,9 @@
    - [MailLog](#315-maillog)
    - [ApprovalRequest](#316-approvalrequest)
    - [Notification](#317-notification)
+   - [ScheduleEvent](#318-scheduleevent)
+   - [ScheduleEventHistory](#319-scheduleeventhistory)
+   - [ScheduleEventParticipant](#3110-scheduleeventparticipant)
 4. [ER 図](#4-er-図)
 5. [Enum 定義](#5-enum-定義)
 6. [初期データ](#6-初期データ)
@@ -61,6 +64,9 @@
 | 15 | MailLog | メール送信ログ | アプリ |
 | 16 | ApprovalRequest | 承認申請データ | アプリ |
 | 17 | Notification | ユーザー通知 | アプリ |
+| 18 | ScheduleEvent | スケジュール予定 | アプリ |
+| 19 | ScheduleEventHistory | スケジュール予定履歴 | アプリ |
+| 20 | ScheduleEventParticipant | スケジュール参加者 | アプリ |
 
 ---
 
@@ -398,6 +404,64 @@ SampleEntityChild の変更履歴テーブル。
 
 ---
 
+### 3.18 ScheduleEvent
+
+スケジュール予定テーブル。個人予定・共有予定・繰り返し設定を管理する。
+
+| カラム名 | 型 | NULL | 制約 | 説明 |
+|---------|---|------|------|------|
+| `Id` | bigint | NOT NULL | PK, IDENTITY | 予定 ID |
+| `Title` | nvarchar(200) | NOT NULL | - | 件名 |
+| `Description` | nvarchar(1000) | NULL | - | 詳細・メモ |
+| `StartDate` | datetime2 | NOT NULL | - | 開始日時 |
+| `EndDate` | datetime2 | NOT NULL | - | 終了日時 |
+| `IsAllDay` | bit | NOT NULL | - | 終日フラグ（1: 終日） |
+| `IsShared` | bit | NOT NULL | - | 全体共有フラグ（1: 共有予定） |
+| `OwnerId` | nvarchar(450) | NOT NULL | - | 作成者ユーザー ID（ApplicationUser.Id） |
+| `RecurrenceType` | int | NOT NULL | - | 繰り返し種別（RecurrenceType Enum） |
+| `RecurrenceInterval` | int | NOT NULL | - | 繰り返し間隔（例: 2 = 2週ごと） |
+| `RecurrenceDaysOfWeek` | nvarchar(20) | NULL | - | 繰り返し曜日（週次のみ: "1,3,5" 形式） |
+| `RecurrenceEndDate` | datetime2 | NULL | - | 繰り返し終了日 |
+| `DelFlag` | bit | NOT NULL | - | 論理削除フラグ |
+| `CreateDate` | datetime2 | NOT NULL | - | 作成日時 |
+| `UpdateDate` | datetime2 | NOT NULL | - | 最終更新日時 |
+| `CreateApplicationUserId` | nvarchar(max) | NULL | - | 作成者ユーザー ID |
+| `UpdateApplicationUserId` | nvarchar(max) | NULL | - | 最終更新者ユーザー ID |
+
+---
+
+### 3.19 ScheduleEventHistory
+
+ScheduleEvent の変更履歴テーブル。更新前のデータを保存する。
+
+| カラム名 | 型 | NULL | 制約 | 説明 |
+|---------|---|------|------|------|
+| `HistoryId` | bigint | NOT NULL | PK, IDENTITY | 履歴 ID |
+| `Id` | bigint | NOT NULL | - | 元予定 ID |
+| *(ScheduleEvent と同じカラム)* | - | - | - | - |
+
+> `HistoryId` 以外は `ScheduleEvent` テーブルと同じカラム構成。更新前データが `_repo.InsertHistory(entity)` で保存される。
+
+---
+
+### 3.20 ScheduleEventParticipant
+
+スケジュール予定への参加者テーブル。作成者本人は含まない（招待されたユーザーのみ登録）。
+
+| カラム名 | 型 | NULL | 制約 | 説明 |
+|---------|---|------|------|------|
+| `Id` | bigint | NOT NULL | PK, IDENTITY | 参加者レコード ID |
+| `EventId` | bigint | NOT NULL | - | 予定 ID（ScheduleEvent.Id） |
+| `UserId` | nvarchar(450) | NOT NULL | - | 参加者ユーザー ID（ApplicationUser.Id） |
+| `Status` | int | NOT NULL | - | 参加ステータス（ParticipantStatus Enum） |
+| `DelFlag` | bit | NOT NULL | - | 論理削除フラグ |
+| `CreateDate` | datetime2 | NOT NULL | - | 作成日時 |
+| `UpdateDate` | datetime2 | NOT NULL | - | 最終更新日時 |
+| `CreateApplicationUserId` | nvarchar(max) | NULL | - | 作成者ユーザー ID |
+| `UpdateApplicationUserId` | nvarchar(max) | NULL | - | 最終更新者ユーザー ID |
+
+---
+
 ## 4. ER 図
 
 ```
@@ -424,6 +488,10 @@ MailLog（独立）
 ApprovalRequest（独立）※ RequesterUserId は ApplicationUser.Id を参照するが FK 制約なし
 
 Notification（独立）※ RecipientUserId は ApplicationUser.Id を参照するが FK 制約なし
+
+ScheduleEvent ────── ScheduleEventParticipant
+     │
+     └── ScheduleEventHistory
 ```
 
 ### 関連詳細
@@ -490,6 +558,27 @@ ApprovalRequest.Status に使用。
 | 3 | Approved | 承認済み |
 | 4 | Rejected | 却下 |
 
+### RecurrenceType（繰り返し種別）
+
+ScheduleEvent.RecurrenceType に使用。
+
+| 値 | 名前 | 表示名 |
+|---|------|--------|
+| 0 | None | なし |
+| 1 | Daily | 毎日 |
+| 2 | Weekly | 毎週 |
+| 3 | Monthly | 毎月 |
+
+### ParticipantStatus（参加ステータス）
+
+ScheduleEventParticipant.Status に使用。
+
+| 値 | 名前 | 表示名 |
+|---|------|--------|
+| 0 | Invited | 未回答 |
+| 1 | Accepted | 承諾 |
+| 2 | Declined | 辞退 |
+
 ### ErrorType（エラー種別）
 
 エラーページの種別区分。
@@ -554,7 +643,10 @@ cd DbMigrationRunner
 dotnet run
 ```
 
-`EnsureCreatedAsync()` によりテーブルが自動生成される（Entity Framework Core のモデルに基づく）。
+- **新規 DB**: `EnsureCreatedAsync()` により全テーブルが自動生成される（EF Core モデルに基づく）。
+- **既存 DB**: `ApplyMissingTablesAsync()` により不足テーブル・カラムが差分適用される。
+  - テーブル追加: `IF NOT EXISTS (sys.tables)` → `CREATE TABLE`
+  - カラム追加: `IF NOT EXISTS (sys.columns)` → `ALTER TABLE ADD`
 
 ---
 

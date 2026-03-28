@@ -554,7 +554,10 @@ cd DbMigrationRunner
 dotnet run
 ```
 
-`EnsureCreatedAsync()` によりテーブルが自動生成される（Entity Framework Core のモデルに基づく）。
+- **新規 DB**: `EnsureCreatedAsync()` により全テーブルが自動生成される（EF Core モデルに基づく）。
+- **既存 DB**: `ApplyMissingTablesAsync()` により不足テーブル・カラムが差分適用される。
+  - テーブル追加: `IF NOT EXISTS (sys.tables)` → `CREATE TABLE`
+  - カラム追加: `IF NOT EXISTS (sys.columns)` → `ALTER TABLE ADD`
 
 ---
 

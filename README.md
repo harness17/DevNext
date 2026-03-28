@@ -62,6 +62,7 @@ dotnet run
 `DbMigrationRunner` は以下を自動実行します。
 
 - `DevNextDB` データベースの作成（`EnsureCreatedAsync`）
+- 既存 DB の場合は不足テーブル・カラムを差分適用（`ApplyMissingTablesAsync`）
 - 初期ロール・ユーザーの投入
 
 **初期ユーザー**

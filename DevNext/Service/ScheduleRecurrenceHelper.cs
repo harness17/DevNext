@@ -36,6 +36,10 @@ namespace Site.Service
                 ? recEndExclusive.Value
                 : windowEnd;
 
+            // interval が 1 以上であることを検証。0 以下は無限ループの原因となる
+            if (interval <= 0)
+                throw new ArgumentOutOfRangeException(nameof(interval), "interval は 1 以上を指定してください。");
+
             if (type == RecurrenceType.None)
             {
                 // 繰り返しなし: ウィンドウ内に start が含まれれば1件だけ返す
@@ -73,7 +77,12 @@ namespace Site.Service
             DateTime windowStart, DateTime effectiveEnd, List<DateTime> results)
         {
             // カンマ区切りの曜日番号（0=日, 1=月, ..., 6=土）をパース
-            var days = daysOfWeek.Split(',').Select(int.Parse).ToArray();
+            // Trim で空白を除去し、TryParse で無効なデータを防ぐ
+            var days = daysOfWeek.Split(',')
+                .Select(s => s.Trim())
+                .Where(s => int.TryParse(s, out _))
+                .Select(int.Parse)
+                .ToArray();
 
             // start の週の日曜日を起点として週単位で進める
             var weekSunday = start.Date.AddDays(-(int)start.DayOfWeek);

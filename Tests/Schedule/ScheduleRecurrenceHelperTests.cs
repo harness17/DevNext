@@ -6,6 +6,21 @@ namespace Tests.Schedule
 {
     public class ScheduleRecurrenceHelperTests
     {
+        // ─── バリデーション ───────────────────────────────────────────────────
+
+        [Fact]
+        public void GetOccurrences_InvalidInterval_ThrowsArgumentOutOfRangeException()
+        {
+            // interval が 0 以下の場合は ArgumentOutOfRangeException を投げる
+            var start = new DateTime(2026, 4, 1, 9, 0, 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ScheduleRecurrenceHelper.GetOccurrences(
+                    start, RecurrenceType.Daily, interval: 0,
+                    recEnd: null, daysOfWeek: null,
+                    windowStart: new DateTime(2026, 4, 1),
+                    windowEnd: new DateTime(2026, 4, 10)));
+        }
+
         // ─── None（繰り返しなし） ─────────────────────────────────────────────
 
         [Fact]

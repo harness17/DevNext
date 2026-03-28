@@ -89,6 +89,9 @@ builder.Services.AddScoped<Site.Service.NotificationService>();
 // エクスポート
 builder.Services.AddScoped<Site.Service.ExportService>();
 
+// スケジュール
+builder.Services.AddScoped<Site.Service.ScheduleService>();
+
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 

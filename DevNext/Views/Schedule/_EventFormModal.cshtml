@@ -1,0 +1,135 @@
+@model Site.Models.ScheduleEventFormViewModel
+@using Site.Common
+@using Site.Entity.Enums
+
+<form id="scheduleForm" action="@(Model.Id == 0 ? "/Schedule/Create" : "/Schedule/Edit/" + Model.Id)"
+      method="post" onsubmit="return submitScheduleForm(this)">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div id="formErrors" class="alert alert-danger d-none"></div>
+
+    <div class="modal-body">
+        <!-- 件名 -->
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label fw-bold"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <!-- 詳細 -->
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- 開始・終了 -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="StartDate" class="form-label fw-bold"></label>
+                <input asp-for="StartDate" type="datetime-local" class="form-control"
+                       value="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="EndDate" class="form-label fw-bold"></label>
+                <input asp-for="EndDate" type="datetime-local" class="form-control"
+                       value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- 終日・共有 -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input asp-for="IsAllDay" class="form-check-input" />
+                    <label asp-for="IsAllDay" class="form-check-label">終日</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input asp-for="IsShared" class="form-check-input" />
+                    <label asp-for="IsShared" class="form-check-label">全体共有</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 繰り返し -->
+        <div class="mb-3">
+            <label asp-for="RecurrenceType" class="form-label fw-bold">繰り返し</label>
+            <select asp-for="RecurrenceType" class="form-select" id="recurrenceTypeSelect">
+                <option value="0">なし</option>
+                <option value="1">毎日</option>
+                <option value="2">毎週</option>
+                <option value="3">毎月</option>
+            </select>
+        </div>
+
+        <div id="recurrenceOptions" style="display:@(Model.RecurrenceType != RecurrenceType.None ? "block" : "none")">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label asp-for="RecurrenceInterval" class="form-label">間隔</label>
+                    <input asp-for="RecurrenceInterval" type="number" class="form-control" min="1" max="99" />
+                </div>
+                <div class="col-md-8">
+                    <label asp-for="RecurrenceEndDate" class="form-label">終了日</label>
+                    <input asp-for="RecurrenceEndDate" type="date" class="form-control"
+                           value="@Model.RecurrenceEndDate?.ToString("yyyy-MM-dd")" />
+                </div>
+            </div>
+
+            <!-- 曜日選択（週次のみ表示） -->
+            <div id="daysOfWeekSection" style="display:@(Model.RecurrenceType == RecurrenceType.Weekly ? "block" : "none")">
+                <label class="form-label">曜日</label>
+                <div class="d-flex gap-2 flex-wrap">
+                    @foreach (var (label, value) in new[] { ("日",0),("月",1),("火",2),("水",3),("木",4),("金",5),("土",6) })
+                    {
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" name="SelectedDaysOfWeek" value="@value"
+                                   class="form-check-input"
+                                   checked="@(Model.SelectedDaysOfWeek.Contains(value) ? "checked" : null)" />
+                            <label class="form-check-label">@label</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- 参加者 -->
+        @if (Model.UserList.Count > 0)
+        {
+            <div class="mb-3">
+                <label class="form-label">参加者を招待</label>
+                <select name="ParticipantUserIds" class="form-select" multiple size="4">
+                    @foreach (var u in Model.UserList)
+                    {
+                        <option value="@u.Value"
+                                selected="@(Model.ParticipantUserIds.Contains(u.Value) ? "selected" : null)">
+                            @u.Text
+                        </option>
+                    }
+                </select>
+                <div class="form-text">Ctrl（Mac: ⌘）を押しながらクリックで複数選択できます。</div>
+            </div>
+        }
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">保存</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+    </div>
+</form>
+
+<script>
+    // 繰り返し種別変更時に関連オプションの表示を切り替える
+    document.getElementById('recurrenceTypeSelect')?.addEventListener('change', function() {
+        var val = parseInt(this.value);
+        document.getElementById('recurrenceOptions').style.display = val !== 0 ? 'block' : 'none';
+        document.getElementById('daysOfWeekSection').style.display = val === 2 ? 'block' : 'none';
+    });
+    // エラーメッセージ div の表示/非表示制御
+    document.getElementById('scheduleForm')?.addEventListener('submit', function() {
+        document.getElementById('formErrors').classList.add('d-none');
+    });
+</script>

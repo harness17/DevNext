@@ -41,6 +41,7 @@ DevNext/
 | JSON | Newtonsoft.Json | 13.0.3 |
 | テスト | xUnit / Moq | 2.9.3 / 4.20.72 |
 | グラフ描画 | Chart.js | 4.4.7 |
+| カレンダー UI | FullCalendar | 6.1.15 |
 
 ---
 
@@ -162,6 +163,16 @@ dotnet test
 - 申請時は Admin 全員に、承認・却下時は申請者にベルアイコン通知
 - CSV・Excel エクスポート（検索条件を維持して全件出力）
 
+### スケジュール・カレンダー
+
+- FullCalendar.js による月・週・日ビュー切り替えカレンダー
+- 個人予定・全体共有予定・招待された予定を色分け表示
+- 予定の作成・編集・削除（Bootstrap モーダルによる非ページ遷移 UX）
+- 繰り返し設定（毎日・毎週・毎月、間隔・曜日・終了日指定）
+- 参加者招待・承諾/辞退による参加ステータス管理
+- 作成者以外は編集・削除不可（参加者は自分のステータスのみ更新可能）
+- 予定更新時は履歴テーブルに旧データを保存
+
 ### ダッシュボード
 
 - サマリーカード（DBサンプル / メール / ファイル / 多段階フォームの件数）
@@ -208,6 +219,7 @@ DevNext/
 │   ├── UserManagementController.cs  # ユーザー・ロール管理（Admin限定）
 │   ├── ApprovalRequestController.cs # 承認ワークフロー
 │   ├── NotificationController.cs    # 通知 Ajax API
+│   ├── ScheduleController.cs        # スケジュール・カレンダー
 │   └── RootErrorController.cs       # エラーハンドリング
 ├── Entity/                       # エンティティ定義
 ├── Models/                       # ビューモデル
@@ -221,14 +233,16 @@ DevNext/
 │   ├── CommonService.cs          # 共通サービス
 │   ├── ApprovalWorkflowService.cs # 承認ワークフロー（状態遷移・通知トリガー）
 │   ├── NotificationService.cs    # 通知の作成・取得・既読更新
-│   └── ExportService.cs          # 承認申請 CSV / Excel エクスポート
+│   ├── ExportService.cs          # 承認申請 CSV / Excel エクスポート
+│   └── ScheduleService.cs        # スケジュール CRUD・繰り返し展開・参加者管理
 ├── Repository/                   # データアクセス層
 │   ├── SampleEntityRepository.cs
 │   ├── SampleEntityChildRepository.cs
 │   ├── FileEntityRepository.cs
 │   ├── WizardEntityRepository.cs
 │   ├── ApprovalRequestRepository.cs
-│   └── NotificationRepository.cs
+│   ├── NotificationRepository.cs
+│   └── ScheduleRepository.cs
 ├── Views/                        # Razor ビュー
 └── Program.cs                    # DI・ミドルウェア設定
 

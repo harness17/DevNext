@@ -1,0 +1,238 @@
+@{
+    ViewData["Title"] = "スケジュール";
+}
+
+@* FullCalendar 6.x CDN *@
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@@fullcalendar/core@6.1.15/locales/ja.global.min.js"></script>
+
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4><i class="fas fa-calendar-alt me-2"></i>スケジュール</h4>
+        <button type="button" class="btn btn-primary" id="btnNewEvent">
+            <i class="fas fa-plus me-1"></i>新規作成
+        </button>
+    </div>
+
+    <!-- 凡例 -->
+    <div class="d-flex gap-3 mb-2 small">
+        <span><span class="badge" style="background:#0d6efd">●</span> 個人予定</span>
+        <span><span class="badge" style="background:#198754">●</span> 共有予定（自分）</span>
+        <span><span class="badge" style="background:#fd7e14">●</span> 招待された予定</span>
+    </div>
+
+    <div id="calendar"></div>
+</div>
+
+<!-- 詳細モーダル -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">予定詳細</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailModalBody">
+                <div class="text-center"><div class="spinner-border" role="status"></div></div>
+            </div>
+            <div class="modal-footer" id="detailModalFooter"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 作成・編集モーダル -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formModalLabel">予定</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="formModalBody">
+                <div class="text-center"><div class="spinner-border" role="status"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // ─── FullCalendar 初期化 ────────────────────────────────────────────────
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'ja',
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left:   'prev,next today',
+            center: 'title',
+            right:  'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        height: 'auto',
+        // FullCalendar が start/end パラメータ付きで呼び出す
+        events: '/Schedule/GetEvents',
+        // 日付クリック → 作成モーダルを開く（クリックした日付をデフォルト値に設定）
+        dateClick: function(info) {
+            openFormModal('/Schedule/Create?defaultStart=' + info.dateStr + 'T09:00:00', '新規予定作成');
+        },
+        // イベントクリック → 詳細モーダルを開く
+        eventClick: function(info) {
+            openDetailModal(info.event.id, info.event.extendedProps.ownerId);
+        }
+    });
+    calendar.render();
+
+    // ─── 新規作成ボタン ──────────────────────────────────────────────────────
+    document.getElementById('btnNewEvent').addEventListener('click', function() {
+        openFormModal('/Schedule/Create', '新規予定作成');
+    });
+
+    // ─── 詳細モーダル ────────────────────────────────────────────────────────
+    function openDetailModal(eventId, ownerId) {
+        var modal = new bootstrap.Modal(document.getElementById('detailModal'));
+        var body = document.getElementById('detailModalBody');
+        var footer = document.getElementById('detailModalFooter');
+        body.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+        footer.innerHTML = '';
+        modal.show();
+
+        fetch('/Schedule/Detail/' + eventId)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.error) { body.innerHTML = '<p class="text-danger">' + data.error + '</p>'; return; }
+                renderDetailBody(body, data);
+                renderDetailFooter(footer, data, modal);
+            });
+    }
+
+    function renderDetailBody(container, d) {
+        var recLabel = getRecurrenceLabel(d.recurrenceType, d.recurrenceInterval, d.recurrenceDaysOfWeek, d.recurrenceEndDate);
+        var participantHtml = d.participants.length === 0 ? '<span class="text-muted">なし</span>' :
+            d.participants.map(function(p) {
+                var badge = p.status === 1 ? 'bg-success' : p.status === 2 ? 'bg-danger' : 'bg-secondary';
+                return '<span class="badge ' + badge + ' me-1">' + escHtml(p.userName) + '（' + p.statusLabel + '）</span>';
+            }).join('');
+
+        container.innerHTML =
+            '<dl class="row mb-0">' +
+            '<dt class="col-sm-3">件名</dt><dd class="col-sm-9">' + escHtml(d.title) + '</dd>' +
+            '<dt class="col-sm-3">詳細</dt><dd class="col-sm-9">' + escHtml(d.description || '―') + '</dd>' +
+            '<dt class="col-sm-3">開始</dt><dd class="col-sm-9">' + d.startDate + '</dd>' +
+            '<dt class="col-sm-3">終了</dt><dd class="col-sm-9">' + d.endDate + '</dd>' +
+            '<dt class="col-sm-3">種別</dt><dd class="col-sm-9">' + (d.isShared ? '<span class="badge bg-success">共有</span>' : '<span class="badge bg-primary">個人</span>') + '</dd>' +
+            '<dt class="col-sm-3">作成者</dt><dd class="col-sm-9">' + escHtml(d.ownerName) + '</dd>' +
+            (recLabel ? '<dt class="col-sm-3">繰り返し</dt><dd class="col-sm-9">' + recLabel + '</dd>' : '') +
+            '<dt class="col-sm-3">参加者</dt><dd class="col-sm-9">' + participantHtml + '</dd>' +
+            '</dl>';
+    }
+
+    function renderDetailFooter(container, d, modal) {
+        var currentUserId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+        var btns = '';
+        // 参加ステータス変更ボタン（自分が参加者の場合のみ表示）
+        var isParticipant = d.participants.some(function(p) { return p.userId === currentUserId; });
+        if (isParticipant) {
+            btns += '<button class="btn btn-success btn-sm me-1" onclick="updateStatus(' + d.id + ', 1, this)">承諾</button>';
+            btns += '<button class="btn btn-danger btn-sm me-1" onclick="updateStatus(' + d.id + ', 2, this)">辞退</button>';
+        }
+        // 編集・削除ボタン（作成者のみ）
+        if (d.ownerId === currentUserId) {
+            btns += '<button class="btn btn-outline-primary btn-sm me-1" onclick="openEditModal(' + d.id + ', modal)">編集</button>';
+            btns += '<button class="btn btn-outline-danger btn-sm" onclick="deleteEvent(' + d.id + ', modal)">削除</button>';
+        }
+        btns += '<button type="button" class="btn btn-secondary btn-sm ms-1" data-bs-dismiss="modal">閉じる</button>';
+        container.innerHTML = btns;
+        // modal 参照を変数にバインドしておく
+        container._modal = modal;
+    }
+
+    // ─── 作成・編集モーダル ───────────────────────────────────────────────────
+    function openFormModal(url, title) {
+        document.getElementById('formModalLabel').textContent = title;
+        var body = document.getElementById('formModalBody');
+        body.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+        var modal = new bootstrap.Modal(document.getElementById('formModal'));
+        modal.show();
+
+        fetch(url)
+            .then(function(res) { return res.text(); })
+            .then(function(html) { body.innerHTML = html; });
+    }
+
+    function openEditModal(eventId, detailModal) {
+        detailModal.hide();
+        openFormModal('/Schedule/Edit/' + eventId, '予定編集');
+    }
+
+    // ─── フォーム送信（モーダル内から呼ばれる） ──────────────────────────────
+    window.submitScheduleForm = function(form) {
+        var fd = new FormData(form);
+        fetch(form.action, { method: 'POST', body: fd })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('formModal')).hide();
+                    calendar.refetchEvents();
+                } else {
+                    var errDiv = document.getElementById('formErrors');
+                    if (errDiv) errDiv.innerHTML = (data.errors || [data.error]).map(function(e) {
+                        return '<p class="mb-0">' + escHtml(e) + '</p>';
+                    }).join('');
+                }
+            });
+        return false; // フォームのデフォルト送信を防止
+    };
+
+    // ─── 削除 ────────────────────────────────────────────────────────────────
+    function deleteEvent(eventId, modal) {
+        if (!confirm('この予定を削除しますか？')) return;
+        var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        fetch('/Schedule/Delete/' + eventId, {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': token, 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: '__RequestVerificationToken=' + encodeURIComponent(token) + '&id=' + eventId
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) { modal.hide(); calendar.refetchEvents(); }
+            else { alert(data.error || '削除に失敗しました。'); }
+        });
+    }
+
+    // ─── 参加ステータス更新 ───────────────────────────────────────────────────
+    function updateStatus(eventId, status, btn) {
+        var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        fetch('/Schedule/UpdateParticipantStatus', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: '__RequestVerificationToken=' + encodeURIComponent(token) +
+                  '&eventId=' + eventId + '&status=' + status
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) { btn.textContent += ' ✓'; btn.disabled = true; }
+            else { alert(data.error || '更新に失敗しました。'); }
+        });
+    }
+
+    // ─── ユーティリティ ──────────────────────────────────────────────────────
+    function escHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function getRecurrenceLabel(type, interval, daysOfWeek, endDate) {
+        if (type === 0) return '';
+        var labels = { 1: '毎日', 2: '毎週', 3: '毎月' };
+        var label = (interval > 1 ? interval + '回ごと' : '') + (labels[type] || '');
+        if (type === 2 && daysOfWeek) {
+            var dayNames = ['日','月','火','水','木','金','土'];
+            label += '（' + daysOfWeek.split(',').map(function(d) { return dayNames[parseInt(d)]; }).join('・') + '）';
+        }
+        if (endDate) label += '（' + endDate + ' まで）';
+        return label;
+    }
+</script>
+@* CSRF トークン（JS からの POST で使用） *@
+@Html.AntiForgeryToken()
+}

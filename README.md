@@ -35,7 +35,7 @@ DevNext/
 | ORM | Entity Framework Core / SQL Server | 10.0.0 |
 | 認証 | ASP.NET Core Identity | 10.0.0 |
 | オブジェクトマッピング | AutoMapper | 16.1.1 |
-| Excel処理 | EPPlus | 7.5.2 |
+| Excel処理 | ClosedXML（MIT ライセンス、商用利用無償） | 0.104.2 |
 | CSV処理 | CsvHelper | 33.0.1 |
 | PDF生成 | QuestPDF | 2026.2.3 |
 | JSON | Newtonsoft.Json | 13.0.3 |
@@ -152,6 +152,15 @@ dotnet test
 - ユーザー削除（初期 Admin ユーザーは削除不可）
 - ロールの付与・剥奪（Admin / Member）
 
+### 承認ワークフロー
+
+- 申請の作成・編集・削除（下書き保存 / 即時申請）
+- 申請ステータス管理（Draft → Pending → Approved / Rejected）
+- 申請一覧（Admin: 全件表示、Member: 自分の申請のみ）
+- 承認・却下（Admin 限定、コメント入力可）
+- 申請時は Admin 全員に、承認・却下時は申請者にベルアイコン通知
+- CSV・Excel エクスポート（検索条件を維持して全件出力）
+
 ### ダッシュボード
 
 - サマリーカード（DBサンプル / メール / ファイル / 多段階フォームの件数）
@@ -196,6 +205,8 @@ DevNext/
 │   ├── ViewSampleController.cs      # UIパターンサンプル
 │   ├── DashboardController.cs        # ダッシュボード・グラフデータ API
 │   ├── UserManagementController.cs  # ユーザー・ロール管理（Admin限定）
+│   ├── ApprovalRequestController.cs # 承認ワークフロー
+│   ├── NotificationController.cs    # 通知 Ajax API
 │   └── RootErrorController.cs       # エラーハンドリング
 ├── Entity/                       # エンティティ定義
 ├── Models/                       # ビューモデル
@@ -206,12 +217,17 @@ DevNext/
 │   ├── WizardSampleService.cs    # 多段階フォーム
 │   ├── DashboardService.cs        # ダッシュボード集計
 │   ├── UserManagementService.cs  # ユーザー・ロール管理
-│   └── CommonService.cs          # 共通サービス
+│   ├── CommonService.cs          # 共通サービス
+│   ├── ApprovalWorkflowService.cs # 承認ワークフロー（状態遷移・通知トリガー）
+│   ├── NotificationService.cs    # 通知の作成・取得・既読更新
+│   └── ExportService.cs          # 承認申請 CSV / Excel エクスポート
 ├── Repository/                   # データアクセス層
 │   ├── SampleEntityRepository.cs
 │   ├── SampleEntityChildRepository.cs
 │   ├── FileEntityRepository.cs
-│   └── WizardEntityRepository.cs
+│   ├── WizardEntityRepository.cs
+│   ├── ApprovalRequestRepository.cs
+│   └── NotificationRepository.cs
 ├── Views/                        # Razor ビュー
 └── Program.cs                    # DI・ミドルウェア設定
 

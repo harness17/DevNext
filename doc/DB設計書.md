@@ -31,6 +31,8 @@
    - [FileEntity](#313-fileentity)
    - [WizardEntity](#314-wizardentity)
    - [MailLog](#315-maillog)
+   - [ApprovalRequest](#316-approvalrequest)
+   - [Notification](#317-notification)
 4. [ER 図](#4-er-図)
 5. [Enum 定義](#5-enum-定義)
 6. [初期データ](#6-初期データ)
@@ -57,6 +59,8 @@
 | 13 | FileEntity | ファイルメタ情報 | アプリ |
 | 14 | WizardEntity | 多段階フォームデータ | アプリ |
 | 15 | MailLog | メール送信ログ | アプリ |
+| 16 | ApprovalRequest | 承認申請データ | アプリ |
+| 17 | Notification | ユーザー通知 | アプリ |
 
 ---
 
@@ -353,6 +357,47 @@ SampleEntityChild の変更履歴テーブル。
 
 ---
 
+### 3.16 ApprovalRequest
+
+承認ワークフローの申請データテーブル。申請者が作成し、Admin が承認・却下する。
+
+| カラム名 | 型 | NULL | 制約 | 説明 |
+|---------|---|------|------|------|
+| `Id` | bigint | NOT NULL | PK, IDENTITY | 申請 ID |
+| `Title` | nvarchar(200) | NOT NULL | - | 申請タイトル |
+| `Content` | nvarchar(2000) | NOT NULL | - | 申請内容 |
+| `Status` | int | NOT NULL | - | 申請状態（ApprovalStatus Enum） |
+| `RequesterUserId` | nvarchar(450) | NOT NULL | - | 申請者ユーザー ID（ApplicationUser.Id） |
+| `ApproverComment` | nvarchar(1000) | NULL | - | 承認者コメント（承認・却下時に入力） |
+| `RequestedDate` | datetime2 | NULL | - | 申請日時（Draft → Pending 移行時にセット） |
+| `ApprovedDate` | datetime2 | NULL | - | 承認・却下確定日時 |
+| `DelFlag` | bit | NOT NULL | - | 論理削除フラグ |
+| `CreateDate` | datetime2 | NOT NULL | - | 作成日時 |
+| `UpdateDate` | datetime2 | NOT NULL | - | 最終更新日時 |
+| `CreateApplicationUserId` | nvarchar(max) | NULL | - | 作成者ユーザー ID |
+| `UpdateApplicationUserId` | nvarchar(max) | NULL | - | 最終更新者ユーザー ID |
+
+---
+
+### 3.17 Notification
+
+承認ワークフローのイベント（申請・承認・却下）に連動して生成されるユーザー通知テーブル。
+
+| カラム名 | 型 | NULL | 制約 | 説明 |
+|---------|---|------|------|------|
+| `Id` | bigint | NOT NULL | PK, IDENTITY | 通知 ID |
+| `RecipientUserId` | nvarchar(450) | NOT NULL | - | 通知先ユーザー ID（ApplicationUser.Id） |
+| `Message` | nvarchar(500) | NOT NULL | - | 通知メッセージ本文 |
+| `IsRead` | bit | NOT NULL | - | 既読フラグ（0: 未読、1: 既読） |
+| `RelatedUrl` | nvarchar(500) | NULL | - | クリック時の遷移先 URL（Detail ページなど） |
+| `DelFlag` | bit | NOT NULL | - | 論理削除フラグ |
+| `CreateDate` | datetime2 | NOT NULL | - | 通知作成日時 |
+| `UpdateDate` | datetime2 | NOT NULL | - | 最終更新日時 |
+| `CreateApplicationUserId` | nvarchar(max) | NULL | - | 作成者ユーザー ID |
+| `UpdateApplicationUserId` | nvarchar(max) | NULL | - | 最終更新者ユーザー ID |
+
+---
+
 ## 4. ER 図
 
 ```
@@ -375,6 +420,10 @@ FileEntity（独立）
 WizardEntity（独立）
 
 MailLog（独立）
+
+ApprovalRequest（独立）※ RequesterUserId は ApplicationUser.Id を参照するが FK 制約なし
+
+Notification（独立）※ RecipientUserId は ApplicationUser.Id を参照するが FK 制約なし
 ```
 
 ### 関連詳細
@@ -429,6 +478,17 @@ WizardEntity.Category に使用。
 | 2 | Request | ご要望 |
 | 3 | BugReport | 不具合報告 |
 | 4 | Other | その他 |
+
+### ApprovalStatus（申請状態）
+
+ApprovalRequest.Status に使用。
+
+| 値 | 名前 | 表示名 |
+|---|------|--------|
+| 1 | Draft | 下書き |
+| 2 | Pending | 申請中 |
+| 3 | Approved | 承認済み |
+| 4 | Rejected | 却下 |
 
 ### ErrorType（エラー種別）
 

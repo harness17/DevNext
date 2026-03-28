@@ -87,7 +87,7 @@
                         <div class="form-check form-check-inline">
                             <input type="checkbox" name="SelectedDaysOfWeek" value="@value"
                                    class="form-check-input"
-                                   @(Model.SelectedDaysOfWeek.Contains(value) ? "checked" : "") />
+                                   checked="@(Model.SelectedDaysOfWeek.Contains(value) ? "checked" : null)" />
                             <label class="form-check-label">@label</label>
                         </div>
                     }
@@ -104,7 +104,7 @@
                     @foreach (var u in Model.UserList)
                     {
                         <option value="@u.Value"
-                                @(Model.ParticipantUserIds.Contains(u.Value) ? "selected" : "")>
+                                selected="@(Model.ParticipantUserIds.Contains(u.Value) ? "selected" : null)">
                             @u.Text
                         </option>
                     }

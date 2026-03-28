@@ -57,6 +57,11 @@ namespace Site.Common
         // 通知
         public DbSet<NotificationEntity> Notification { get; set; }
 
+        // スケジュール
+        public DbSet<ScheduleEventEntity> ScheduleEvent { get; set; }
+        public DbSet<ScheduleEventEntityHistory> ScheduleEventHistory { get; set; }
+        public DbSet<ScheduleEventParticipantEntity> ScheduleEventParticipant { get; set; }
+
         #endregion
     }
 }

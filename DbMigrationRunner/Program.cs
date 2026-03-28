@@ -87,17 +87,26 @@ namespace DbMigrationRunner
         }
 
         /// <summary>
-        /// 不足しているテーブルを追加する。
-        /// 新しいエンティティを追加した場合は、このメソッドに対応するブロックを追記すること。
-        /// EF Core が生成する DDL と型を合わせるため、各カラムの型は EF Core の規約に従う。
-        ///   - string（[Required][MaxLength(N)]）→ nvarchar(N) NOT NULL
-        ///   - string?（[MaxLength(N)]）         → nvarchar(N) NULL
-        ///   - string?（MaxLength指定なし）       → nvarchar(max) NULL
-        ///   - long                              → bigint NOT NULL
-        ///   - bool                              → bit NOT NULL
-        ///   - DateTime                          → datetime2(7) NOT NULL
-        ///   - DateTime?                         → datetime2(7) NULL
-        ///   - enum (int)                        → int NOT NULL
+        /// 既存 DB に対してスキーマ差分を適用する。
+        ///
+        /// ■ 新しいエンティティを追加した場合
+        ///   [テーブル追加] セクションに CREATE TABLE ブロックを追記する。
+        ///   同時に、EnsureCreatedAsync で作成される新規 DB 用の DDL にも追加が必要。
+        ///
+        /// ■ 既存エンティティにカラムを追加した場合
+        ///   [カラム追加] セクションに ALTER TABLE ブロックを追記する。
+        ///   また、[テーブル追加] セクションの CREATE TABLE DDL にも追記して
+        ///   新規 DB でも同じカラムが作成されるようにすること。
+        ///
+        /// ■ EF Core 型 → SQL 型 対応表
+        ///   string [Required][MaxLength(N)] → nvarchar(N)   NOT NULL
+        ///   string? [MaxLength(N)]          → nvarchar(N)   NULL
+        ///   string? (MaxLength 指定なし)    → nvarchar(max) NULL
+        ///   long                            → bigint        NOT NULL
+        ///   int / enum(int)                 → int           NOT NULL
+        ///   bool                            → bit           NOT NULL
+        ///   DateTime                        → datetime2(7)  NOT NULL
+        ///   DateTime?                       → datetime2(7)  NULL
         /// </summary>
         static async Task ApplyMissingTablesAsync(DBContext context)
         {
@@ -283,6 +292,35 @@ namespace DbMigrationRunner
                         CONSTRAINT [PK_ScheduleEventParticipant] PRIMARY KEY ([Id])
                     )
                 END");
+
+            // ================================================================
+            // [カラム追加] 既存テーブルへのカラム追加はここに追記する
+            // ================================================================
+            // パターン（1カラムにつき1ブロック）:
+            //
+            //   Console.WriteLine("  カラム [テーブル名].[カラム名] を確認しています...");
+            //   await context.Database.ExecuteSqlRawAsync(@"
+            //       IF NOT EXISTS (
+            //           SELECT 1 FROM sys.columns
+            //           WHERE object_id = OBJECT_ID('テーブル名') AND name = 'カラム名'
+            //       )
+            //           ALTER TABLE [テーブル名] ADD [カラム名] <SQL型> <NULL制約>");
+            //
+            // 注意: NOT NULL カラムを既存テーブルに追加する場合は DEFAULT 句が必要:
+            //   ALTER TABLE [テーブル名] ADD [カラム名] int NOT NULL DEFAULT 0
+            //
+            // ================================================================
+            // 例: ApprovalRequest に PriorityLevel (int, NOT NULL) を追加した場合
+            //   Console.WriteLine("  カラム [ApprovalRequest].[PriorityLevel] を確認しています...");
+            //   await context.Database.ExecuteSqlRawAsync(@"
+            //       IF NOT EXISTS (
+            //           SELECT 1 FROM sys.columns
+            //           WHERE object_id = OBJECT_ID('ApprovalRequest') AND name = 'PriorityLevel'
+            //       )
+            //           ALTER TABLE [ApprovalRequest] ADD [PriorityLevel] int NOT NULL DEFAULT 0");
+            // ================================================================
+
+            Console.WriteLine("  [カラム追加] 現時点では追加カラムなし。");
         }
 
         static async Task SeedAsync(DBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)

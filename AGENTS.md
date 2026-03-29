@@ -23,6 +23,13 @@ docs/             ← 設計書・実装計画
 scripts/          ← 開発補助スクリプト
 ```
 
+### Samples/ の設計制約
+
+- 各Sampleは `CommonLibrary` を参照してよい
+- **Sample同士は依存しない**（FileSampleがMailSampleを参照するなど禁止）
+- 各Sampleは単独でビルド・起動できる状態にすること
+- Sample内のエンティティ・DBContextはSample専用とし、コアのDBContextとは分離する
+
 ---
 
 ## コーディング方針
@@ -61,6 +68,14 @@ builder.Services.AddScoped<AccessLogAttribute>();
 
 `Program.cs` で設定。以下をすべて満たすこと：最低6文字・大文字・小文字・数字・記号すべて必須
 
+### テスト記述時の注意
+
+`SignInResult` は `Microsoft.AspNetCore.Identity.SignInResult` と `Microsoft.AspNetCore.Mvc.SignInResult` が競合するため、テストコードではエイリアスを使用すること：
+
+```csharp
+using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
+```
+
 ---
 
 ## データベースルール
@@ -98,12 +113,12 @@ builder.Services.AddScoped<AccessLogAttribute>();
 
 ---
 
-## 実装完了後の必須手順
+## ⚠️ 実装完了後の必須手順
 
-実装が完了したら必ず以下を実行してください：
+> **この手順をスキップするとレビューフェーズに進めません。**
+
+実装が完了したら必ず以下を順番に実行してください：
 
 1. ビルドが通ることを確認: `cd DevNext && dotnet build`
 2. テストが通ることを確認: `cd Tests && dotnet test`
 3. レビュー依頼スクリプトを実行: `./scripts/request-review.ps1`
-
-> **注意**: request-review.ps1 を実行しないとレビューフェーズに進めません。

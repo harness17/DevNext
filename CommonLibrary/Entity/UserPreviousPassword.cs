@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Site.Entity
+namespace Dev.CommonLibrary.Entity
 {
     /// <summary>
-    /// パスワード履歴
+    /// 以前使用したパスワード履歴
     /// </summary>
     public class UserPreviousPassword
     {

@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using Dev.CommonLibrary.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Site.Common;
+using Dev.CommonLibrary.Entity;
 using Site.Entity;
 using Site.Models;
 using Site.Repository;

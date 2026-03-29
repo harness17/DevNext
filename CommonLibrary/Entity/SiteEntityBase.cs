@@ -1,6 +1,4 @@
-using Dev.CommonLibrary.Entity;
-
-namespace Site.Entity
+namespace Dev.CommonLibrary.Entity
 {
     /// <summary>
     /// サイトエンティティベース

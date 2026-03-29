@@ -1,3 +1,4 @@
+using Dev.CommonLibrary.Entity;
 using Site.Common;
 using Site.Entity.Enums;
 using System.ComponentModel.DataAnnotations;

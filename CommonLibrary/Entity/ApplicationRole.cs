@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Site.Entity
+namespace Dev.CommonLibrary.Entity
 {
     /// <summary>
-    /// アプリケーションロール
+    /// ロール情報
     /// </summary>
     public class ApplicationRole : IdentityRole
     {

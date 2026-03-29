@@ -1,3 +1,4 @@
+using Dev.CommonLibrary.Entity;
 using Site.Common;
 using System.ComponentModel.DataAnnotations;
 

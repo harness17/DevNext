@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Site.Entity
+namespace Dev.CommonLibrary.Entity
 {
     /// <summary>
     /// アカウント情報

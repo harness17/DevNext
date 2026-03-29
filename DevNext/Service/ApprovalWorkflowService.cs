@@ -3,6 +3,7 @@ using Dev.CommonLibrary.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging.Abstractions;
 using Site.Common;
+using Dev.CommonLibrary.Entity;
 using Site.Entity;
 using Site.Models;
 using Site.Repository;

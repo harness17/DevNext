@@ -1,4 +1,4 @@
-using Site.Entity;
+using Dev.CommonLibrary.Entity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Site.Entity

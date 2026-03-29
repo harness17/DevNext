@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Site.Common;
+using Dev.CommonLibrary.Entity;
 using Site.Entity;
 using Site.Entity.Enums;
 using Site.Models;

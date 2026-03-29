@@ -424,3 +424,6 @@ DevNext/wwwroot/js/bootstrap*
 /doc/tmp_gen
 /tmp/playwright
 /playwright-config.json
+
+# 発行成果物（dotnet publish の出力先）
+_publish/

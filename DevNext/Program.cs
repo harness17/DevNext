@@ -90,6 +90,7 @@ builder.Services.AddScoped<Site.Service.NotificationService>();
 builder.Services.AddScoped<Site.Service.ExportService>();
 
 // スケジュール
+builder.Services.AddScoped<Site.Repository.ScheduleRepository>();
 builder.Services.AddScoped<Site.Service.ScheduleService>();
 
 // AutoMapper

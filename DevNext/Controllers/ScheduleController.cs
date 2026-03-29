@@ -49,9 +49,10 @@ namespace Site.Controllers
                 var events = _service.GetEventsForRange(start, end, GetCurrentUserId());
                 return Json(events);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Json(new { error = ex.Message });
+                // 内部エラーの詳細はクライアントに露出しない
+                return Json(new { error = "イベントの取得中にエラーが発生しました。" });
             }
         }
 

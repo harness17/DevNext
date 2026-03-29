@@ -17,10 +17,10 @@ namespace Site.Service
         private readonly ScheduleRepository _repo;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ScheduleService(DBContext context, UserManager<ApplicationUser> userManager)
+        public ScheduleService(DBContext context, UserManager<ApplicationUser> userManager, ScheduleRepository repo)
         {
             _context = context;
-            _repo = new ScheduleRepository(context);
+            _repo = repo;
             _userManager = userManager;
         }
 

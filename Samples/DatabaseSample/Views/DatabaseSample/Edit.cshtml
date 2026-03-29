@@ -1,0 +1,127 @@
+@model DatabaseSampleDetailViewModel
+@{
+    ViewData["Title"] = Model.Id == null ? "新規作成" : "編集";
+    // ポイント: Model.Id の null チェックで新規作成／編集を判定する
+    //           フォームの action と送信ボタンのラベルをこのフラグで切り替える
+    bool isNew = Model.Id == null;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        @*
+            ポイント: 新規作成と編集で同一ビューを使い回すパターン
+            asp-action で action を動的に切り替えているため、Controller 側で
+            Create(GET) → View("Edit", new...) としてこのビューを返している
+            enctype="multipart/form-data" はファイルアップロードがある場合に必須
+        *@
+        <form asp-controller="DatabaseSample" asp-action="@(isNew ? "Create" : "Edit")" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @* ポイント: Id を hidden で保持することで編集時に対象レコードを特定する *@
+            <input asp-for="Id" type="hidden" />
+            @* ポイント: asp-validation-summary="All" でモデル全体のバリデーションエラーをまとめて表示する *@
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="StringData" class="form-label"></label>
+                <input asp-for="StringData" class="form-control" />
+                @* ポイント: asp-validation-for でプロパティ単位のバリデーションエラーメッセージを表示する *@
+                <span asp-validation-for="StringData" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="IntData" class="form-label"></label>
+                <input asp-for="IntData" type="number" class="form-control" />
+                <span asp-validation-for="IntData" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="BoolData" class="form-label"></label>
+                @* ポイント: bool 型は form-check-input でチェックボックスとして表示する
+                           asp-for が checkbox の checked 状態を自動で処理してくれる *@
+                <div class="form-check">
+                    <input asp-for="BoolData" class="form-check-input" />
+                    <label asp-for="BoolData" class="form-check-label">あり</label>
+                </div>
+                <span asp-validation-for="BoolData" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">EnumData</label>
+                <div>
+                    @*
+                        ポイント: Enum の入力はラジオボタンで実装する
+                        asp-for="EnumData" を各ラジオボタンに付けることで同一 name になり
+                        選択した value が EnumData としてバインドされる
+                    *@
+                    @foreach (var item in Model.EnumDataList)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   asp-for="EnumData"
+                                   id="EnumData_@item.Value"
+                                   value="@item.Value" />
+                            <label class="form-check-label" for="EnumData_@item.Value">@item.Text</label>
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="EnumData" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="EnumData2" class="form-label"></label>
+                @* ポイント: Enum の単一選択はドロップダウンで実装する *@
+                <select asp-for="EnumData2" asp-items="Model.EnumData2List" class="form-select">
+                    <option value="">選択してください</option>
+                </select>
+                <span asp-validation-for="EnumData2" class="text-danger"></span>
+            </div>
+
+            @*
+                ポイント: ファイルアップロードは編集時のみ表示する
+                新規作成時は Id がないためアップロード先フォルダを特定できないため
+            *@
+            @if (!isNew)
+            {
+                <div class="mb-3">
+                    <label asp-for="FileData_file" class="form-label">ファイルアップロード</label>
+                    @* ポイント: multiple 属性で複数ファイル選択に対応する（IFormFile[] に対応）
+                               accept 属性でファイル選択ダイアログの初期フィルターを指定できる *@
+                    <input asp-for="FileData_file" type="file" class="form-control" multiple />
+                    <span asp-validation-for="FileData_file" class="text-danger"></span>
+                    <small class="text-muted">対応形式: pdf, xls, xlsx, doc, docx, ppt, pptx, png, jpeg, jpg, gif (最大2MB)</small>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.FileData))
+                {
+                    @* ポイント: 保存済みファイルを表示する
+                               FileData はカンマ区切りの文字列なので Split して1件ずつ表示する *@
+                    <div class="mb-3">
+                        <label class="form-label">既存ファイル</label>
+                        <div>
+                            @foreach (var fileName in Model.FileData.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <div class="mb-1">
+                                    <i class="fas fa-file me-1"></i>@fileName.Trim()
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">
+                    @(isNew ? "作成" : "更新")
+                </button>
+                <a asp-action="Index" asp-route-returnList="true" class="btn btn-secondary ms-2">一覧に戻る</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @* ポイント: クライアントサイドバリデーション（jQuery Validate）を有効にするパーシャル *@
+    <partial name="_ValidationScriptsPartial" />
+}

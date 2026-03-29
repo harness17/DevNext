@@ -1,0 +1,24 @@
+@model DatabaseMapperUsageSampleViewModel
+@{
+    ViewData["Title"] = "MapperUsage サンプル";
+}
+
+<h2>@ViewData["Title"]</h2>
+@*
+    ポイント: AutoMapper の前付け名・後付け名マッピングのサンプル
+    - 前付け名 (RecognizeDestinationPrefixes):
+        宛先プロパティ名の先頭にプレフィックスが付いていても無視してマッピングする
+        例: SampleEntity.StringData → DatabaseMapperUsageSampleDataModel.MapperUsageStringData
+    - 後付け名 (RecognizeDestinationPostfixes):
+        宛先プロパティ名の末尾にサフィックスが付いていても無視してマッピングする
+        例: SampleEntity.StringData → DatabaseMapperUsageSampleDataModel.StringDataWithMapper
+    Service.GetMapperUsage() で MapperConfiguration に設定して使用する
+*@
+<p>AutoMapperを使用したデータマッピングのサンプルです。</p>
+
+@* ポイント: パーシャルビューにモデルをそのまま渡して表示を委譲する *@
+@await Html.PartialAsync("MapperUsagePartial/_List", Model)
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

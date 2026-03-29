@@ -1,0 +1,41 @@
+@model DatabaseSampleChildEditViewModel
+@{
+    ViewData["Title"] = "子エンティティ 削除確認";
+}
+
+<h2>@ViewData["Title"]</h2>
+<h3 class="text-danger">この子エンティティを削除しますか？</h3>
+
+@* ポイント: どの親に紐づくかを表示して削除対象を明示する *@
+<p class="text-muted">
+    <i class="fas fa-database me-1"></i>親エンティティ ID: <strong>@Model.ParentId</strong>
+</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">子ID</dt>
+            <dd class="col-sm-8">@Model.Id</dd>
+
+            <dt class="col-sm-4">文字列データ</dt>
+            <dd class="col-sm-8">@Model.StringData</dd>
+
+            <dt class="col-sm-4">数値データ</dt>
+            <dd class="col-sm-8">@Model.IntData</dd>
+
+            <dt class="col-sm-4">BoolData</dt>
+            <dd class="col-sm-8">@(Model.BoolData ? "あり" : "無し")</dd>
+        </dl>
+
+        <form asp-controller="DatabaseSample" asp-action="ChildDelete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            @* ポイント: parentId を hidden で渡すことで削除後に正しい詳細ページへリダイレクトできる *@
+            <input type="hidden" name="parentId" value="@Model.ParentId" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash me-1"></i>削除する
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.ParentId" class="btn btn-secondary ms-2">キャンセル</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.Identity
+@using Dev.CommonLibrary.Entity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item">
+        <span class="nav-link text-white">@UserManager.GetUserName(User)</span>
+    </li>
+    <li class="nav-item">
+        <form method="post" asp-controller="Account" asp-action="LogOff">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-link nav-link text-white">ログアウト</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-white" asp-controller="Account" asp-action="Login">ログイン</a>
+    </li>
+}

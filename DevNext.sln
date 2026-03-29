@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{5D20
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseSample", "Samples\DatabaseSample\DatabaseSample.csproj", "{78BDB7CA-5BEE-429D-8D2B-2F155B5CDDEA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSample", "Samples\FileSample\FileSample.csproj", "{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,11 +101,24 @@ Global
 		{78BDB7CA-5BEE-429D-8D2B-2F155B5CDDEA}.Release|x64.Build.0 = Release|Any CPU
 		{78BDB7CA-5BEE-429D-8D2B-2F155B5CDDEA}.Release|x86.ActiveCfg = Release|Any CPU
 		{78BDB7CA-5BEE-429D-8D2B-2F155B5CDDEA}.Release|x86.Build.0 = Release|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Debug|x64.Build.0 = Debug|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Debug|x86.Build.0 = Debug|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|x64.ActiveCfg = Release|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|x64.Build.0 = Release|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|x86.ActiveCfg = Release|Any CPU
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{78BDB7CA-5BEE-429D-8D2B-2F155B5CDDEA} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
+		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 	EndGlobalSection
 EndGlobal

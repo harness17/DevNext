@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Site.Common;
+using Dev.CommonLibrary.Entity;
 using Site.Entity;
 
 namespace Site.Service

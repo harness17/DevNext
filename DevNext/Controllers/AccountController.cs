@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Site.Common;
+using Dev.CommonLibrary.Entity;
 using Site.Entity;
 using Site.Models;
 

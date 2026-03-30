@@ -18,13 +18,13 @@
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
-# git diff でステージング済み＋未ステージの変更ファイル一覧を取得
-$diffStat = git diff HEAD --stat 2>&1
-$diffContent = git diff HEAD 2>&1
+# git diff で直前コミットの変更ファイル一覧を取得（Codexがコミット後に実行する前提）
+$diffStat = git diff HEAD~1 HEAD --stat 2>&1
+$diffContent = git diff HEAD~1 HEAD 2>&1
 
-# 変更がなければスキップ（ステージ済みの差分も確認）
-if (-not $diffStat -and -not (git diff --cached --stat 2>&1)) {
-    Write-Host "変更がありません。レビューをスキップします。"
+# 変更がなければスキップ（コミット履歴を確認）
+if (-not $diffStat -and -not (git log --oneline -1 2>&1)) {
+    Write-Host "コミットがありません。レビューをスキップします。"
     exit 0
 }
 

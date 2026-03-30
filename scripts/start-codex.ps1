@@ -27,7 +27,9 @@ if (-not (Test-Path $absolutePlanFile)) {
 
 # Codexに渡すプロンプト
 # AGENTS.md を参照した上で計画ファイルを読んで実装するよう指示する
-$prompt = "AGENTS.md のルールに従って、以下の実装計画をチェックボックス順に実行してください: $absolutePlanFile 実装完了後は必ず scripts/request-review.ps1 を実行してください。"
+# シングルクォートをエスケープしてプロンプトインジェクションを防ぐ
+$safePlanFile = $absolutePlanFile -replace "'", "''"
+$prompt = "AGENTS.md のルールに従って、以下の実装計画をチェックボックス順に実行してください: $safePlanFile 実装完了後は必ず scripts/request-review.ps1 を実行してください。"
 
 Write-Host "Codexを起動します..."
 Write-Host "計画ファイル: $absolutePlanFile"

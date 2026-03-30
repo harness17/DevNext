@@ -81,7 +81,7 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 ## データベースルール
 
 - **SQL Server**、DB名: `DevNextDB`、接続文字列キー: `SiteConnection`
-- 接続設定: 各プロジェクトの `appsettings.json`
+- 接続設定: 各プロジェクトの `appsettings.json`（接続文字列は `appsettings.Development.json` に記載し `appsettings.json` にはプレースホルダーのみ置くこと。`appsettings.Development.json` は `.gitignore` 対象）
 - DB作成・Seed投入は `DbMigrationRunner` を実行（`EnsureCreatedAsync` 使用）
 - **マイグレーションファイルは使用しない**
 - テーブル・カラムを追加・変更した場合は `DbMigrationRunner` を再実行すること

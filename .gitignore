@@ -427,3 +427,13 @@ DevNext/wwwroot/js/bootstrap*
 
 # 発行成果物（dotnet publish の出力先）
 _publish/
+/docs/superpowers/plans
+
+# アップロードファイル（ユーザーデータ）
+**/wwwroot/Uploads/
+
+# スクリーンショット
+*.png
+
+# 起動設定（個人環境依存）
+**/Properties/launchSettings.json

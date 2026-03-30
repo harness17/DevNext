@@ -1,0 +1,75 @@
+@model MailSampleViewModel
+@{
+    ViewData["Title"] = "メール送信サンプル";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p class="text-muted">
+    <code>Email.cs</code> とテキストテンプレート（<code>wwwroot/Templates/Mail/Contact.txt</code>）を使ったメール送信のサンプルです。
+    フォーム送信後、入力したメールアドレス宛に確認メールが送信されます。
+</p>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">お問い合わせフォーム</div>
+            <div class="card-body">
+                <form asp-action="Index" method="post">
+                    @Html.AntiForgeryToken()
+
+                    @* バリデーションエラー一覧 *@
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" placeholder="山田 太郎" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="example@example.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Subject" class="form-label"></label>
+                        <input asp-for="Subject" class="form-control" placeholder="ご質問の件名を入力してください" />
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Body" class="form-label"></label>
+                        <textarea asp-for="Body" class="form-control" rows="6"
+                                  placeholder="お問い合わせ内容を入力してください（最大2000文字）"></textarea>
+                        <span asp-validation-for="Body" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i>送信する
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        @* 実装メモ *@
+        <div class="card mt-3 border-info">
+            <div class="card-header bg-info text-white">実装ポイント</div>
+            <div class="card-body small">
+                <ul class="mb-0">
+                    <li><code>Site.Common.Email</code> クラスで SMTP 送信（SSL / 認証 / タイムアウト対応）</li>
+                    <li>メール本文は <code>wwwroot/Templates/Mail/Contact.txt</code> から読み込み（{Name} などのプレースホルダを置換）</li>
+                    <li>SMTP設定は <code>appsettings.json</code> の <code>Smtp</code> セクション（Host / Port / EnableSsl / UserName / Password）</li>
+                    <li>送信者・管理者BCC は <code>Mail:From</code> / <code>Mail:AdminAddress</code> で設定</li>
+                    <li>開発環境では <strong>smtp4dev</strong>（ローカル仮想SMTPサーバー）を使用
+                        — <code>smtp4dev-start.ps1</code> を実行後、
+                        <a href="http://localhost:5010" target="_blank">http://localhost:5010</a> で受信確認できる</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

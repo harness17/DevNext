@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseSample", "Samples\D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSample", "Samples\FileSample\FileSample.csproj", "{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailSample", "Samples\MailSample\MailSample.csproj", "{D047F548-99AB-4EFE-B669-CCBB98269CDE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,18 @@ Global
 		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|x64.Build.0 = Release|Any CPU
 		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|x86.ActiveCfg = Release|Any CPU
 		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1}.Release|x86.Build.0 = Release|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Debug|x64.Build.0 = Debug|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Debug|x86.Build.0 = Debug|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Release|x64.ActiveCfg = Release|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Release|x64.Build.0 = Release|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Release|x86.ActiveCfg = Release|Any CPU
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,5 +134,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{78BDB7CA-5BEE-429D-8D2B-2F155B5CDDEA} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 		{4C08E8BD-5A60-48AE-BD8B-4ADEDEED8BD1} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
+		{D047F548-99AB-4EFE-B669-CCBB98269CDE} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 	EndGlobalSection
 EndGlobal

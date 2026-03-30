@@ -59,20 +59,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpContextAccessor();
 
 // サービス登録
-builder.Services.AddScoped<DatabaseSampleService>();
 builder.Services.AddScoped<CommonService>();
 builder.Services.AddScoped<Dev.CommonLibrary.Attributes.AccessLogAttribute>();
-
-// メール送信サンプル
-builder.Services.AddScoped<Site.Service.MailSampleService>();
-// メール送信ログ一覧
-builder.Services.AddScoped<Site.Service.MailLogService>();
-
-// ファイル管理サンプル
-builder.Services.AddScoped<Site.Service.FileManagementService>();
-
-// 多段階フォームサンプル
-builder.Services.AddScoped<Site.Service.WizardSampleService>();
 
 // ユーザー・ロール管理
 builder.Services.AddScoped<Site.Service.UserManagementService>();
@@ -82,9 +70,6 @@ builder.Services.AddScoped<Site.Service.ApprovalWorkflowService>();
 
 // 通知
 builder.Services.AddScoped<Site.Service.NotificationService>();
-
-// エクスポート
-builder.Services.AddScoped<Site.Service.ExportService>();
 
 // スケジュール
 builder.Services.AddScoped<Site.Repository.ScheduleRepository>();

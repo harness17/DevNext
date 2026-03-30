@@ -38,19 +38,6 @@ namespace Site.Common
         #region DbSet
 
         public DbSet<UserPreviousPassword> UserPreviousPasswords { get; set; }
-        public DbSet<SampleEntity> SampleEntity { get; set; }
-        public DbSet<SampleEntityHistory> SampleEntityHistory { get; set; }
-        public DbSet<SampleEntityChild> SampleEntityChild { get; set; }
-        public DbSet<SampleEntityChildHistory> SampleEntityChildHistory { get; set; }
-
-        // ファイル管理サンプル
-        public DbSet<FileEntity> FileEntity { get; set; }
-
-        // 多段階フォームサンプル
-        public DbSet<WizardEntity> WizardEntity { get; set; }
-
-        // メール送信ログ
-        public DbSet<MailLogEntity> MailLog { get; set; }
 
         // 承認ワークフロー
         public DbSet<ApprovalRequestEntity> ApprovalRequest { get; set; }

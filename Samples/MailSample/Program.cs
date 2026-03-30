@@ -10,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 builder.Services.AddDbContext<MailSampleDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SiteConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("SiteConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure()));
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {

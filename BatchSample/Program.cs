@@ -68,7 +68,7 @@ namespace BatchSample
                 _logger.Info(new LogModel(mutexName + " 実行開始"));
 
                 // 処理としてサンプルテーブルの項目数を表示
-                Console.Write("SampleEntity:" + _context.SampleEntity.Count());
+                Console.Write("ApprovalRequest:" + _context.ApprovalRequest.Count());
                 Console.ReadKey();
             }
 

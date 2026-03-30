@@ -1,5 +1,5 @@
 using Site.Common;
-using Site.Entity;
+using Dev.CommonLibrary.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -290,6 +290,96 @@ namespace DbMigrationRunner
                         [UpdateDate]                datetime2(7)    NOT NULL,
                         [CreateDate]                datetime2(7)    NOT NULL,
                         CONSTRAINT [PK_ScheduleEventParticipant] PRIMARY KEY ([Id])
+                    )
+                END");
+
+            // ─── SampleEntity ────────────────────────────────────────────────
+            Console.WriteLine("  テーブル [SampleEntity] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SampleEntity')
+                BEGIN
+                    CREATE TABLE [SampleEntity] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [ApplicationUserId]         nvarchar(128)   NULL,
+                        [StringData]                nvarchar(max)   NOT NULL,
+                        [IntData]                   int             NOT NULL,
+                        [BoolData]                  bit             NOT NULL,
+                        [EnumData]                  int             NOT NULL,
+                        [EnumData2]                 int             NOT NULL,
+                        [FileData]                  nvarchar(max)   NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_SampleEntity] PRIMARY KEY ([Id])
+                    )
+                END");
+
+            // ─── SampleEntityHistory ──────────────────────────────────────────
+            Console.WriteLine("  テーブル [SampleEntityHistory] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SampleEntityHistory')
+                BEGIN
+                    CREATE TABLE [SampleEntityHistory] (
+                        [HistoryId]                 bigint          NOT NULL IDENTITY(1,1),
+                        [Id]                        bigint          NOT NULL,
+                        [ApplicationUserId]         nvarchar(128)   NULL,
+                        [StringData]                nvarchar(max)   NOT NULL,
+                        [IntData]                   int             NOT NULL,
+                        [BoolData]                  bit             NOT NULL,
+                        [EnumData]                  int             NOT NULL,
+                        [EnumData2]                 int             NOT NULL,
+                        [FileData]                  nvarchar(max)   NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_SampleEntityHistory] PRIMARY KEY ([HistoryId])
+                    )
+                END");
+
+            // ─── SampleEntityChild ────────────────────────────────────────────
+            Console.WriteLine("  テーブル [SampleEntityChild] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SampleEntityChild')
+                BEGIN
+                    CREATE TABLE [SampleEntityChild] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [SumpleEntityID]            bigint          NOT NULL,
+                        [ApplicationUserId]         nvarchar(128)   NULL,
+                        [StringData]                nvarchar(max)   NOT NULL,
+                        [IntData]                   int             NOT NULL,
+                        [BoolData]                  bit             NOT NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_SampleEntityChild] PRIMARY KEY ([Id])
+                    )
+                END");
+
+            // ─── SampleEntityChildHistory ─────────────────────────────────────
+            Console.WriteLine("  テーブル [SampleEntityChildHistory] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SampleEntityChildHistory')
+                BEGIN
+                    CREATE TABLE [SampleEntityChildHistory] (
+                        [HistoryId]                 bigint          NOT NULL IDENTITY(1,1),
+                        [Id]                        bigint          NOT NULL,
+                        [SumpleEntityID]            bigint          NOT NULL,
+                        [ApplicationUserId]         nvarchar(128)   NULL,
+                        [StringData]                nvarchar(max)   NOT NULL,
+                        [IntData]                   int             NOT NULL,
+                        [BoolData]                  bit             NOT NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_SampleEntityChildHistory] PRIMARY KEY ([HistoryId])
                     )
                 END");
 

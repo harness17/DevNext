@@ -1,0 +1,114 @@
+@model WizardSampleListViewModel
+@using Dev.CommonLibrary.Common
+@{
+    ViewData["Title"] = "多段階フォーム登録データ一覧";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-action="Step1" class="btn btn-success">
+        <i class="fas fa-plus me-1"></i>新規登録
+    </a>
+</p>
+
+@* hidden フィールドで Page / Sort / SortDir / RecordNum / PageRead を管理し、
+   JavaScript が値を書き換えてから Ajax POST することでページング・ソート・件数変更に対応する *@
+<form id="SearchForm" asp-controller="WizardSample" asp-action="Index" method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Page"      type="hidden" />
+    <input asp-for="Sort"      type="hidden" />
+    <input asp-for="SortDir"   type="hidden" />
+    <input asp-for="RecordNum" type="hidden" />
+    <input asp-for="PageRead"  type="hidden" />
+
+    <div class="card mb-3">
+        <div class="card-header">検索条件</div>
+        <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-3">
+                    <label asp-for="Cond.Name" class="form-label"></label>
+                    <input asp-for="Cond.Name" class="form-control" placeholder="部分一致" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Cond.Email" class="form-label"></label>
+                    <input asp-for="Cond.Email" class="form-control" placeholder="部分一致" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Cond.Category" class="form-label"></label>
+                    <select asp-for="Cond.Category" asp-items="Model.Cond.CategoryList" class="form-select">
+                        <option value="">全て</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" onclick="funcSearch()">
+                <i class="fas fa-search me-1"></i>検索
+            </button>
+            <button type="button" class="btn btn-secondary ms-1" onclick="funcClear()">
+                <i class="fas fa-times me-1"></i>クリア
+            </button>
+        </div>
+    </div>
+</form>
+
+@* Ajax 成功時にこの div 内をパーシャルビューで差し替える *@
+<div id="SearchResult">
+    @await Html.PartialAsync("_IndexPartial", Model)
+</div>
+
+@section Scripts {
+    <script>
+        function funcSearch() {
+            $('#Page').val(1);
+            $('#PageRead').val('Resarch');
+            submitSearch();
+        }
+
+        function funcClear() {
+            window.location.href = '@Url.Action("Index")';
+        }
+
+        function funcSort(sortColumn) {
+            var currentSort = $('#Sort').val();
+            var currentDir  = $('#SortDir').val();
+            if (currentSort === sortColumn) {
+                $('#SortDir').val(currentDir === 'ASC' ? 'DESC' : 'ASC');
+            } else {
+                $('#Sort').val(sortColumn);
+                $('#SortDir').val('ASC');
+            }
+            $('#Page').val(1);
+            $('#PageRead').val('Sorting');
+            submitSearch();
+        }
+
+        function funcRecordNumber(val) {
+            $('#RecordNum').val(val);
+            $('#Page').val(1);
+            $('#PageRead').val('ChangeRecordNum');
+            submitSearch();
+        }
+
+        function funcPage(page) {
+            $('#Page').val(page);
+            $('#PageRead').val('Paging');
+            submitSearch();
+        }
+
+        function submitSearch() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Index")',
+                data: $('#SearchForm').serialize(),
+                success: function (result) {
+                    $('#SearchResult').html(result);
+                },
+                error: function () {
+                    alert('検索中にエラーが発生しました。');
+                }
+            });
+        }
+    </script>
+}

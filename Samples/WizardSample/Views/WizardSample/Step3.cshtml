@@ -1,0 +1,59 @@
+@model WizardSessionModel
+@using Dev.CommonLibrary.Common
+@{
+    ViewData["Title"] = "多段階フォーム - 確認";
+}
+
+<h2>多段階フォームサンプル</h2>
+
+@await Html.PartialAsync("_ProgressBar", 3)
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>入力内容をご確認ください。「登録する」をクリックすると確定します。
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header"><i class="fas fa-user me-1"></i>基本情報</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">氏名</dt>
+                    <dd class="col-sm-8">@Model.Name</dd>
+                    <dt class="col-sm-4">メールアドレス</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+                    <dt class="col-sm-4">電話番号</dt>
+                    <dd class="col-sm-8">@(Model.Phone ?? "未入力")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-file-alt me-1"></i>詳細情報</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">件名</dt>
+                    <dd class="col-sm-8">@Model.Subject</dd>
+                    <dt class="col-sm-4">カテゴリ</dt>
+                    <dd class="col-sm-8">@(EnumUtility.GetEnumDisplay<WizardCategory>(Model.Category.ToString()))</dd>
+                    <dt class="col-sm-4">内容</dt>
+                    <dd class="col-sm-8" style="white-space: pre-wrap;">@Model.Content</dd>
+                    <dt class="col-sm-4">希望対応日</dt>
+                    <dd class="col-sm-8">@(Model.DesiredDate?.ToString("yyyy/MM/dd") ?? "未入力")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <form asp-action="Step3" method="post">
+            @Html.AntiForgeryToken()
+            <div class="d-flex justify-content-between">
+                <a asp-action="Step2" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>戻る
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check me-1"></i>登録する
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

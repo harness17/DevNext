@@ -1,0 +1,84 @@
+# DevNext project-scoped Codex security defaults.
+# This file intentionally keeps Codex in a least-privilege posture for local work.
+
+profile = "coding"
+
+approval_policy = "untrusted"
+sandbox_mode = "workspace-write"
+allow_login_shell = false
+web_search = "disabled"
+
+[sandbox_workspace_write]
+network_access = false
+
+[shell_environment_policy]
+inherit = "core"
+exclude = [
+  "*PASSWORD*",
+  "*TOKEN*",
+  "*SECRET*",
+  "*API_KEY*",
+  "*CONNECTION*",
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "AZURE_*",
+  "AWS_*",
+  "GITHUB_*",
+  "NUGET_*",
+  "SQLCONNSTR_*",
+]
+
+[profiles.coding]
+# Daily development profile: edit files freely in the workspace and ask only when
+# the agent decides it needs higher-risk actions.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+allow_login_shell = false
+web_search = "disabled"
+
+[profiles.coding.sandbox_workspace_write]
+network_access = false
+
+[profiles.coding.shell_environment_policy]
+inherit = "core"
+exclude = [
+  "*PASSWORD*",
+  "*TOKEN*",
+  "*SECRET*",
+  "*API_KEY*",
+  "*CONNECTION*",
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "AZURE_*",
+  "AWS_*",
+  "GITHUB_*",
+  "NUGET_*",
+  "SQLCONNSTR_*",
+]
+
+[profiles.coding_with_network]
+# Use only when package restore or external docs access is required during coding.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+allow_login_shell = false
+web_search = "cached"
+
+[profiles.coding_with_network.sandbox_workspace_write]
+network_access = true
+
+[profiles.coding_with_network.shell_environment_policy]
+inherit = "core"
+exclude = [
+  "*PASSWORD*",
+  "*TOKEN*",
+  "*SECRET*",
+  "*API_KEY*",
+  "*CONNECTION*",
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "AZURE_*",
+  "AWS_*",
+  "GITHUB_*",
+  "NUGET_*",
+  "SQLCONNSTR_*",
+]

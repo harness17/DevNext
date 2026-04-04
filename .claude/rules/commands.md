@@ -4,7 +4,7 @@
 
 | 用途 | コマンド |
 |------|---------|
-| ビルド | `cd DevNext && dotnet build` |
+| ビルド | `cd H:/ClaudeCode/DevNext && dotnet build DevNext.sln` |
 | 開発サーバー起動 | `cd DevNext && dotnet run` |
 | テスト実行 | `cd Tests && dotnet test` |
 | DB 初期化（作成・Seed） | `cd DbMigrationRunner && dotnet run` |

@@ -119,6 +119,25 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 ---
 
+## ⛔ 禁止操作
+
+以下の操作は絶対に実行しないこと。
+
+| 禁止コマンド | 理由 |
+|-------------|------|
+| `git reset --hard` | コミット済みの作業が失われる |
+| `git push --force` | リモートの履歴を破壊する |
+| `git clean -f` / `git clean -fd` | 未追跡ファイルを削除する |
+| `git add -A` / `git add .` | 意図しないファイルが混入する可能性がある |
+| `rm -rf <ディレクトリ>` | 復元不可能な削除になる |
+
+追加の制約:
+- テストが失敗したままコミットしない
+- ビルドエラーが残ったままコミットしない
+- `appsettings.Development.json` はコミットしない（`.gitignore` 対象）
+
+---
+
 ## ⚠️ 実装完了後の必須手順
 
 実装が完了したら必ず以下を順番に実行してください：

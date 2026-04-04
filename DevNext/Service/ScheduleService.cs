@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Site.Common;
 using Dev.CommonLibrary.Entity;
 using Site.Entity;
@@ -331,11 +332,12 @@ namespace Site.Service
             string excludeUserId)
         {
             var users = _userManager.Users
+                .AsNoTracking()
                 .Where(u => u.Id != excludeUserId)
                 .OrderBy(u => u.UserName)
-                .ToList();
+                .ToListAsync();
 
-            return users.Select(u => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            return (await users).Select(u => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             {
                 Value = u.Id,
                 Text  = u.UserName ?? u.Id,

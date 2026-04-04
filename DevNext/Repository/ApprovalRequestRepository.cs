@@ -1,5 +1,6 @@
 using Dev.CommonLibrary.Common;
 using Dev.CommonLibrary.Repository;
+using Microsoft.EntityFrameworkCore;
 using Site.Common;
 using Site.Entity;
 using Site.Models;
@@ -94,6 +95,7 @@ namespace Site.Repository
         public IQueryable<ApprovalRequestEntity> GetBaseQuery(ApprovalRequestCondModel? cond = null, bool includeDelete = false)
         {
             IQueryable<ApprovalRequestEntity> query = _context.ApprovalRequest
+                .AsNoTracking()
                 .Where(x => includeDelete ? true : !x.DelFlag);
 
             if (cond != null)

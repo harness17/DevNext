@@ -64,11 +64,13 @@ namespace Site.Repository
         {
             // 参加者として招待されているイベント ID を取得
             var participantEventIds = _context.ScheduleEventParticipant
+                .AsNoTracking()
                 .Where(p => p.UserId == currentUserId && !p.DelFlag)
                 .Select(p => p.EventId)
                 .ToHashSet();
 
             return _context.ScheduleEvent
+                .AsNoTracking()
                 .Where(x => !x.DelFlag)
                 // 閲覧権限: 個人（自分）・共有・招待済み
                 .Where(x => (!x.IsShared && x.OwnerId == currentUserId)
@@ -86,6 +88,7 @@ namespace Site.Repository
 
         public List<ScheduleEventParticipantEntity> GetParticipants(long eventId)
             => _context.ScheduleEventParticipant
+                .AsNoTracking()
                 .Where(x => x.EventId == eventId && !x.DelFlag)
                 .ToList();
 

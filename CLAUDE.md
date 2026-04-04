@@ -75,3 +75,5 @@ scripts/          ← 開発補助スクリプト
 @rules/context-reset.md
 @rules/my-skill-graph.md
 @rules/branching-and-merge.md
+@rules/viewimports.md
+@rules/git-ops.md

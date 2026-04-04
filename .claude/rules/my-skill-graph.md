@@ -2,7 +2,7 @@
 
 ## ボルトパス
 
-`C:/Users/harne/iCloudDrive/My-Skill-Graph`
+`C:/Users/harne/iCloudDrive/My-Skill-Graph/My-Skill-Graph`
 
 ---
 

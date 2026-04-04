@@ -1,0 +1,155 @@
+@model InvoiceDetailViewModel
+@{
+    bool isNew = Model.Id == null;
+    ViewData["Title"] = isNew ? "請求書作成" : "請求書編集";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="@(isNew ? "Create" : "Edit")" method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header">基本情報</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="InvoiceNumber" class="form-label"></label>
+                        <input asp-for="InvoiceNumber" class="form-control" />
+                        <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ClientName" class="form-label"></label>
+                        <input asp-for="ClientName" class="form-control" />
+                        <span asp-validation-for="ClientName" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="IssueDate" class="form-label"></label>
+                            <input asp-for="IssueDate" type="date" class="form-control" />
+                            <span asp-validation-for="IssueDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="DueDate" class="form-label"></label>
+                            <input asp-for="DueDate" type="date" class="form-control" />
+                            <span asp-validation-for="DueDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" asp-items="Model.StatusList" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>明細</span>
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="addItemRow()">
+                        <i class="fas fa-plus me-1"></i>行追加
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="itemRows">
+                        @for (int i = 0; i < Model.Items.Count; i++)
+                        {
+                            <div class="border rounded p-3 mb-3 item-row">
+                                <input asp-for="Items[i].Id" type="hidden" />
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-5">
+                                        <label asp-for="Items[i].Description" class="form-label"></label>
+                                        <input asp-for="Items[i].Description" class="form-control" />
+                                        <span asp-validation-for="Items[i].Description" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label asp-for="Items[i].Quantity" class="form-label"></label>
+                                        <input asp-for="Items[i].Quantity" class="form-control" type="number" min="1" />
+                                        <span asp-validation-for="Items[i].Quantity" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label asp-for="Items[i].UnitPrice" class="form-label"></label>
+                                        <input asp-for="Items[i].UnitPrice" class="form-control" type="number" step="0.01" min="0" />
+                                        <span asp-validation-for="Items[i].UnitPrice" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-outline-danger w-100" onclick="removeItemRow(this)">削除</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">@(isNew ? "登録" : "更新")</button>
+                <a asp-action="Index" asp-route-returnList="true" class="btn btn-secondary ms-2">一覧に戻る</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function addItemRow() {
+            var index = $('#itemRows .item-row').length;
+            var html = `
+<div class="border rounded p-3 mb-3 item-row">
+    <input type="hidden" name="Items[${index}].Id" value="" />
+    <div class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label" for="Items_${index}__Description">品目</label>
+            <input class="form-control" type="text" id="Items_${index}__Description" name="Items[${index}].Description" value="" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="Items_${index}__Quantity">数量</label>
+            <input class="form-control" type="number" min="1" id="Items_${index}__Quantity" name="Items[${index}].Quantity" value="1" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="Items_${index}__UnitPrice">単価</label>
+            <input class="form-control" type="number" step="0.01" min="0" id="Items_${index}__UnitPrice" name="Items[${index}].UnitPrice" value="0" />
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-danger w-100" onclick="removeItemRow(this)">削除</button>
+        </div>
+    </div>
+</div>`;
+            $('#itemRows').append(html);
+        }
+
+        function removeItemRow(button) {
+            var rows = $('#itemRows .item-row');
+            if (rows.length === 1) {
+                alert('明細は1行以上必要です。');
+                return;
+            }
+            $(button).closest('.item-row').remove();
+            reindexRows();
+        }
+
+        function reindexRows() {
+            $('#itemRows .item-row').each(function(index, row) {
+                $(row).find('input, label, span').each(function(_, element) {
+                    if (element.name) {
+                        element.name = element.name.replace(/Items\[\d+\]/g, `Items[${index}]`);
+                    }
+                    if (element.id) {
+                        element.id = element.id.replace(/Items_\d+__/g, `Items_${index}__`);
+                    }
+                    if (element.htmlFor) {
+                        element.htmlFor = element.htmlFor.replace(/Items_\d+__/g, `Items_${index}__`);
+                    }
+                });
+            });
+        }
+    </script>
+}

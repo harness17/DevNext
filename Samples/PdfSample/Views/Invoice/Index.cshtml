@@ -1,0 +1,124 @@
+@model InvoiceViewModel
+@{
+    ViewData["Title"] = "請求書一覧";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus me-1"></i>新規作成</a>
+</p>
+
+<form id="SearchForm" asp-controller="Invoice" asp-action="Index" method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Page" type="hidden" />
+    <input asp-for="Sort" type="hidden" />
+    <input asp-for="SortDir" type="hidden" />
+    <input asp-for="RecordNum" type="hidden" />
+    <input asp-for="PageRead" type="hidden" />
+
+    <div class="card mb-3">
+        <div class="card-header">検索条件</div>
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label asp-for="Cond.ClientName" class="form-label"></label>
+                    <input asp-for="Cond.ClientName" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Cond.Status" class="form-label"></label>
+                    <select asp-for="Cond.Status" asp-items="Model.Cond.StatusList" class="form-select">
+                        <option value="">全て</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" onclick="funcSearch()">
+                <i class="fas fa-search me-1"></i>検索
+            </button>
+            <button type="button" class="btn btn-secondary ms-1" onclick="funcClear()">
+                <i class="fas fa-times me-1"></i>クリア
+            </button>
+            <button type="button" class="btn btn-danger ms-1" onclick="downloadZip()">
+                <i class="fas fa-file-archive me-1"></i>PDF一括ダウンロード
+            </button>
+        </div>
+    </div>
+
+    <div id="SearchResult">
+        @await Html.PartialAsync("_IndexPartial", Model)
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function funcSearch() {
+            $('#Page').val(1);
+            $('#PageRead').val('Research');
+            submitSearch();
+        }
+
+        function funcClear() {
+            window.location.href = '@Url.Action("Index")';
+        }
+
+        function funcSort(sortColumn) {
+            var currentSort = $('#Sort').val();
+            var currentDir = $('#SortDir').val();
+            if (currentSort === sortColumn) {
+                $('#SortDir').val(currentDir === 'ASC' ? 'DESC' : 'ASC');
+            } else {
+                $('#Sort').val(sortColumn);
+                $('#SortDir').val('ASC');
+            }
+            $('#Page').val(1);
+            $('#PageRead').val('Sorting');
+            submitSearch();
+        }
+
+        function funcRecordNumber(val) {
+            $('#RecordNum').val(val);
+            $('#Page').val(1);
+            $('#PageRead').val('ChangeRecordNum');
+            submitSearch();
+        }
+
+        function funcPage(page) {
+            $('#Page').val(page);
+            $('#PageRead').val('Paging');
+            submitSearch();
+        }
+
+        function submitSearch() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Index")',
+                data: $('#SearchForm').serialize(),
+                success: function (result) {
+                    $('#SearchResult').html(result);
+                },
+                error: function () {
+                    alert('検索中にエラーが発生しました。');
+                }
+            });
+        }
+
+        function toggleAll(source) {
+            $('input[name="SelectedIds"]').prop('checked', source.checked);
+        }
+
+        function downloadZip() {
+            if ($('input[name="SelectedIds"]:checked').length === 0) {
+                alert('請求書を1件以上選択してください。');
+                return;
+            }
+
+            var form = $('#SearchForm');
+            var action = form.attr('action');
+            form.attr('action', '@Url.Action("DownloadZip")');
+            form.submit();
+            form.attr('action', action);
+        }
+    </script>
+}

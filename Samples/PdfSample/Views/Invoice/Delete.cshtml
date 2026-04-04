@@ -1,0 +1,33 @@
+@model InvoiceDetailViewModel
+@{
+    ViewData["Title"] = "削除確認";
+}
+
+<h2>@ViewData["Title"]</h2>
+<h3 class="text-danger">この請求書を削除しますか？</h3>
+
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">請求書番号</dt>
+            <dd class="col-sm-8">@Model.InvoiceNumber</dd>
+            <dt class="col-sm-4">取引先名</dt>
+            <dd class="col-sm-8">@Model.ClientName</dd>
+            <dt class="col-sm-4">発行日</dt>
+            <dd class="col-sm-8">@Model.IssueDate.ToString("yyyy/MM/dd")</dd>
+            <dt class="col-sm-4">支払期限</dt>
+            <dd class="col-sm-8">@Model.DueDate.ToString("yyyy/MM/dd")</dd>
+            <dt class="col-sm-4">ステータス</dt>
+            <dd class="col-sm-8">@Model.Status.DisplayName()</dd>
+        </dl>
+
+        <form asp-action="DeleteConfirmed" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash me-1"></i>削除する
+            </button>
+            <a asp-action="Index" asp-route-returnList="true" class="btn btn-secondary ms-2">一覧に戻る</a>
+        </form>
+    </div>
+</div>

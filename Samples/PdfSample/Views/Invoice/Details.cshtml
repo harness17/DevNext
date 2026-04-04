@@ -1,0 +1,74 @@
+@model InvoiceDetailViewModel
+@{
+    ViewData["Title"] = "請求書詳細";
+    var total = Model.Items.Sum(x => x.SubTotal);
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>請求書情報</strong>
+        <div>
+            <a asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
+                <i class="fas fa-file-pdf me-1"></i>PDF ダウンロード
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">編集</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">請求書番号</dt>
+            <dd class="col-sm-9">@Model.InvoiceNumber</dd>
+            <dt class="col-sm-3">取引先名</dt>
+            <dd class="col-sm-9">@Model.ClientName</dd>
+            <dt class="col-sm-3">発行日</dt>
+            <dd class="col-sm-9">@Model.IssueDate.ToString("yyyy/MM/dd")</dd>
+            <dt class="col-sm-3">支払期限</dt>
+            <dd class="col-sm-9">@Model.DueDate.ToString("yyyy/MM/dd")</dd>
+            <dt class="col-sm-3">ステータス</dt>
+            <dd class="col-sm-9">@Model.Status.DisplayName()</dd>
+            <dt class="col-sm-3">備考</dt>
+            <dd class="col-sm-9">@Model.Notes</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">明細</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>品目</th>
+                        <th class="text-end">数量</th>
+                        <th class="text-end">単価</th>
+                        <th class="text-end">小計</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.Description</td>
+                            <td class="text-end">@item.Quantity</td>
+                            <td class="text-end">@item.UnitPrice.ToString("#,0.##")</td>
+                            <td class="text-end">@item.SubTotal.ToString("#,0.##")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">合計</th>
+                        <th class="text-end">@total.ToString("#,0.##")</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" asp-route-returnList="true" class="btn btn-secondary">一覧に戻る</a>
+</div>

@@ -383,6 +383,47 @@ namespace DbMigrationRunner
                     )
                 END");
 
+            // ─── ExcelItemEntity ──────────────────────────────────────────────
+            Console.WriteLine("  テーブル [ExcelItemEntity] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ExcelItemEntity')
+                BEGIN
+                    CREATE TABLE [ExcelItemEntity] (
+                        [Id]                        bigint          NOT NULL IDENTITY(1,1),
+                        [Name]                      nvarchar(100)   NOT NULL,
+                        [Category]                  nvarchar(50)    NOT NULL,
+                        [Price]                     int             NOT NULL,
+                        [Quantity]                  int             NOT NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_ExcelItemEntity] PRIMARY KEY ([Id])
+                    )
+                END");
+
+            // ─── ExcelItemEntityHistory ───────────────────────────────────────
+            Console.WriteLine("  テーブル [ExcelItemEntityHistory] を確認しています...");
+            await context.Database.ExecuteSqlRawAsync(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ExcelItemEntityHistory')
+                BEGIN
+                    CREATE TABLE [ExcelItemEntityHistory] (
+                        [HistoryId]                 bigint          NOT NULL IDENTITY(1,1),
+                        [Id]                        bigint          NOT NULL,
+                        [Name]                      nvarchar(100)   NOT NULL,
+                        [Category]                  nvarchar(50)    NOT NULL,
+                        [Price]                     int             NOT NULL,
+                        [Quantity]                  int             NOT NULL,
+                        [DelFlag]                   bit             NOT NULL,
+                        [UpdateApplicationUserId]   nvarchar(max)   NULL,
+                        [CreateApplicationUserId]   nvarchar(max)   NULL,
+                        [UpdateDate]                datetime2(7)    NOT NULL,
+                        [CreateDate]                datetime2(7)    NOT NULL,
+                        CONSTRAINT [PK_ExcelItemEntityHistory] PRIMARY KEY ([HistoryId])
+                    )
+                END");
+
             // ================================================================
             // [カラム追加] 既存テーブルへのカラム追加はここに追記する
             // ================================================================

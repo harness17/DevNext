@@ -12,11 +12,9 @@ namespace Site.Service
     {
         private readonly NotificationRepository _repo;
 
-        public NotificationService(DBContext context)
+        public NotificationService(NotificationRepository repo)
         {
-            // ポイント: Repository はサービス内で new して使う（DIせず）
-            //           Repository 自体が DBContext に依存するため、DI 済みの context を渡して初期化する
-            _repo = new NotificationRepository(context);
+            _repo = repo;
         }
 
         // ─── 作成 ──────────────────────────────────────────────────────────────
@@ -42,10 +40,21 @@ namespace Site.Service
         /// </summary>
         public async Task CreateForMultipleAsync(IEnumerable<string> recipientUserIds, string message, string? relatedUrl = null)
         {
-            foreach (var userId in recipientUserIds)
+            var notifications = recipientUserIds.Select(userId =>
             {
-                await CreateAsync(userId, message, relatedUrl);
-            }
+                var entity = new NotificationEntity
+                {
+                    RecipientUserId = userId,
+                    Message = message,
+                    RelatedUrl = relatedUrl,
+                    IsRead = false,
+                };
+                entity.SetForCreate();
+                return entity;
+            }).ToList();
+
+            if (notifications.Count == 0) return;
+            await _repo.InsertRangeAsync(notifications);
         }
 
         // ─── 取得 ──────────────────────────────────────────────────────────────
@@ -70,13 +79,7 @@ namespace Site.Service
         /// </summary>
         public async Task MarkAsReadAsync(long id, string userId)
         {
-            var entity = await _repo.SelectByIdAsync(id);
-            // ポイント: 本人の通知以外は無視（他人の通知を既読にできないよう保護）
-            if (entity == null || entity.RecipientUserId != userId) return;
-
-            entity.IsRead = true;
-            entity.SetForUpdate();
-            await _repo.UpdateAsync(entity);
+            await _repo.MarkAsReadAsync(id, userId);
         }
 
         /// <summary>指定ユーザーの未読通知をすべて既読にする。</summary>

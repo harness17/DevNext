@@ -60,14 +60,6 @@ scripts/          ← 開発補助スクリプト
 
 ---
 
-## 実装完了後の必須手順
-
-1. ビルド確認: `cd DevNext && dotnet build`
-2. テスト確認: `cd Tests && dotnet test`
-3. レビュー依頼: `./scripts/request-review.ps1`
-
----
-
 ## ルール参照
 
 @rules/coding-policy.md
@@ -81,3 +73,5 @@ scripts/          ← 開発補助スクリプト
 @rules/add-page-trigger.md
 @rules/document-output.md
 @rules/context-reset.md
+@rules/my-skill-graph.md
+@rules/branching-and-merge.md

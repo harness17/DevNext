@@ -27,6 +27,7 @@ namespace Site.Repository
         public async Task<int> GetUnreadCountAsync(string userId)
         {
             return await _context.Notification
+                .AsNoTracking()
                 .CountAsync(n => n.RecipientUserId == userId && !n.IsRead && !n.DelFlag);
         }
 
@@ -34,10 +35,18 @@ namespace Site.Repository
         public async Task<List<NotificationEntity>> GetRecentAsync(string userId, int count = 10)
         {
             return await _context.Notification
+                .AsNoTracking()
                 .Where(n => n.RecipientUserId == userId && !n.DelFlag)
                 .OrderByDescending(n => n.CreateDate)
                 .Take(count)
                 .ToListAsync();
+        }
+
+        /// <summary>複数通知をまとめて登録する。</summary>
+        public async Task InsertRangeAsync(IEnumerable<NotificationEntity> entities)
+        {
+            _context.Notification.AddRange(entities);
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>ID で通知を取得する。</summary>
@@ -57,17 +66,23 @@ namespace Site.Repository
         /// <summary>指定ユーザーの未読通知をすべて既読にする。</summary>
         public async Task MarkAllAsReadAsync(string userId)
         {
-            var notifications = await _context.Notification
+            await _context.Notification
                 .Where(n => n.RecipientUserId == userId && !n.IsRead && !n.DelFlag)
-                .ToListAsync();
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(n => n.IsRead, true)
+                    .SetProperty(n => n.UpdateDate, _ => DateTime.Now)
+                    .SetProperty(n => n.UpdateApplicationUserId, _ => userId));
+        }
 
-            foreach (var n in notifications)
-            {
-                n.IsRead = true;
-                n.SetForUpdate();
-            }
-
-            await _context.SaveChangesAsync();
+        /// <summary>指定ユーザーの通知を1件既読にする。</summary>
+        public async Task MarkAsReadAsync(long id, string userId)
+        {
+            await _context.Notification
+                .Where(n => n.Id == id && n.RecipientUserId == userId && !n.IsRead && !n.DelFlag)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(n => n.IsRead, true)
+                    .SetProperty(n => n.UpdateDate, _ => DateTime.Now)
+                    .SetProperty(n => n.UpdateApplicationUserId, _ => userId));
         }
     }
 }

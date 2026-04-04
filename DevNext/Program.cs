@@ -1,6 +1,7 @@
 using Dev.CommonLibrary.Entity;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Site.Common;
 using Site.Entity;
@@ -20,8 +21,14 @@ builder.Services.AddControllersWithViews()
     .AddRazorRuntimeCompilation();
 
 // DBContext
-builder.Services.AddDbContext<DBContext>(options =>
+builder.Services.AddDbContextPool<DBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SiteConnection")));
+
+// Response compression
+builder.Services.AddResponseCompression(options =>
+{
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
+});
 
 // ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -69,6 +76,7 @@ builder.Services.AddScoped<Site.Service.UserManagementService>();
 builder.Services.AddScoped<Site.Service.ApprovalWorkflowService>();
 
 // 通知
+builder.Services.AddScoped<Site.Repository.NotificationRepository>();
 builder.Services.AddScoped<Site.Service.NotificationService>();
 
 // スケジュール
@@ -95,7 +103,24 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseResponseCompression();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        var headers = context.Context.Response.Headers;
+        if (app.Environment.IsDevelopment())
+        {
+            headers.CacheControl = "no-cache, no-store";
+            headers.Pragma = "no-cache";
+            headers.Expires = "0";
+            return;
+        }
+
+        // 静的アセットはブラウザ側で再利用し、不要な再取得を減らす
+        headers.CacheControl = "public,max-age=604800";
+    }
+});
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();

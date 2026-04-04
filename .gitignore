@@ -367,7 +367,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/.claude
+/.claude/**
+!/.claude/rules/
+!/.claude/rules/**
+!/.claude/skills/
+!/.claude/skills/**
 CLAUDE.md
 CLAUDE.local.md
 サンプルベース/

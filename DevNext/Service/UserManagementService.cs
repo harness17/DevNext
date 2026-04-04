@@ -1,5 +1,6 @@
 using Dev.CommonLibrary.Common;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Site.Common;
 using Dev.CommonLibrary.Entity;
@@ -34,7 +35,7 @@ namespace Site.Service
             // ページャー設定（件数・ページ番号・ソート列 を CondViewModel に反映）
             LocalUtil.SetPager(model.Cond, model);
 
-            var query = _userManager.Users.AsQueryable();
+            var query = _userManager.Users.AsNoTracking().AsQueryable();
 
             // 検索条件フィルタリング
             if (!string.IsNullOrEmpty(model.Cond.UserName))
@@ -52,11 +53,11 @@ namespace Site.Service
             };
 
             // 件数取得（ページングより先に全件数を確定する）
-            int totalRecords = query.Count();
+            int totalRecords = await query.CountAsync();
 
             // ページング適用
             LocalUtil.SetTakeSkip(ref query, model.Cond);
-            var users = query.ToList();
+            var users = await query.ToListAsync();
 
             // ポイント: GetRolesAsync は非同期・1件ずつのため foreach で処理する
             var items = new List<UserManagementListItemViewModel>();
@@ -173,6 +174,7 @@ namespace Site.Service
         // ポイント: ロール選択肢を名前順で返す共通処理
         private List<SelectListItem> GetAvailableRoles()
             => _roleManager.Roles
+                .AsNoTracking()
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem { Value = r.Name, Text = r.Name })
                 .ToList();

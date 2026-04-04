@@ -32,6 +32,7 @@ Samples/
   FileSample/              # ファイルアップロード・ダウンロードサンプル（独立 Web アプリ）
   MailSample/              # メール送信サンプル（独立 Web アプリ）
   WizardSample/            # 多段階フォームサンプル（独立 Web アプリ）
+  ExcelSample/             # Excel エクスポート・インポートサンプル（独立 Web アプリ、ClosedXML 使用）
 docs/
   setup.md                 # セットアップ手順
   customization.md         # 新案件向けカスタマイズ指針

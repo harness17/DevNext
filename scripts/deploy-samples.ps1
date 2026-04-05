@@ -6,7 +6,6 @@ $IisSiteName  = "DevNext"
 $AppPoolName  = "DevNext"
 $DeployRoot   = "C:\inetpub\wwwroot\DevNext\samples"
 $SolutionRoot = "H:\ClaudeCode\DevNext"
-$AppcmdPath   = "C:\Windows\System32\inetsrv\appcmd.exe"
 $Samples      = @(
     "DatabaseSample",
     "ExcelSample",
@@ -15,12 +14,6 @@ $Samples      = @(
     "PdfSample",
     "WizardSample"
 )
-
-# -- Prerequisites check ---------------------------------------------
-if (-not (Test-Path $AppcmdPath)) {
-    Write-Error "appcmd.exe not found: $AppcmdPath`nPlease verify IIS is installed."
-    exit 1
-}
 
 Import-Module WebAdministration -ErrorAction Stop
 
@@ -34,15 +27,13 @@ if ($poolState -ne "Stopped") {
 Write-Host "AppPool stopped." -ForegroundColor Green
 
 # -- Ensure /samples virtual directory exists ------------------------
-$samplesPhysical = "C:\inetpub\wwwroot\DevNext\samples"
-if (-not (Test-Path $samplesPhysical)) {
-    New-Item -ItemType Directory -Path $samplesPhysical | Out-Null
+if (-not (Test-Path $DeployRoot)) {
+    New-Item -ItemType Directory -Path $DeployRoot | Out-Null
 }
-$samplesVdir = & $AppcmdPath list vdir "$IisSiteName/samples" 2>$null
+$samplesVdir = Get-WebVirtualDirectory -Site $IisSiteName -Name "samples" -ErrorAction SilentlyContinue
 if (-not $samplesVdir) {
     Write-Host "Creating /samples virtual directory..." -ForegroundColor Cyan
-    & $AppcmdPath add vdir /app.name:"$IisSiteName/" /path:/samples /physicalPath:$samplesPhysical
-    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to create /samples virtual directory." }
+    New-WebVirtualDirectory -Site $IisSiteName -Name "samples" -PhysicalPath $DeployRoot | Out-Null
     Write-Host "/samples virtual directory created." -ForegroundColor Green
 }
 
@@ -54,7 +45,6 @@ foreach ($sample in $Samples) {
     $sampleProjectPath = Join-Path $SolutionRoot "Samples\$sample"
     $deployPath        = Join-Path $DeployRoot $sample
     $sampleAppPool     = "DevNext-$sample"
-    $virtualPath       = "/samples/$sample"
 
     try {
         # 1. dotnet publish
@@ -70,33 +60,26 @@ foreach ($sample in $Samples) {
         }
 
         # 2. Create AppPool if not exists
-        $existingPool = & $AppcmdPath list apppool $sampleAppPool 2>$null
-        if (-not $existingPool) {
+        if (-not (Test-Path "IIS:\AppPools\$sampleAppPool")) {
             Write-Host "  Creating AppPool '$sampleAppPool'..."
-            & $AppcmdPath add apppool /name:$sampleAppPool /managedRuntimeVersion:"" | Out-Null
-            if ($LASTEXITCODE -ne 0) { throw "Failed to create AppPool '$sampleAppPool'." }
+            New-WebAppPool -Name $sampleAppPool | Out-Null
+            Set-ItemProperty "IIS:\AppPools\$sampleAppPool" -Name managedRuntimeVersion -Value ""
             Write-Host "  AppPool created."
         } else {
             Write-Host "  AppPool '$sampleAppPool' already exists."
         }
 
-        # 3. Register virtual app if not exists, else update physicalPath
-        $existingApp = & $AppcmdPath list app "$IisSiteName$virtualPath" 2>$null
+        # 3. Register web application (samples/<SampleName>)
+        $existingApp = Get-WebApplication -Site $IisSiteName -Name "samples/$sample" -ErrorAction SilentlyContinue
         if (-not $existingApp) {
-            Write-Host "  Registering virtual app '$virtualPath'..."
-            & $AppcmdPath add app `
-                /site.name:$IisSiteName `
-                /path:$virtualPath `
-                /physicalPath:$deployPath
-            if ($LASTEXITCODE -ne 0) { throw "Failed to register virtual app '$virtualPath'." }
-            & $AppcmdPath set app "$IisSiteName$virtualPath" `
-                /applicationPool:$sampleAppPool
-            if ($LASTEXITCODE -ne 0) { throw "Failed to set AppPool for '$virtualPath'." }
-            Write-Host "  Virtual app registered."
+            Write-Host "  Registering web application 'samples/$sample'..."
+            New-WebApplication -Site $IisSiteName -Name "samples/$sample" `
+                -PhysicalPath $deployPath `
+                -ApplicationPool $sampleAppPool | Out-Null
+            Write-Host "  Web application registered."
         } else {
-            Write-Host "  Virtual app '$virtualPath' exists. Updating physicalPath..."
-            & $AppcmdPath set app "$IisSiteName$virtualPath" /physicalPath:$deployPath | Out-Null
-            if ($LASTEXITCODE -ne 0) { throw "Failed to update physicalPath for '$virtualPath'." }
+            Write-Host "  Web application 'samples/$sample' exists. Updating physicalPath..."
+            Set-ItemProperty "IIS:\Sites\$IisSiteName\samples\$sample" -Name physicalPath -Value $deployPath
             Write-Host "  physicalPath updated."
         }
 

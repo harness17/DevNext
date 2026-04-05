@@ -33,6 +33,19 @@ if ($poolState -ne "Stopped") {
 }
 Write-Host "AppPool stopped." -ForegroundColor Green
 
+# -- Ensure /samples virtual directory exists ------------------------
+$samplesPhysical = "C:\inetpub\wwwroot\DevNext\samples"
+if (-not (Test-Path $samplesPhysical)) {
+    New-Item -ItemType Directory -Path $samplesPhysical | Out-Null
+}
+$samplesVdir = & $AppcmdPath list vdir "$IisSiteName/samples" 2>$null
+if (-not $samplesVdir) {
+    Write-Host "Creating /samples virtual directory..." -ForegroundColor Cyan
+    & $AppcmdPath add vdir /app.name:"$IisSiteName/" /path:/samples /physicalPath:$samplesPhysical
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to create /samples virtual directory." }
+    Write-Host "/samples virtual directory created." -ForegroundColor Green
+}
+
 # -- Deploy each Sample ----------------------------------------------
 $failed = @()
 
@@ -74,10 +87,10 @@ foreach ($sample in $Samples) {
             & $AppcmdPath add app `
                 /site.name:$IisSiteName `
                 /path:$virtualPath `
-                /physicalPath:$deployPath | Out-Null
+                /physicalPath:$deployPath
             if ($LASTEXITCODE -ne 0) { throw "Failed to register virtual app '$virtualPath'." }
             & $AppcmdPath set app "$IisSiteName$virtualPath" `
-                /applicationPool:$sampleAppPool | Out-Null
+                /applicationPool:$sampleAppPool
             if ($LASTEXITCODE -ne 0) { throw "Failed to set AppPool for '$virtualPath'." }
             Write-Host "  Virtual app registered."
         } else {

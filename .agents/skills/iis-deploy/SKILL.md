@@ -10,19 +10,19 @@ disable-model-invocation: true
 
 - **AppPool 名**: `DevNext`
 - **IIS 物理パス**: `C:/inetpub/wwwroot/DevNext`
-- **パブリッシュ出力先**: `H:/Codex/DevNext/publish_output`（一時フォルダ）
+- **パブリッシュ出力先**: `H:/ClaudeCode/DevNext/publish_output`（一時フォルダ）
 
 ## 手順
 
 ### 1. ビルド確認
 ```bash
-cd H:/Codex/DevNext && dotnet build -c Release
+cd H:/ClaudeCode/DevNext && dotnet build -c Release
 ```
 エラーがあれば中止してユーザーに報告する。
 
 ### 2. パブリッシュ
 ```bash
-cd H:/Codex/DevNext && dotnet publish DevNext/DevNext.csproj -c Release -o publish_output
+cd H:/ClaudeCode/DevNext && dotnet publish DevNext/DevNext.csproj -c Release -o publish_output
 ```
 
 ### 3. AppPool 停止

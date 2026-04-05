@@ -53,6 +53,17 @@ foreach ($sample in $Samples) {
     $appFullName       = "$IisSiteName/DevNext/samples/$sample"
 
     try {
+        # 0. Stop Sample AppPool to release file locks
+        $poolListOutput = (& $AppcmdPath list apppool /apppool.name:$sampleAppPool 2>$null) -join ""
+        if ($poolListOutput -like "*`"$sampleAppPool`"*") {
+            $samplePoolState = (Get-WebAppPoolState -Name $sampleAppPool -ErrorAction SilentlyContinue).Value
+            if ($samplePoolState -and $samplePoolState -ne "Stopped") {
+                Write-Host "  Stopping AppPool '$sampleAppPool'..."
+                Stop-WebAppPool -Name $sampleAppPool
+                Start-Sleep -Seconds 1
+            }
+        }
+
         # 1. dotnet publish
         Write-Host "  Publishing..."
         & dotnet publish "$sampleProjectPath\$sample.csproj" `
@@ -88,6 +99,12 @@ foreach ($sample in $Samples) {
             Write-Host "  App registered."
         } else {
             Write-Host "  App '$appPath' already registered (files updated by publish)."
+        }
+
+        # 4. Start Sample AppPool
+        $samplePoolState = (Get-WebAppPoolState -Name $sampleAppPool -ErrorAction SilentlyContinue).Value
+        if ($samplePoolState -and $samplePoolState -ne "Started") {
+            Start-WebAppPool -Name $sampleAppPool
         }
 
         Write-Host "[$sample] Deploy complete." -ForegroundColor Green

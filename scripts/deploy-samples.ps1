@@ -86,10 +86,7 @@ foreach ($sample in $Samples) {
             if ($LASTEXITCODE -ne 0) { throw "Failed to set AppPool for '$appPath'." }
             Write-Host "  App registered."
         } else {
-            Write-Host "  App '$appPath' exists. Updating physicalPath..."
-            & $AppcmdPath set vdir "$appFullName/" /physicalPath:$deployPath
-            if ($LASTEXITCODE -ne 0) { throw "Failed to update physicalPath for '$appPath'." }
-            Write-Host "  physicalPath updated."
+            Write-Host "  App '$appPath' already registered (files updated by publish)."
         }
 
         Write-Host "[$sample] Deploy complete." -ForegroundColor Green

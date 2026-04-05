@@ -50,3 +50,34 @@ AppPool が起動していることを確認し、デプロイ完了を報告す
 - デプロイ前にユーザーへ確認を取ること（本番環境への変更のため）
 - `appsettings.Production.json` や `DataProtectionKeys/` は上書きしない
 - デプロイ後に IIS のサイトへのアクセスが正常か確認を促す
+
+---
+
+## Sample プロジェクトのデプロイ
+
+ユーザーが「Sample をデプロイ」「サンプルを発行」「サンプルを IIS に配置」など Sample 向けのデプロイを指示した場合は、DevNext 本体の手順ではなく以下の手順を実行すること。
+
+### 前提確認
+
+appcmd.exe の存在を確認する（管理者権限チェックを兼ねる）：
+
+```bash
+ls "C:/Windows/System32/inetsrv/appcmd.exe"
+```
+
+存在しない場合は「IIS がインストールされていないか、管理者権限で Claude Code を起動してください」と報告して中止する。
+
+### 実行
+
+```bash
+cd H:/ClaudeCode/DevNext && powershell -ExecutionPolicy Bypass -File scripts/deploy-samples.ps1
+```
+
+### 結果報告
+
+スクリプトの出力から結果を読み取り、以下の形式で報告する：
+
+- デプロイ成功した Sample の一覧（✅）
+- デプロイ失敗した Sample の一覧（❌）と失敗理由
+- 初回デプロイ時は「IIS 仮想アプリケーションを新規登録しました」と補足する
+- 失敗がある場合はエラーログを引用して原因を説明する

@@ -81,7 +81,10 @@ foreach ($sample in $Samples) {
             if ($LASTEXITCODE -ne 0) { throw "仮想アプリ '$virtualPath' への AppPool 設定に失敗しました。" }
             Write-Host "  仮想アプリを登録しました。"
         } else {
-            Write-Host "  仮想アプリ '$virtualPath' は既に存在します。"
+            Write-Host "  仮想アプリ '$virtualPath' は既に存在します。physicalPath を更新します..."
+            & $AppcmdPath set app "$IisSiteName$virtualPath" /physicalPath:$deployPath | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "仮想アプリ '$virtualPath' の physicalPath 更新に失敗しました。" }
+            Write-Host "  physicalPath を更新しました。"
         }
 
         Write-Host "[$sample] デプロイ完了" -ForegroundColor Green

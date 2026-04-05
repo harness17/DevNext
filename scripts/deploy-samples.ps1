@@ -76,9 +76,10 @@ foreach ($sample in $Samples) {
             Write-Host "  AppPool '$sampleAppPool' already exists."
         }
 
-        # 3. Register web application
-        $existingApp = & $AppcmdPath list app /app.name:"$appFullName" 2>$null
-        if (-not $existingApp) {
+        # 3. Register web application (exact match check)
+        $appListOutput = (& $AppcmdPath list app /app.name:"$appFullName" 2>$null) -join ""
+        $appExists = $appListOutput -like "*APP `"$appFullName`"*"
+        if (-not $appExists) {
             Write-Host "  Registering app '$appPath'..."
             & $AppcmdPath add app /site.name:"$IisSiteName" /path:$appPath /physicalPath:$deployPath
             if ($LASTEXITCODE -ne 0) { throw "Failed to register app '$appPath'." }

@@ -21,7 +21,7 @@ $Samples      = @(
 
 # -- Stop AppPool ----------------------------------------------------
 Write-Host "Stopping DevNext AppPool..." -ForegroundColor Cyan
-Import-Module WebAdministration -SkipEditionCheck -ErrorAction Stop
+Import-Module WebAdministration -ErrorAction Stop
 $poolState = (Get-WebAppPoolState -Name $AppPoolName).Value
 if ($poolState -ne "Stopped") {
     Stop-WebAppPool -Name $AppPoolName

@@ -66,7 +66,7 @@ foreach ($sample in $Samples) {
         }
 
         # 2. Create AppPool if not exists
-        $existingPool = & $AppcmdPath list apppool $sampleAppPool 2>$null
+        $existingPool = & $AppcmdPath list apppool /apppool.name:$sampleAppPool 2>$null
         if (-not $existingPool) {
             Write-Host "  Creating AppPool '$sampleAppPool'..."
             & $AppcmdPath add apppool /name:$sampleAppPool /managedRuntimeVersion:""
@@ -77,7 +77,7 @@ foreach ($sample in $Samples) {
         }
 
         # 3. Register web application
-        $existingApp = & $AppcmdPath list app $appFullName 2>$null
+        $existingApp = & $AppcmdPath list app /app.name:"$appFullName" 2>$null
         if (-not $existingApp) {
             Write-Host "  Registering app '$appPath'..."
             & $AppcmdPath add app /site.name:"$IisSiteName" /path:$appPath /physicalPath:$deployPath

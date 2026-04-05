@@ -26,8 +26,11 @@ Import-Module WebAdministration -ErrorAction Stop
 
 # ── AppPool 停止 ───────────────────────────────────────
 Write-Host "DevNext AppPool を停止します..." -ForegroundColor Cyan
-Stop-WebAppPool -Name $AppPoolName
-Start-Sleep -Seconds 2
+$poolState = (Get-WebAppPoolState -Name $AppPoolName).Value
+if ($poolState -ne "Stopped") {
+    Stop-WebAppPool -Name $AppPoolName
+    Start-Sleep -Seconds 2
+}
 Write-Host "停止しました。" -ForegroundColor Green
 
 # ── 各 Sample をデプロイ ──────────────────────────────
@@ -58,6 +61,7 @@ foreach ($sample in $Samples) {
         if (-not $existingPool) {
             Write-Host "  AppPool '$sampleAppPool' を作成します..."
             & $AppcmdPath add apppool /name:$sampleAppPool /managedRuntimeVersion:"" | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "AppPool '$sampleAppPool' の作成に失敗しました。" }
             Write-Host "  AppPool を作成しました。"
         } else {
             Write-Host "  AppPool '$sampleAppPool' は既に存在します。"
@@ -71,8 +75,10 @@ foreach ($sample in $Samples) {
                 /site.name:$IisSiteName `
                 /path:$virtualPath `
                 /physicalPath:$deployPath | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "仮想アプリ '$virtualPath' の登録に失敗しました。" }
             & $AppcmdPath set app "$IisSiteName$virtualPath" `
                 /applicationPool:$sampleAppPool | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "仮想アプリ '$virtualPath' への AppPool 設定に失敗しました。" }
             Write-Host "  仮想アプリを登録しました。"
         } else {
             Write-Host "  仮想アプリ '$virtualPath' は既に存在します。"
@@ -88,7 +94,10 @@ foreach ($sample in $Samples) {
 
 # ── AppPool 起動 ───────────────────────────────────────
 Write-Host "`nDevNext AppPool を起動します..." -ForegroundColor Cyan
-Start-WebAppPool -Name $AppPoolName
+$poolState = (Get-WebAppPoolState -Name $AppPoolName).Value
+if ($poolState -ne "Started") {
+    Start-WebAppPool -Name $AppPoolName
+}
 Write-Host "起動しました。" -ForegroundColor Green
 
 # ── 結果サマリー ───────────────────────────────────────

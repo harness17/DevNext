@@ -30,10 +30,10 @@ Write-Host "AppPool stopped." -ForegroundColor Green
 if (-not (Test-Path $DeployRoot)) {
     New-Item -ItemType Directory -Path $DeployRoot | Out-Null
 }
-$samplesVdir = Get-WebVirtualDirectory -Site $IisSiteName -Name "samples" -ErrorAction SilentlyContinue
+$samplesVdir = Get-WebVirtualDirectory -Site $IisSiteName -Application "/" -Name "samples" -ErrorAction SilentlyContinue
 if (-not $samplesVdir) {
     Write-Host "Creating /samples virtual directory..." -ForegroundColor Cyan
-    New-WebVirtualDirectory -Site $IisSiteName -Name "samples" -PhysicalPath $DeployRoot | Out-Null
+    New-WebVirtualDirectory -Site $IisSiteName -Application "/" -Name "samples" -PhysicalPath $DeployRoot | Out-Null
     Write-Host "/samples virtual directory created." -ForegroundColor Green
 }
 

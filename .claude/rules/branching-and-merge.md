@@ -32,6 +32,6 @@
 | CommonLibrary の変更 | CommonLibrary利用ガイド |
 
 手順：
-1. 該当する `doc/*.md` を先に更新する
+1. 該当する `docs/*.md` を先に更新する
 2. `/export-docs` を実行して Office ファイルを再生成する
 3. ドキュメントの変更もコミットに含めてからマージする

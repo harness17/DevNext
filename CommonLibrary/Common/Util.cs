@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace Dev.CommonLibrary.Common
 {
     /// <summary>
-    /// ‹¤’ÊŠÖ”ƒNƒ‰ƒX
+    /// å…±é€šé–¢æ•°ã‚¯ãƒ©ã‚¹
     /// </summary>
     public static class Util
     {

@@ -5,6 +5,7 @@
 | ドキュメント名 | CommonLibrary 利用ガイド |
 | バージョン | 1.0 |
 | 作成日 | 2026-03-28 |
+| 更新日 | 2026-04-05 |
 | 対象システム | DevNext Web アプリケーション |
 
 ---
@@ -22,6 +23,7 @@
 9. [ページング・サマリー](#9-ページングサマリー)
 10. [ロガー（Logger）](#10-ロガーlogger)
 11. [新規プロジェクトへの導入方法](#11-新規プロジェクトへの導入方法)
+12. [CommonLibrary への追加ルール](#12-commonlibrary-への追加ルール)
 
 ---
 
@@ -526,6 +528,59 @@ public class MyRepository : RepositoryBase<MyEntity, MyCondModel>
 using Dev.CommonLibrary.Common;
 using Dev.CommonLibrary.Extensions;
 using Dev.CommonLibrary.Repository;
+```
+
+---
+
+## 12. CommonLibrary への追加ルール
+
+### 基本原則
+
+> **「このライブラリを別プロジェクトに持っていっても使える」ものだけを置く。**
+
+### 追加してよいカテゴリ（ホワイトリスト）
+
+| カテゴリ | 具体例 |
+|---------|-------|
+| Entity 基底 | `EntityBase`, `SiteEntityBase`, `IEntity` |
+| Identity エンティティ | `ApplicationUser`, `ApplicationRole`, `UserPreviousPassword` |
+| Repository 基底 | `RepositoryBase`, `IRepository` |
+| ページング | `CommonListPagerModel`, `CommonListSummaryModel` |
+| ロギング | `Logger`, `LogModel`, `ILogModel` |
+| 属性 | `AccessLogAttribute`, `SubValueAttribute`, `FileAttribute` |
+| 拡張メソッド | `StringExtensions`, `EnumExtensions` など |
+| バッチ基底 | `IBatch`, `BatchService` |
+
+### 追加してはいけないもの（ブラックリスト）
+
+| NG の例 | 理由 |
+|--------|------|
+| アプリ固有の定数・Enum | プロジェクト依存 |
+| Sample 固有のヘルパー | Sample は CommonLibrary を使う側 |
+| 特定機能の業務ロジック | 呼び出し側プロジェクトに書く |
+
+### 既存クラスへの追記ルール
+
+> **既存クラスへの追記が許されるのは、そのクラスの責務名で説明できるときだけ。**
+> 説明できなければ新クラスを作る。
+
+例：`CookieUtility` に Cookie 削除メソッドを追加 → OK（Cookie 操作の責務内）  
+例：`CookieUtility` に MD5 計算を追加 → NG（責務外 → `Util` クラスへ）
+
+### グレーゾーンの判断ゲート（3問チェック）
+
+ホワイトリストに当てはまらないものを追加しようとするとき：
+
+```
+① 他プロジェクトに持っていっても使えるか？
+     NO → CommonLibrary には入れない。呼び出し側に書く。
+
+② 単一の責務に収まるか？
+     NO → CommonLibrary には入れない。責務を分解してから再検討。
+
+③ 独立したクラスとして成立するか？
+     NO → 既存クラスの責務名で説明できるか確認。できなければ新クラスを作る。
+     YES → 新クラスとして追加する。
 ```
 
 ---

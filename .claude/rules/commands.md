@@ -23,3 +23,4 @@
 |------|---------|
 | smtp4dev 起動 | `smtp4dev-start.ps1` |
 | ビルド＋テスト一括 | `/verify` スキルを使用 |
+| agent-browser インストール | `./scripts/install-agent-browser.ps1` |

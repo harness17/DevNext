@@ -38,7 +38,7 @@ Agentツールを使って以下のように委譲する：
 
 例：
 ```
---background AGENTS.md のルールに従って、実装計画 docs/superpowers/plans/2026-03-30-my-feature.md をチェックボックス順に実装してください。完了後は git add -A && git commit してください。
+--background AGENTS.md のルールに従って、実装計画 doc/superpowers/plans/2026-03-30-my-feature.md をチェックボックス順に実装してください。完了後は git add -A && git commit してください。
 ```
 
 起動したらユーザーに伝える：

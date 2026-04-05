@@ -77,3 +77,4 @@ scripts/          ← 開発補助スクリプト
 @rules/branching-and-merge.md
 @rules/viewimports.md
 @rules/git-ops.md
+@rules/commonlibrary-boundary.md

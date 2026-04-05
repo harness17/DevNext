@@ -87,7 +87,7 @@ foreach ($sample in $Samples) {
             Write-Host "  App registered."
         } else {
             Write-Host "  App '$appPath' exists. Updating physicalPath..."
-            & $AppcmdPath set app "$appFullName" /physicalPath:$deployPath
+            & $AppcmdPath set vdir "$appFullName/" /physicalPath:$deployPath
             if ($LASTEXITCODE -ne 0) { throw "Failed to update physicalPath for '$appPath'." }
             Write-Host "  physicalPath updated."
         }

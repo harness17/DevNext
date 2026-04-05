@@ -7,7 +7,7 @@
     実装させる計画ファイルのパス（リポジトリルートからの相対パス）。
 
 .EXAMPLE
-    ./scripts/start-codex.ps1 docs/superpowers/plans/2026-03-30-my-feature.md
+    ./scripts/start-codex.ps1 doc/superpowers/plans/2026-03-30-my-feature.md
 #>
 param(
     [Parameter(Mandatory = $true)]

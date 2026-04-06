@@ -149,7 +149,7 @@ namespace Site.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("UserPreviousPasswords");
+                    b.ToTable("UserPreviousPasswords", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -311,7 +311,7 @@ namespace Site.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApprovalRequest");
+                    b.ToTable("ApprovalRequest", (string)null);
                 });
 
             modelBuilder.Entity("Site.Entity.NotificationEntity", b =>
@@ -356,7 +356,7 @@ namespace Site.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notification");
+                    b.ToTable("Notification", (string)null);
                 });
 
             modelBuilder.Entity("Site.Entity.ScheduleEventEntity", b =>
@@ -423,7 +423,7 @@ namespace Site.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ScheduleEvent");
+                    b.ToTable("ScheduleEvent", (string)null);
                 });
 
             modelBuilder.Entity("Site.Entity.ScheduleEventEntityHistory", b =>
@@ -493,7 +493,7 @@ namespace Site.Migrations
 
                     b.HasKey("HistoryId");
 
-                    b.ToTable("ScheduleEventHistory");
+                    b.ToTable("ScheduleEventHistory", (string)null);
                 });
 
             modelBuilder.Entity("Site.Entity.ScheduleEventParticipantEntity", b =>
@@ -532,7 +532,7 @@ namespace Site.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ScheduleEventParticipant");
+                    b.ToTable("ScheduleEventParticipant", (string)null);
                 });
 
             modelBuilder.Entity("Dev.CommonLibrary.Entity.UserPreviousPassword", b =>

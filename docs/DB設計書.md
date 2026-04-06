@@ -627,7 +627,7 @@ ScheduleEventParticipant.Status に使用。
 
 ## 6. 初期データ
 
-DbMigrationRunner によって以下のデータが投入される。
+アプリ起動時に `Program.cs` の `SeedAsync` によって以下のデータが投入される（ユーザーが 0 件のときのみ実行）。
 
 ### ロール
 
@@ -671,14 +671,13 @@ DbMigrationRunner によって以下のデータが投入される。
 ### DB 作成・初期化
 
 ```bash
-cd DbMigrationRunner
-dotnet run
+# 初回またはマイグレーション追加時
+cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext
 ```
 
-- **新規 DB**: `EnsureCreatedAsync()` により全テーブルが自動生成される（EF Core モデルに基づく）。
-- **既存 DB**: `ApplyMissingTablesAsync()` により不足テーブル・カラムが差分適用される。
-  - テーブル追加: `IF NOT EXISTS (sys.tables)` → `CREATE TABLE`
-  - カラム追加: `IF NOT EXISTS (sys.columns)` → `ALTER TABLE ADD`
+- **新規 DB**: マイグレーション適用により全テーブルが作成される。
+- **既存 DB**: 未適用のマイグレーションのみ差分適用される。
+- **アプリ起動時**: `Program.cs` の `MigrateAsync` が未適用マイグレーションを自動適用し、`SeedAsync` が初期データを投入する。
 
 ---
 

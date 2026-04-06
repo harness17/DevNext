@@ -38,14 +38,17 @@ cd DevNext
 
 ---
 
-## 3. DB 初期化（テーブル作成・Seed投入）
+## 3. DB 初期化（マイグレーション適用・Seed投入）
+
+初回のみ、EF Core Migrations を手動で適用してください。
 
 ```bash
-cd DbMigrationRunner
-dotnet run
+cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext
 ```
 
-`EnsureCreatedAsync` によりテーブルが作成され、初期ユーザーが投入されます。
+2回目以降（マイグレーションファイルが追加された場合）も同じコマンドで差分を適用します。
+
+> **起動時の自動処理**: `Program.cs` の `MigrateAsync` + `SeedAsync` により、アプリ起動時に未適用のマイグレーションが自動適用され、初期ユーザーが投入されます。
 
 ### 初期ユーザー
 

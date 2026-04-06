@@ -7,7 +7,8 @@
 | ビルド | `cd H:/ClaudeCode/DevNext && dotnet build DevNext.sln` |
 | 開発サーバー起動 | `cd DevNext && dotnet run` |
 | テスト実行 | `cd Tests && dotnet test` |
-| DB 初期化（作成・Seed） | `cd DbMigrationRunner && dotnet run` |
+| マイグレーション追加 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations add <名前> --project DevNext` |
+| DB に適用（手動） | `cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext` |
 
 ## デプロイ
 

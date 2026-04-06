@@ -24,7 +24,6 @@ ASP.NET Core 10 製の Web アプリケーション **コアテンプレート**
 ```
 DevNext/                   # コアのみ（認証・ユーザー管理・承認・スケジュール）
 CommonLibrary/             # 共通ライブラリ（RootNamespace: Dev.CommonLibrary）
-DbMigrationRunner/         # DB作成・Seedデータ投入ツール
 BatchSample/               # バッチ処理サンプル
 Tests/                     # ユニットテスト
 Samples/
@@ -60,15 +59,18 @@ docs/
 ## クイックスタート
 
 ```bash
-# 1. DB 初期化（テーブル作成・Seed 投入）
-cd DbMigrationRunner && dotnet run
+# 1. DB マイグレーション適用（初回のみ）
+cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext
 
-# 2. コア起動
+# 2. コア起動（マイグレーション適用・Seed 投入は起動時に自動実行）
 cd DevNext && dotnet run
 
 # 3. テスト
 cd Tests && dotnet test
 ```
+
+> **Note**: 手順 1 は初回セットアップ時のみ必要です。  
+> 以降のマイグレーション追加時は `dotnet ef migrations add <名前>` → `dotnet ef database update` を実行してください。
 
 詳細は [docs/setup.md](docs/setup.md) を参照してください。
 
@@ -119,6 +121,14 @@ cd Tests && dotnet test
 
 各サンプルは `CommonLibrary` を参照した **独立した Web アプリ**です。
 DevNextDB を共有するため、同じユーザーアカウントでログインできます。
+
+### Sample の DB セットアップ
+
+各 Sample は EF Migrations ではなく `EnsureCreatedAsync` を使用しています。  
+**起動時に自動でテーブルが作成されます**。手動操作は不要です。
+
+Sample に新しいテーブル・カラムを追加する場合は、Sample 側の DBContext と `EnsureCreatedAsync` の呼び出しコードを更新してください。  
+既存 DB に後からカラムを追加する場合は、SQL Server Management Studio 等で手動 ALTER TABLE が必要です（Sample は本番運用を想定しないため）。
 
 | プロジェクト | 内容 | 参照レシピ |
 |---|---|---|

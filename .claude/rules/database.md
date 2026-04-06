@@ -10,15 +10,10 @@
 
 | 用途 | コマンド |
 |------|---------|
-| **DB 更新（通常はこれだけ）** | `./scripts/db-update.ps1` |
-| DB 更新（名前指定） | `./scripts/db-update.ps1 -Name AddXxx` |
+| マイグレーション追加 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations add <名前> --project DevNext` |
+| DB に適用 | `cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext` |
 | 適用済み一覧 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations list --project DevNext` |
 | 最後のマイグレーションを削除 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations remove --project DevNext` |
-
-`db-update.ps1` は内部で以下を自動実行する：
-1. `has-pending-model-changes` でモデル変更を検出
-2. 変更があれば `migrations add Auto_yyyyMMddHHmmss` を生成
-3. `database update` で DB に適用
 
 ## Seed データ（初期ユーザー）
 

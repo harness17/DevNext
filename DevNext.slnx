@@ -1,3 +1,12 @@
 <Solution>
-  <Project Path="DevNext/DevNext.fsproj" />
+  <Project Path="DevNext/DevNext.csproj" />
+  <Project Path="CommonLibrary/CommonLibrary.csproj" />
+  <Project Path="Tests/Tests.csproj" />
+  <Project Path="BatchSample/BatchSample.csproj" />
+  <Project Path="Samples/DatabaseSample/DatabaseSample.csproj" />
+  <Project Path="Samples/ExcelSample/ExcelSample.csproj" />
+  <Project Path="Samples/FileSample/FileSample.csproj" />
+  <Project Path="Samples/MailSample/MailSample.csproj" />
+  <Project Path="Samples/PdfSample/PdfSample.csproj" />
+  <Project Path="Samples/WizardSample/WizardSample.csproj" />
 </Solution>

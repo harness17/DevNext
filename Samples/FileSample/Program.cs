@@ -56,6 +56,15 @@ Dev.CommonLibrary.Entity.EntityBase.HttpContextAccessor = accessor;
 var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 Dev.CommonLibrary.Common.Logger.GetLogger().SetLogger(loggerFactory.CreateLogger("App"));
 
+// DB作成・初期データ投入
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var sp = scope.ServiceProvider;
+    var context = sp.GetRequiredService<FileSampleDbContext>();
+    await context.Database.EnsureCreatedAsync();
+    await SeedAsync(sp);
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/RootError/Error");
@@ -72,3 +81,27 @@ app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=FileManagement}/{action=Index}/{id?}");
 
 app.Run();
+
+static async Task SeedAsync(IServiceProvider sp)
+{
+    var roleManager = sp.GetRequiredService<RoleManager<ApplicationRole>>();
+    var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
+
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new ApplicationRole { Id = "1", Name = "Admin" });
+    if (!await roleManager.RoleExistsAsync("Member"))
+        await roleManager.CreateAsync(new ApplicationRole { Id = "2", Name = "Member" });
+
+    if (await userManager.FindByNameAsync("admin1@sample.jp") == null)
+    {
+        var admin = new ApplicationUser { Id = "1", Email = "admin1@sample.jp", UserName = "admin1@sample.jp", ApplicationRoleName = "Admin" };
+        await userManager.CreateAsync(admin, "Admin1!");
+        await userManager.AddToRoleAsync(admin, "Admin");
+    }
+    if (await userManager.FindByNameAsync("member1@sample.jp") == null)
+    {
+        var member = new ApplicationUser { Id = "2", Email = "member1@sample.jp", UserName = "member1@sample.jp", ApplicationRoleName = "Member" };
+        await userManager.CreateAsync(member, "Member1!");
+        await userManager.AddToRoleAsync(member, "Member");
+    }
+}

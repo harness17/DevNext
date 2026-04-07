@@ -45,6 +45,14 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddEntityFrameworkStores<DBContext>()
 .AddDefaultTokenProviders();
 
+// Antiforgery Cookie 名を環境ごとに分離（開発サーバーとIIS仮想ディレクトリの名前衝突を防ぐ）
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = builder.Environment.IsDevelopment()
+        ? ".AspNetCore.Antiforgery.DevNext-Dev"
+        : ".AspNetCore.Antiforgery.DevNext";
+});
+
 // Cookie認証設定
 builder.Services.ConfigureApplicationCookie(options =>
 {

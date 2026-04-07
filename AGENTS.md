@@ -16,7 +16,7 @@ Claude Code固有の設定（スキル・フック）は `.claude/` を参照し
 ```
 DevNext/          ← メインWebアプリ（RootNamespace: Site）
 CommonLibrary/    ← 共通ライブラリ（RootNamespace: Dev.CommonLibrary）
-DbMigrationRunner/ ← DB初期化ツール（RootNamespace: DbMigrationRunner）
+BatchSample/      ← バッチ処理サンプル（RootNamespace: BatchSample）
 Tests/            ← xUnit テストプロジェクト
 Samples/          ← 独立したサンプルプロジェクト群（各自独立）
 docs/             ← 設計書・実装計画
@@ -43,7 +43,7 @@ scripts/          ← 開発補助スクリプト
 |---|---|
 | `DevNext/` | `Site` |
 | `CommonLibrary/` | `Dev.CommonLibrary` |
-| `DbMigrationRunner/` | `DbMigrationRunner` |
+| `BatchSample/` | `BatchSample` |
 
 ### エンティティ設計ルール
 
@@ -82,9 +82,9 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 - **SQL Server**、DB名: `DevNextDB`、接続文字列キー: `SiteConnection`
 - 接続設定: 各プロジェクトの `appsettings.json`（接続文字列は `appsettings.Development.json` に記載し `appsettings.json` にはプレースホルダーのみ置くこと。`appsettings.Development.json` は `.gitignore` 対象）
-- DB作成・Seed投入は `DbMigrationRunner` を実行（`EnsureCreatedAsync` 使用）
-- **マイグレーションファイルは使用しない**
-- テーブル・カラムを追加・変更した場合は `DbMigrationRunner` を再実行すること
+- **EF Core Migrations** を使用してスキーマ管理する
+- DB 作成・マイグレーション適用・Seed 投入はアプリ起動時に自動実行される（`Program.cs` の `MigrateAsync` + `SeedAsync`）
+- テーブル・カラムを追加・変更した場合は `/add-entity` スキルを使用すること
 
 ### Seed データ（初期ユーザー）
 
@@ -99,10 +99,11 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 | 用途 | コマンド |
 |------|---------|
-| ビルド | `cd DevNext && dotnet build` |
+| ビルド | `dotnet build DevNext.sln` |
 | 開発サーバー起動 | `cd DevNext && dotnet run` |
 | テスト実行 | `cd Tests && dotnet test` |
-| DB初期化（作成・Seed） | `cd DbMigrationRunner && dotnet run` |
+| マイグレーション追加 | `dotnet ef migrations add <名前> --project DevNext` |
+| DB に適用（手動） | `dotnet ef database update --project DevNext` |
 
 ---
 

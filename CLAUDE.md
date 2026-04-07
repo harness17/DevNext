@@ -9,7 +9,7 @@
 ```
 DevNext/          ← メインWebアプリ（RootNamespace: Site）
 CommonLibrary/    ← 共通ライブラリ（RootNamespace: Dev.CommonLibrary）
-DbMigrationRunner/ ← DB初期化ツール
+BatchSample/      ← バッチ処理サンプル（RootNamespace: BatchSample）
 Tests/            ← xUnit テストプロジェクト
 Samples/          ← 独立したサンプルプロジェクト群
 docs/             ← 設計書・実装計画

@@ -9,7 +9,7 @@ namespace Dev.CommonLibrary.Common
     /// </summary>
     public static class Util
     {
-        public static string calcMd5(string srcStr)
+        public static string CalcMd5(string srcStr)
         {
             byte[] srcBytes = Encoding.UTF8.GetBytes(srcStr);
             byte[] destBytes = MD5.HashData(srcBytes);

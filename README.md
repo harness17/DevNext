@@ -3,9 +3,9 @@
 ASP.NET Core 10 製の Web アプリケーション **コアテンプレート**。
 新案件の出発点として使うことを目的に設計されています。
 
-> セットアップ詳細 → [doc/setup.md](doc/setup.md)
-> 新案件カスタマイズ → [doc/customization.md](doc/customization.md)
-> 実装パターン集 → [doc/recipes/](doc/recipes/)
+> セットアップ詳細 → [docs/setup.md](docs/setup.md)
+> 新案件カスタマイズ → [docs/customization.md](docs/customization.md)
+> 実装パターン集 → [docs/recipes/](docs/recipes/)
 
 ---
 
@@ -24,7 +24,6 @@ ASP.NET Core 10 製の Web アプリケーション **コアテンプレート**
 ```
 DevNext/                   # コアのみ（認証・ユーザー管理・承認・スケジュール）
 CommonLibrary/             # 共通ライブラリ（RootNamespace: Dev.CommonLibrary）
-DbMigrationRunner/         # DB作成・Seedデータ投入ツール
 BatchSample/               # バッチ処理サンプル
 Tests/                     # ユニットテスト
 Samples/
@@ -33,7 +32,7 @@ Samples/
   MailSample/              # メール送信サンプル（独立 Web アプリ）
   WizardSample/            # 多段階フォームサンプル（独立 Web アプリ）
   ExcelSample/             # Excel エクスポート・インポートサンプル（独立 Web アプリ、ClosedXML 使用）
-doc/
+docs/
   setup.md                 # セットアップ手順
   customization.md         # 新案件向けカスタマイズ指針
   recipes/                 # 実装パターン集
@@ -60,17 +59,20 @@ doc/
 ## クイックスタート
 
 ```bash
-# 1. DB 初期化（テーブル作成・Seed 投入）
-cd DbMigrationRunner && dotnet run
+# 1. DB マイグレーション適用（初回のみ）
+cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext
 
-# 2. コア起動
+# 2. コア起動（マイグレーション適用・Seed 投入は起動時に自動実行）
 cd DevNext && dotnet run
 
 # 3. テスト
 cd Tests && dotnet test
 ```
 
-詳細は [doc/setup.md](doc/setup.md) を参照してください。
+> **Note**: 手順 1 は初回セットアップ時のみ必要です。  
+> 以降のマイグレーション追加時は `dotnet ef migrations add <名前>` → `dotnet ef database update` を実行してください。
+
+詳細は [docs/setup.md](docs/setup.md) を参照してください。
 
 ### 初期ユーザー
 
@@ -120,12 +122,20 @@ cd Tests && dotnet test
 各サンプルは `CommonLibrary` を参照した **独立した Web アプリ**です。
 DevNextDB を共有するため、同じユーザーアカウントでログインできます。
 
+### Sample の DB セットアップ
+
+各 Sample は EF Migrations ではなく `EnsureCreatedAsync` を使用しています。  
+**起動時に自動でテーブルが作成されます**。手動操作は不要です。
+
+Sample に新しいテーブル・カラムを追加する場合は、Sample 側の DBContext と `EnsureCreatedAsync` の呼び出しコードを更新してください。  
+既存 DB に後からカラムを追加する場合は、SQL Server Management Studio 等で手動 ALTER TABLE が必要です（Sample は本番運用を想定しないため）。
+
 | プロジェクト | 内容 | 参照レシピ |
 |---|---|---|
-| DatabaseSample | CRUD・ページング・ソート・一括編集・Excel/PDF エクスポート | [excel-export](doc/recipes/excel-export.md) / [pdf-export](doc/recipes/pdf-export.md) / [bulk-edit](doc/recipes/bulk-edit.md) |
-| FileSample | ファイルアップロード・ダウンロード・削除 | [file-upload](doc/recipes/file-upload.md) |
+| DatabaseSample | CRUD・ページング・ソート・一括編集・Excel/PDF エクスポート | [excel-export](docs/recipes/excel-export.md) / [pdf-export](docs/recipes/pdf-export.md) / [bulk-edit](docs/recipes/bulk-edit.md) |
+| FileSample | ファイルアップロード・ダウンロード・削除 | [file-upload](docs/recipes/file-upload.md) |
 | MailSample | テンプレートメール送信・送信ログ | — |
-| WizardSample | 多段階フォーム（TempData を使ったステップ間状態保持） | [wizard](doc/recipes/wizard.md) |
+| WizardSample | 多段階フォーム（TempData を使ったステップ間状態保持） | [wizard](docs/recipes/wizard.md) |
 
 ---
 

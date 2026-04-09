@@ -1,9 +1,9 @@
 ---
 name: export-docs
-description: doc/ フォルダの Markdown ドキュメントを Word / Excel ファイルに出力する。ドキュメント更新後に実行して .docx / .xlsx を最新に保つ。
+description: docs/ フォルダの Markdown ドキュメントを Word / Excel ファイルに出力する。ドキュメント更新後に実行して .docx / .xlsx を最新に保つ。
 ---
 
-`doc/` フォルダの Markdown ソースをもとに、対応する Word / Excel ファイルを生成してください。
+`docs/` フォルダの Markdown ソースをもとに、対応する Word / Excel ファイルを生成してください。
 
 ## ドキュメント形式の対応表
 
@@ -126,6 +126,6 @@ rm 生成スクリプト.py
 
 ## 注意事項
 
-- 生成した Office ファイルは `doc/` フォルダに出力する
+- 生成した Office ファイルは `docs/` フォルダに出力する
 - Markdown ソース（`.md`）が正として Office ファイルは派生物として扱う
 - Markdown と Office ファイルの内容が乖離しないよう、機能追加・変更時は両方を更新する

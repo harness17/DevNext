@@ -30,11 +30,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <!-- ClosedXML: MIT ライセンスのため商用利用も無償で可能 -->
-    <PackageReference Include="ClosedXML" Version="0.104.2" />
-    <PackageReference Include="CsvHelper" Version="33.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
-    <PackageReference Include="QuestPDF" Version="2026.2.3" />
   </ItemGroup>
 </Project>

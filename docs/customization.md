@@ -42,7 +42,7 @@ Site → MyApp
 "SiteConnection": "Server=(localdb)\\mssqllocaldb;Database=MyAppDB;..."
 ```
 
-`DbMigrationRunner/appsettings.json` も同様に変更し、`dotnet run` で DB を再作成してください。
+`appsettings.Development.json` の変更後、`dotnet ef database update --project DevNext` を実行して新 DB にマイグレーションを適用してください。
 
 ---
 
@@ -87,7 +87,7 @@ builder.Services.AddDataProtection()
 
 ## 5. 初期ユーザーの変更
 
-`DbMigrationRunner/Seeder.cs`（または相当ファイル）の Seed データを変更してください。
+`DevNext/Program.cs` の `SeedAsync` メソッド内の Seed データを変更してください。
 
 ---
 

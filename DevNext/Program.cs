@@ -45,6 +45,14 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddEntityFrameworkStores<DBContext>()
 .AddDefaultTokenProviders();
 
+// Antiforgery Cookie 名を環境ごとに分離（開発サーバーとIIS仮想ディレクトリの名前衝突を防ぐ）
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = builder.Environment.IsDevelopment()
+        ? ".AspNetCore.Antiforgery.DevNext-Dev"
+        : ".AspNetCore.Antiforgery.DevNext";
+});
+
 // Cookie認証設定
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -96,6 +104,16 @@ EntityBase.HttpContextAccessor = accessor;
 var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 Dev.CommonLibrary.Common.Logger.GetLogger().SetLogger(loggerFactory.CreateLogger("App"));
 
+// DB マイグレーション適用・Seed
+// MigrateAsync は未適用のマイグレーションを順次適用する（新規 DB 作成も含む）
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var sp = scope.ServiceProvider;
+    var context = sp.GetRequiredService<DBContext>();
+    await context.Database.MigrateAsync();
+    await SeedAsync(sp);
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/RootError/Error");
@@ -131,3 +149,44 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+/// <summary>
+/// 初期ロール・ユーザーを作成する。既に存在する場合はスキップされる。
+/// </summary>
+static async Task SeedAsync(IServiceProvider sp)
+{
+    var roleManager = sp.GetRequiredService<RoleManager<ApplicationRole>>();
+    var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
+    var context = sp.GetRequiredService<DBContext>();
+
+    // ロール作成
+    if (!await roleManager.RoleExistsAsync(ApplicationRoleType.Admin.ToString()))
+        await roleManager.CreateAsync(new ApplicationRole { Id = "1", Name = ApplicationRoleType.Admin.ToString() });
+
+    if (!await roleManager.RoleExistsAsync(ApplicationRoleType.Member.ToString()))
+        await roleManager.CreateAsync(new ApplicationRole { Id = "2", Name = ApplicationRoleType.Member.ToString() });
+
+    // 初期ユーザー作成（ユーザーが1件もない場合のみ）
+    if (!context.Users.Any())
+    {
+        var adminUser = new ApplicationUser
+        {
+            Id = "1",
+            Email = "admin1@sample.jp",
+            UserName = "admin1@sample.jp",
+            ApplicationRoleName = ApplicationRoleType.Admin.ToString()
+        };
+        await userManager.CreateAsync(adminUser, "Admin1!");
+        await userManager.AddToRoleAsync(adminUser, ApplicationRoleType.Admin.ToString());
+
+        var memberUser = new ApplicationUser
+        {
+            Id = "2",
+            Email = "member1@sample.jp",
+            UserName = "member1@sample.jp",
+            ApplicationRoleName = ApplicationRoleType.Member.ToString()
+        };
+        await userManager.CreateAsync(memberUser, "Member1!");
+        await userManager.AddToRoleAsync(memberUser, ApplicationRoleType.Member.ToString());
+    }
+}

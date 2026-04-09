@@ -13,12 +13,12 @@ namespace Dev.CommonLibrary.Common
             return value;
         }
 
-        public static void SetCookie(IResponseCookies cookies, string key, string value)
+        public static void SetCookie(IResponseCookies cookies, string key, string value, DateTimeOffset? expires = null)
         {
             cookies.Append(key, value, new CookieOptions
             {
                 Path = "/",
-                Expires = DateTimeOffset.Now.AddMonths(1)
+                Expires = expires ?? DateTimeOffset.Now.AddMonths(1)
             });
         }
 

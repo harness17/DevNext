@@ -205,5 +205,214 @@ namespace ExcelSample.Service
 
             return (entities.Count, errors);
         }
+
+        // ─────────────────────────────────────────────
+        // エクスポート（CSV）
+        // ─────────────────────────────────────────────
+
+        /// <summary>
+        /// 商品一覧を CSV ファイルとして出力する
+        /// ポイント: UTF-8 BOM 付きで出力することで Excel で開いたときに文字化けを防ぐ
+        ///           フィールドにカンマ・ダブルクォート・改行が含まれる場合はダブルクォートで囲む（RFC 4180 準拠）
+        /// </summary>
+        public MemoryStream ExportCsv()
+        {
+            var rows = _repository.GetBaseQuery().OrderByDescending(x => x.Id).ToList();
+            var memoryStream = new MemoryStream();
+
+            // ポイント: new UTF8Encoding(true) の引数 true が BOM 付きを指定する
+            using (var writer = new StreamWriter(memoryStream, new System.Text.UTF8Encoding(true), leaveOpen: true))
+            {
+                // ── ヘッダー行 ──────────────────────────
+                writer.WriteLine("ID,商品名,カテゴリ,単価（円）,在庫数,登録日時");
+
+                // ── データ行 ──────────────────────────
+                foreach (var row in rows)
+                {
+                    writer.WriteLine(string.Join(",",
+                        row.Id,
+                        EscapeCsvField(row.Name),
+                        EscapeCsvField(row.Category),
+                        row.Price,
+                        row.Quantity,
+                        EscapeCsvField(row.CreateDate.ToString("yyyy/MM/dd HH:mm"))
+                    ));
+                }
+            }
+
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+
+        /// <summary>
+        /// CSV フィールドのエスケープ処理
+        /// ポイント: カンマ・ダブルクォート・改行を含む場合はダブルクォートで囲み、
+        ///           フィールド内のダブルクォートは "" にエスケープする（RFC 4180）
+        /// </summary>
+        private static string EscapeCsvField(string field)
+        {
+            if (field.Contains(',') || field.Contains('"') || field.Contains('\n') || field.Contains('\r'))
+                return $"\"{field.Replace("\"", "\"\"")}\"";
+            return field;
+        }
+
+        // ─────────────────────────────────────────────
+        // インポート（CSV）
+        // ─────────────────────────────────────────────
+
+        /// <summary>
+        /// CSV ファイルをインポートして商品データをDBに登録する
+        /// ポイント: BOM 付き UTF-8 も自動認識する StreamReader を使用する
+        ///           列順は「商品名 / カテゴリ / 単価（円） / 在庫数」（Excel インポートと同一）
+        /// </summary>
+        public (int successCount, List<string> errors) ImportCsv(Stream fileStream, string? userName)
+        {
+            var errors = new List<string>();
+            var entities = new List<ExcelItemEntity>();
+
+            // ポイント: detectEncodingFromByteOrderMarks: true で BOM 付き UTF-8 を自動検出する
+            using (var reader = new StreamReader(fileStream, detectEncodingFromByteOrderMarks: true))
+            {
+                // 1行目はヘッダーとしてスキップ
+                var headerLine = reader.ReadLine();
+                if (headerLine == null) return (0, errors);
+
+                int rowNum = 1; // ヘッダーが1行目なのでデータは2行目から
+                string? line;
+
+                while ((line = reader.ReadLine()) != null)
+                {
+                    rowNum++;
+
+                    // 空行はスキップ
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    // ポイント: RFC 4180 対応の CSV パーサーで quoted フィールドを正しく分割する
+                    var fields = ParseCsvLine(line);
+
+                    if (fields.Count < 4)
+                    {
+                        errors.Add($"{rowNum}行目: 列数が不足しています（必要: 4列, 実際: {fields.Count}列）。");
+                        continue;
+                    }
+
+                    var name     = fields[0].Trim();
+                    var category = fields[1].Trim();
+                    var priceStr = fields[2].Trim();
+                    var qtyStr   = fields[3].Trim();
+
+                    // ── バリデーション ──────────────────
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        errors.Add($"{rowNum}行目: 商品名は必須です。");
+                        continue;
+                    }
+                    if (name.Length > 100)
+                    {
+                        errors.Add($"{rowNum}行目: 商品名は100文字以内で入力してください。");
+                        continue;
+                    }
+                    if (string.IsNullOrEmpty(category))
+                    {
+                        errors.Add($"{rowNum}行目: カテゴリは必須です。");
+                        continue;
+                    }
+                    if (!int.TryParse(priceStr, out int price) || price < 0)
+                    {
+                        errors.Add($"{rowNum}行目: 単価に無効な値が入力されています（「{priceStr}」）。");
+                        continue;
+                    }
+                    if (!int.TryParse(qtyStr, out int quantity) || quantity < 0)
+                    {
+                        errors.Add($"{rowNum}行目: 在庫数に無効な値が入力されています（「{qtyStr}」）。");
+                        continue;
+                    }
+
+                    // ── エンティティ生成 ──────────────
+                    var entity = new ExcelItemEntity
+                    {
+                        Name     = name,
+                        Category = category,
+                        Price    = price,
+                        Quantity = quantity,
+                    };
+                    entity.SetForCreate();
+                    entities.Add(entity);
+                }
+            }
+
+            if (entities.Count > 0)
+            {
+                _context.ExcelItemEntity.AddRange(entities);
+                _context.SaveChanges();
+            }
+
+            return (entities.Count, errors);
+        }
+
+        /// <summary>
+        /// CSV 1行を RFC 4180 に従ってフィールドリストに分割する
+        /// ポイント: ダブルクォートで囲まれたフィールド内のカンマ・改行・"" エスケープを正しく処理する
+        /// </summary>
+        private static List<string> ParseCsvLine(string line)
+        {
+            var fields = new List<string>();
+            int i = 0;
+
+            while (i <= line.Length)
+            {
+                if (i == line.Length)
+                {
+                    // 末尾のカンマ後の空フィールド
+                    fields.Add("");
+                    break;
+                }
+
+                if (line[i] == '"')
+                {
+                    // quoted フィールド
+                    i++; // 開きクォートをスキップ
+                    var sb = new System.Text.StringBuilder();
+
+                    while (i < line.Length)
+                    {
+                        if (line[i] == '"')
+                        {
+                            if (i + 1 < line.Length && line[i + 1] == '"')
+                            {
+                                // "" → " のエスケープ
+                                sb.Append('"');
+                                i += 2;
+                            }
+                            else
+                            {
+                                // 閉じクォート
+                                i++;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            sb.Append(line[i]);
+                            i++;
+                        }
+                    }
+
+                    fields.Add(sb.ToString());
+                    // 次のカンマをスキップ
+                    if (i < line.Length && line[i] == ',') i++;
+                }
+                else
+                {
+                    // unquoted フィールド
+                    int start = i;
+                    while (i < line.Length && line[i] != ',') i++;
+                    fields.Add(line.Substring(start, i - start));
+                    if (i < line.Length) i++; // カンマをスキップ
+                }
+            }
+
+            return fields;
+        }
     }
 }

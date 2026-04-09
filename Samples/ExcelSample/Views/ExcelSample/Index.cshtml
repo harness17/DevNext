@@ -11,6 +11,9 @@
         <a asp-action="Export" class="btn btn-success">
             <i class="fa fa-file-excel"></i> Excelダウンロード
         </a>
+        <a asp-action="ExportCsv" class="btn btn-outline-success ms-2">
+            <i class="fa fa-file-csv"></i> CSVダウンロード
+        </a>
     </div>
 </div>
 
@@ -56,6 +59,57 @@
                     <strong>以下の行にエラーがあります（スキップされました）：</strong>
                     <ul class="mb-0 mt-1">
                         @foreach (var err in Model.ImportErrors)
+                        {
+                            <li>@err</li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- ─────────────────────────────────────────────
+     CSVインポートフォーム
+───────────────────────────────────────────── -->
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>CSVインポート</strong>
+    </div>
+    <div class="card-body">
+        <form asp-action="ImportCsv" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="row align-items-end g-2">
+                <div class="col-auto">
+                    <label class="form-label mb-0">CSVファイル（.csv）</label>
+                    <input type="file" name="CsvImportFile" accept=".csv" class="form-control" />
+                    <span asp-validation-for="CsvImportFile" class="text-danger"></span>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">インポート</button>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small">
+                ※ 1行目はヘッダー行としてスキップされます。列順：商品名 / カテゴリ / 単価（円） / 在庫数
+            </div>
+        </form>
+
+        <!-- CSVインポート結果 -->
+        @if (Model.CsvImportSuccessCount > 0 || Model.CsvImportErrors.Count > 0)
+        {
+            <hr />
+            @if (Model.CsvImportSuccessCount > 0)
+            {
+                <div class="alert alert-success py-2">
+                    <i class="fa fa-check-circle"></i> @Model.CsvImportSuccessCount 件を登録しました。
+                </div>
+            }
+            @if (Model.CsvImportErrors.Count > 0)
+            {
+                <div class="alert alert-warning py-2">
+                    <strong>以下の行にエラーがあります（スキップされました）：</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach (var err in Model.CsvImportErrors)
                         {
                             <li>@err</li>
                         }

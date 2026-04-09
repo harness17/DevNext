@@ -67,6 +67,65 @@ namespace ExcelSample.Controllers
         }
 
         // ─────────────────────────────────────────────
+        // エクスポート（CSV ダウンロード）
+        // ─────────────────────────────────────────────
+
+        [HttpGet]
+        public IActionResult ExportCsv()
+        {
+            var stream = _service.ExportCsv();
+            var fileName = $"商品一覧_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            // ポイント: ContentType は text/csv を指定する。BOM 付き UTF-8 なので Excel でも文字化けしない
+            return File(stream, "text/csv", fileName);
+        }
+
+        // ─────────────────────────────────────────────
+        // インポート（CSV アップロード）
+        // ─────────────────────────────────────────────
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ImportCsv(ExcelSampleViewModel model)
+        {
+            if (model.CsvImportFile == null || model.CsvImportFile.Length == 0)
+            {
+                ModelState.AddModelError(nameof(model.CsvImportFile), "ファイルを選択してください。");
+                model = _service.GetItemList(model);
+                return View("Index", model);
+            }
+
+            const long maxFileSize = 5 * 1024 * 1024; // 5MB
+            if (model.CsvImportFile.Length > maxFileSize)
+            {
+                ModelState.AddModelError(nameof(model.CsvImportFile), "ファイルサイズは 5MB 以内にしてください。");
+                model = _service.GetItemList(model);
+                return View("Index", model);
+            }
+
+            // ポイント: ブラウザが送るCSVのMIMEタイプはOSによって異なるため、
+            //           text/csv・application/csv・text/plain・application/octet-stream を許容する
+            var allowedMimes = new[] { "text/csv", "application/csv", "text/plain", "application/octet-stream" };
+            if (!allowedMimes.Contains(model.CsvImportFile.ContentType))
+            {
+                ModelState.AddModelError(nameof(model.CsvImportFile), "csv ファイルを選択してください。");
+                model = _service.GetItemList(model);
+                return View("Index", model);
+            }
+
+            var (successCount, errors) = _service.ImportCsv(
+                model.CsvImportFile.OpenReadStream(), User.Identity?.Name);
+
+            model.CsvImportErrors = errors;
+            model.CsvImportSuccessCount = successCount;
+            model = _service.GetItemList(model);
+
+            if (errors.Count == 0)
+                TempData["Message"] = $"{successCount}件のデータを登録しました。";
+
+            return View("Index", model);
+        }
+
+        // ─────────────────────────────────────────────
         // インポート（Excel アップロード）
         // ─────────────────────────────────────────────
 

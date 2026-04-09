@@ -45,5 +45,14 @@ namespace ExcelSample.Models
 
         /// <summary>インポート成功件数</summary>
         public int ImportSuccessCount { get; set; }
+
+        /// <summary>CSVインポート用ファイル</summary>
+        public IFormFile? CsvImportFile { get; set; }
+
+        /// <summary>CSVインポートエラーリスト（行番号 + エラーメッセージ）</summary>
+        public List<string> CsvImportErrors { get; set; } = new();
+
+        /// <summary>CSVインポート成功件数</summary>
+        public int CsvImportSuccessCount { get; set; }
     }
 }

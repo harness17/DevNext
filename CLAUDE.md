@@ -9,7 +9,7 @@
 ```
 DevNext/          ← メインWebアプリ（RootNamespace: Site）
 CommonLibrary/    ← 共通ライブラリ（RootNamespace: Dev.CommonLibrary）
-DbMigrationRunner/ ← DB初期化ツール
+BatchSample/      ← バッチ処理サンプル（RootNamespace: BatchSample）
 Tests/            ← xUnit テストプロジェクト
 Samples/          ← 独立したサンプルプロジェクト群
 docs/             ← 設計書・実装計画
@@ -55,7 +55,7 @@ scripts/          ← 開発補助スクリプト
 
 - 作業は機能単位で1つずつ進める（全部まとめてリファクタリングしない）
 - 移動・削除の前に影響範囲（参照・DI登録・ナビゲーション）を確認する
-- `DevNext.sln` のプロジェクト参照はSample追加・削除のたびに更新する
+- `DevNext.sln` / `DevNext.slnx` のプロジェクト参照はSample追加・削除のたびに更新する
 - ビルドが通ることを各ステップで確認してからコミットする
 
 ---

@@ -4,4 +4,4 @@
 |---|---|
 | `DevNext/` | `Site` |
 | `CommonLibrary/` | `Dev.CommonLibrary` |
-| `DbMigrationRunner/` | `DbMigrationRunner` |
+| `BatchSample/` | `BatchSample` |

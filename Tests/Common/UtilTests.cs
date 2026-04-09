@@ -11,22 +11,22 @@ namespace Tests.Common
         public void CalcMd5_KnownInput_ReturnsExpectedHash()
         {
             // "test" の MD5 は既知の値
-            var result = Util.calcMd5("test");
+            var result = Util.CalcMd5("test");
             Assert.Equal("098f6bcd4621d373cade4e832627b4f6", result);
         }
 
         [Fact]
         public void CalcMd5_SameInputTwice_ReturnsSameHash()
         {
-            var hash1 = Util.calcMd5("hello");
-            var hash2 = Util.calcMd5("hello");
+            var hash1 = Util.CalcMd5("hello");
+            var hash2 = Util.CalcMd5("hello");
             Assert.Equal(hash1, hash2);
         }
 
         [Fact]
         public void CalcMd5_DifferentInputs_ReturnDifferentHashes()
         {
-            Assert.NotEqual(Util.calcMd5("foo"), Util.calcMd5("bar"));
+            Assert.NotEqual(Util.CalcMd5("foo"), Util.CalcMd5("bar"));
         }
 
         // ---- SetFileName ----

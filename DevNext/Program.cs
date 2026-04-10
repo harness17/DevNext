@@ -114,11 +114,21 @@ await using (var scope = app.Services.CreateAsyncScope())
     await SeedAsync(sp);
 }
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
+    // 開発環境: 例外詳細（スタックトレース）をブラウザに表示する
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    // 本番環境: カスタムエラーページにリダイレクトし、例外情報をログに記録する
     app.UseExceptionHandler("/RootError/Error");
     app.UseHsts();
 }
+
+// 404/403 などのHTTPステータスコードエラーをカスタムページで処理する
+// ポイント: UseStatusCodePagesWithReExecute はルーティング前に配置する必要がある
+app.UseStatusCodePagesWithReExecute("/RootError/StatusCode/{0}");
 
 app.UseHttpsRedirection();
 app.UseResponseCompression();

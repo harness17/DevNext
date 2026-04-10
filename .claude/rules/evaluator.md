@@ -1,10 +1,10 @@
 # Evaluator（コードレビュー）ルール
 
-Playwright デバッグ完了後、`superpowers:code-reviewer` エージェントでコードを評価すること。
+agent-browser デバッグ完了後、`superpowers:code-reviewer` エージェントでコードを評価すること。
 
 ## 実行順序
 
-Playwright デバッグ → **Evaluator レビュー** → `/add-page`
+agent-browser デバッグ → **Evaluator レビュー** → `/add-page`
 
 ## 評価軸と重み
 

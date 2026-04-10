@@ -15,7 +15,7 @@
 
 以下の順番で実行すること：
 
-1. Playwright デバッグ（動作確認）
+1. agent-browser デバッグ（動作確認）
 2. **Evaluator レビュー**（`superpowers:code-reviewer` → `evaluator.md` 参照）
 3. `/add-page` 実行
 

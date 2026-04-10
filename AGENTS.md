@@ -118,6 +118,27 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 ---
 
+## アドバイザー戦略（モデル選択）
+
+Sonnet（Executor）がタスク全体を実行し、判断が難しい局面でのみ Opus（Advisor）に相談する。
+
+| 役割 | モデル | 担当 |
+|------|--------|------|
+| Executor | Sonnet | 実装・ファイル操作・ビルド・テスト |
+| Advisor | Opus | 方針・トレードオフの判断のみ（実行しない） |
+
+**Opus に相談するタイミング**:
+- アーキテクチャ判断（CommonLibrary か呼び出し側か、など）
+- 複数の実装方針のトレードオフ比較
+- セキュリティ設計の妥当性確認
+- 根本原因が特定できない複雑なバグの仮説出し
+
+**相談しないタイミング**: ルーティン実装・ビルドエラー修正・ファイル操作・Git 操作
+
+詳細: `.claude/rules/advisor-strategy.md`
+
+---
+
 ## ⛔ 禁止操作
 
 以下の操作は絶対に実行しないこと。

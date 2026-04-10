@@ -78,3 +78,4 @@ scripts/          ← 開発補助スクリプト
 @rules/viewimports.md
 @rules/git-ops.md
 @rules/commonlibrary-boundary.md
+@rules/advisor-strategy.md

@@ -29,7 +29,7 @@ Stop-Process -Id <PID> -Force
 ### Step 3: ビルドを再実行する
 
 ```bash
-cd H:/Codex/DevNext && dotnet build DevNext.sln
+cd H:/ClaudeCode/DevNext && dotnet build DevNext.slnx
 ```
 
 ## よくあるケース

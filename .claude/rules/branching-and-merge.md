@@ -13,7 +13,7 @@
 | # | 手順 | スキル・コマンド |
 |---|------|----------------|
 | 1 | ビルド＋テスト通過 | `/verify` |
-| 2 | Playwright デバッグ（動作確認） | Playwright MCP |
+| 2 | agent-browser デバッグ（動作確認） | `agent-browser open/snapshot/click` |
 | 3 | Evaluator レビュー（差し戻しなし） | `superpowers:code-reviewer` |
 | 4 | ページ・ナビ・README 更新 | `/add-page`（トリガー条件を満たす場合） |
 | 5 | **ドキュメント更新** | `/export-docs`（下記参照） |

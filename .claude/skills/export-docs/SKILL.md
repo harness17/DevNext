@@ -51,29 +51,28 @@ done
 
 `template.docx` は Word で開いてスタイルを編集したものを `docs/` に置く。
 
-## Excel ファイルの生成（openpyxl）
+## Excel ファイルの生成（md_to_xlsx.py）
 
-Pandoc は xlsx 出力に対応していないため、Excel は引き続き openpyxl で生成する。
+`scripts/md_to_xlsx.py` を使う。Markdown をそのまま xlsx に変換する汎用スクリプト。
 
-```python
-import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+```bash
+# DB設計書
+python scripts/md_to_xlsx.py docs/DB設計書.md docs/DB設計書.xlsx
 
-wb = openpyxl.Workbook()
-# シートを追加・整形して保存
-wb.save('output.xlsx')
+# テストケース一覧
+python scripts/md_to_xlsx.py docs/テスト設計書.md docs/テストケース一覧.xlsx
 ```
 
-**Excel の色分け規則:**
+**変換ルール（自動適用）:**
 
-| 用途 | fill color |
-|------|-----------|
-| ヘッダー行 | `2E75B6`（青） |
-| 交互行 | `DEEAF1`（薄青） |
-| 主キー行 | `E2EFDA`（薄緑） |
-| 外部キー行 | `FCE4D6`（薄橙） |
-| セクションタイトル | `BDD7EE`（薄青） |
-| タイトル行 | `1F4E79`（濃紺） |
+| Markdown 要素 | xlsx 出力 |
+|--------------|----------|
+| `# H1` | 濃紺タイトル行（シート先頭） |
+| `## H2` | 新しいシートを作成 |
+| `### H3` | 薄青のセクションタイトル行 |
+| テーブルヘッダー行 | 青背景・白文字 |
+| テーブルデータ行（偶数） | 薄青交互 |
+| 通常テキスト | 薄グレー行 |
 
 ## バリデーション
 

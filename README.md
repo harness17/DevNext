@@ -32,6 +32,7 @@ Samples/
   MailSample/              # メール送信サンプル（独立 Web アプリ）
   WizardSample/            # 多段階フォームサンプル（独立 Web アプリ）
   ExcelSample/             # Excel エクスポート・インポートサンプル（独立 Web アプリ、ClosedXML 使用）
+  ApiSample/               # REST API + JWT 認証 + Swagger サンプル（独立 Web API）
 docs/
   setup.md                 # セットアップ手順
   customization.md         # 新案件向けカスタマイズ指針
@@ -53,6 +54,8 @@ docs/
 | PDF生成（DatabaseSample） | QuestPDF | 2026.x |
 | テスト | xUnit / Moq | 2.9.x / 4.20.x |
 | カレンダー UI | FullCalendar | 6.1.x |
+| REST API ドキュメント（ApiSample） | Swashbuckle（Swagger UI） | 8.1.x |
+| JWT 認証（ApiSample） | Microsoft.AspNetCore.Authentication.JwtBearer | 10.0.0 |
 
 ---
 
@@ -136,6 +139,7 @@ Sample に新しいテーブル・カラムを追加する場合は、Sample 側
 | FileSample | ファイルアップロード・ダウンロード・削除 | [file-upload](docs/recipes/file-upload.md) |
 | MailSample | テンプレートメール送信・送信ログ | — |
 | WizardSample | 多段階フォーム（TempData を使ったステップ間状態保持） | [wizard](docs/recipes/wizard.md) |
+| ApiSample | REST API（CRUD）+ JWT Bearer 認証 + Swagger UI（`/swagger` でアクセス） | — |
 
 ---
 

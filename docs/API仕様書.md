@@ -320,4 +320,32 @@ setInterval(async () => {
 
 ---
 
+---
+
+## 付録：ApiSample — 外部公開 REST API サンプル
+
+`Samples/ApiSample` は DevNext 本体とは独立した **REST API サンプルプロジェクト**です。
+内部 Ajax API ではなく、JWT Bearer 認証による外部公開を想定した API のパターンを示します。
+
+| 項目 | 内容 |
+|------|------|
+| ベース URL | `http://localhost:5200/api` |
+| 認証方式 | JWT Bearer（`Authorization: Bearer {token}`） |
+| API ドキュメント | `/swagger` — Swagger UI（JWT Authorize ボタン付き） |
+
+### 主要エンドポイント
+
+| メソッド | URL | 説明 | 必要権限 |
+|---------|-----|------|---------|
+| POST | `/api/auth/login` | JWT トークン発行 | 不要 |
+| GET | `/api/items` | 商品一覧取得 | 認証済み |
+| GET | `/api/items/{id}` | 商品詳細取得 | 認証済み |
+| POST | `/api/items` | 商品登録 | Admin |
+| PUT | `/api/items/{id}` | 商品更新 | Admin |
+| DELETE | `/api/items/{id}` | 商品削除 | Admin |
+
+詳細な仕様は起動後に Swagger UI（`/swagger`）で確認してください。
+
+---
+
 *本ドキュメントは DevNext プロジェクトの内部 Ajax API 仕様を記述したものです。*

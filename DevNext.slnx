@@ -2,6 +2,9 @@
   <Project Path="DevNext/DevNext.csproj" />
   <Project Path="CommonLibrary/CommonLibrary.csproj" />
   <Project Path="Tests/Tests.csproj" />
+  <Folder Name="/Samples/">
+    <Project Path="Samples/ApiSample/ApiSample.csproj" />
+  </Folder>
   <Project Path="BatchSample/BatchSample.csproj" />
   <Project Path="Samples/DatabaseSample/DatabaseSample.csproj" />
   <Project Path="Samples/ExcelSample/ExcelSample.csproj" />

@@ -99,7 +99,7 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 | 用途 | コマンド |
 |------|---------|
-| ビルド | `dotnet build DevNext.sln` |
+| ビルド | `dotnet build DevNext.slnx` |
 | 開発サーバー起動 | `cd DevNext && dotnet run` |
 | テスト実行 | `cd Tests && dotnet test` |
 | マイグレーション追加 | `dotnet ef migrations add <名前> --project DevNext` |
@@ -141,7 +141,7 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 実装が完了したら必ず以下を順番に実行してください：
 
-1. ビルドが通ることを確認: `cd H:/ClaudeCode/DevNext && dotnet build DevNext.sln`
+1. ビルドが通ることを確認: `cd H:/ClaudeCode/DevNext && dotnet build DevNext.slnx`
 2. テストが通ることを確認: `cd Tests && dotnet test`
 3. `git add` で変更ファイルを個別指定してコミット（`git add -A` は使用しない）
 

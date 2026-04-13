@@ -111,7 +111,7 @@ DB 名は `XxxSampleDB` のように Sample ごとに一意にする。
 
 ```bash
 cd H:/ClaudeCode/DevNext
-dotnet sln DevNext.sln add Samples/XxxSample/XxxSample.csproj
+dotnet sln DevNext.slnx add Samples/XxxSample/XxxSample.csproj
 ```
 
 ---
@@ -125,7 +125,7 @@ dotnet sln DevNext.sln add Samples/XxxSample/XxxSample.csproj
 ## Step 8: ビルド確認
 
 ```bash
-cd H:/ClaudeCode/DevNext && dotnet build DevNext.sln
+cd H:/ClaudeCode/DevNext && dotnet build DevNext.slnx
 ```
 
 エラーがあれば修正する。

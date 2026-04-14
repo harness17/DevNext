@@ -233,5 +233,8 @@ _publish/
 # 起動設定（個人環境依存）
 **/Properties/launchSettings.json
 
+# ローカル開発用設定（接続文字列・認証情報を含む）
+**/appsettings.Development.json
+
 # サンプルベース（旧フォルダ）
 サンプルベース/

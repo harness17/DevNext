@@ -132,8 +132,7 @@ namespace Site.Controllers
             if (model == null) return RedirectToAction(nameof(Index));
 
             // ポイント: IDOR 対策 — Admin は全件閲覧可、Member は自分の申請のみ閲覧可
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-            if (!User.IsInRole("Admin") && model.RequesterUserId != currentUserId)
+            if (!User.IsInRole("Admin") && model.RequesterUserId != GetCurrentUserId())
                 return Forbid();
 
             return View(model);

@@ -112,7 +112,8 @@
 {
     <script>
         $(function () {
-            $('#alertMessageBody').text('@Html.Raw(message?.Replace("'", "\\'")?.Replace("\n", "\\n") ?? "")');
+            // ポイント: JsonSerializer.Serialize でバックスラッシュ・クォート・</script>・改行を安全にエスケープする
+            $('#alertMessageBody').text(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(message ?? "")));
             var modal = new bootstrap.Modal(document.getElementById('modal-alertmessage'));
             modal.show();
         });

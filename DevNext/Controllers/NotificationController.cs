@@ -7,8 +7,8 @@ namespace Site.Controllers
 {
     /// <summary>
     /// 通知 Controller。ナビバーの Ajax ポーリング用エンドポイントを提供する。
-    /// ポイント: [ValidateAntiForgeryToken] を付けないことで Ajax からの POST を受け付ける。
-    ///           認証必須（[Authorize]）のため CSRF リスクは低い。
+    /// ポイント: POST 系アクションは [ValidateAntiForgeryToken] で保護する。
+    ///           Ajax 側は X-CSRF-TOKEN ヘッダーでトークンを送信する（AddAntiforgery の HeaderName 設定と対応）。
     /// </summary>
     [Authorize]
     public class NotificationController : Controller
@@ -55,6 +55,7 @@ namespace Site.Controllers
         /// POST: 指定 ID の通知を既読にする。
         /// </summary>
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAsRead([FromBody] MarkAsReadRequest request)
         {
             await _service.MarkAsReadAsync(request.Id, GetCurrentUserId());
@@ -65,6 +66,7 @@ namespace Site.Controllers
         /// POST: すべての未読通知を既読にする。
         /// </summary>
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAllAsRead()
         {
             await _service.MarkAllAsReadAsync(GetCurrentUserId());

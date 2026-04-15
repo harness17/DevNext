@@ -1,8 +1,11 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* ポイント: CSRF トークンを meta タグに埋め込み、Ajax POST 時に X-CSRF-TOKEN ヘッダーで送信する *@
+    <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
     <title>@ViewData["Title"] - DevNext</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -74,6 +77,16 @@
     @if (User.Identity?.IsAuthenticated == true)
     {
         <script>
+            // ─── Ajax 共通設定：CSRF トークンをすべての POST リクエストに自動付加 ──
+            // ポイント: $.ajaxSetup で一括設定することで個別リクエストへの追加が不要になる
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (settings.type === 'POST' || settings.type === 'post') {
+                        xhr.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'));
+                    }
+                }
+            });
+
             // ─── 通知ポーリング ──────────────────────────────────────────────
             // ポイント: ダッシュボードと同じ Ajax ポーリング方式（10秒間隔）
             //           ベルアイコンのバッジ表示を定期的に更新する

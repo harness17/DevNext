@@ -79,3 +79,4 @@ scripts/          ← 開発補助スクリプト
 @rules/git-ops.md
 @rules/commonlibrary-boundary.md
 @rules/advisor-strategy.md
+@rules/browser-test.md

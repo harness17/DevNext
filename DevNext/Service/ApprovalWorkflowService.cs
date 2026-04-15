@@ -21,12 +21,11 @@ namespace Site.Service
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly NotificationService _notificationService;
 
-        public ApprovalWorkflowService(DBContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
+        public ApprovalWorkflowService(DBContext context, ApprovalRequestRepository repo, UserManager<ApplicationUser> userManager, NotificationService notificationService)
         {
             _context = context;
-            // ポイント: Repository はサービス内で new して使う（DIせず）
-            //           Repository 自体が DBContext に依存するため、DI 済みの context を渡して初期化する
-            _repo = new ApprovalRequestRepository(context);
+            // ポイント: Repository は DI コンテナから注入する（Program.cs で AddScoped 登録済み）
+            _repo = repo;
             _userManager = userManager;
             _notificationService = notificationService;
         }

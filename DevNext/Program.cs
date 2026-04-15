@@ -46,11 +46,13 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddDefaultTokenProviders();
 
 // Antiforgery Cookie 名を環境ごとに分離（開発サーバーとIIS仮想ディレクトリの名前衝突を防ぐ）
+// HeaderName: Ajax POST から X-CSRF-TOKEN ヘッダーでトークンを受け取れるようにする
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = builder.Environment.IsDevelopment()
         ? ".AspNetCore.Antiforgery.DevNext-Dev"
         : ".AspNetCore.Antiforgery.DevNext";
+    options.HeaderName = "X-CSRF-TOKEN";
 });
 
 // Cookie認証設定
@@ -81,6 +83,7 @@ builder.Services.AddScoped<Dev.CommonLibrary.Attributes.AccessLogAttribute>();
 builder.Services.AddScoped<Site.Service.UserManagementService>();
 
 // 承認ワークフロー
+builder.Services.AddScoped<Site.Repository.ApprovalRequestRepository>();
 builder.Services.AddScoped<Site.Service.ApprovalWorkflowService>();
 
 // 通知

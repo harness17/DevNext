@@ -112,7 +112,7 @@
 {
     <script>
         $(function () {
-            // ポイント: JsonSerializer.Serialize でバックスラッシュ・クォート・</script>・改行を安全にエスケープする
+            // ポイント: JsonSerializer.Serialize でバックスラッシュ・クォート・改行を安全にエスケープする
             $('#alertMessageBody').text(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(message ?? "")));
             var modal = new bootstrap.Modal(document.getElementById('modal-alertmessage'));
             modal.show();

@@ -110,20 +110,20 @@
                         return;
                     }
 
-                    let html = '';
+                    const $list = $('#notificationList').empty();
                     items.forEach(function (item) {
                         // ポイント: 未読は背景色を変えて強調表示する
                         const bgClass = item.isRead ? '' : 'bg-light';
                         const fontClass = item.isRead ? 'text-muted' : 'fw-semibold';
-                        const escapedUrl = item.relatedUrl ? item.relatedUrl.replace(/"/g, '&quot;') : '';
-                        html += `
-                            <a class="dropdown-item notification-item ${bgClass} py-2 border-bottom"
-                               href="#" data-id="${item.id}" data-url="${escapedUrl}">
-                                <div class="small ${fontClass}">${item.message}</div>
-                                <div class="text-muted" style="font-size:0.72rem;">${item.createDate}</div>
-                            </a>`;
+                        // ポイント: XSS 対策 — message・createDate は .text() で設定し HTML として解釈させない
+                        //           ユーザー入力のタイトルが通知メッセージに含まれるため innerHTML への直接展開は禁止
+                        const $a = $('<a>')
+                            .addClass('dropdown-item notification-item py-2 border-bottom ' + bgClass)
+                            .attr({ href: '#', 'data-id': item.id, 'data-url': item.relatedUrl || '' });
+                        $('<div>').addClass('small ' + fontClass).text(item.message).appendTo($a);
+                        $('<div>').addClass('text-muted').css('font-size', '0.72rem').text(item.createDate).appendTo($a);
+                        $list.append($a);
                     });
-                    $('#notificationList').html(html);
                 }).fail(function () {
                     $('#notificationList').html(
                         '<div class="px-3 py-2 text-danger small">取得に失敗しました</div>'

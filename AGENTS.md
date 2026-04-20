@@ -23,6 +23,18 @@ docs/             ← 設計書・実装計画
 scripts/          ← 開発補助スクリプト
 ```
 
+### Samples/ の一覧
+
+| Sample | 概要 |
+|--------|------|
+| ApiSample | REST API + JWT 認証 + Swagger |
+| DatabaseSample | DB 操作パターン |
+| ExcelSample | Excel 出力・CSV エクスポート・インポート |
+| FileSample | ファイルアップロード・ダウンロード |
+| MailSample | メール送信 |
+| PdfSample | PDF 出力 |
+| WizardSample | ウィザード形式フォーム |
+
 ### Samples/ の設計制約
 
 - 各Sampleは `CommonLibrary` を参照してよい

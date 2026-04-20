@@ -36,3 +36,10 @@ builder.Services.AddScoped<Site.Service.NotificationService>();
 
 - 最低 6 文字
 - 大文字・小文字・数字・記号すべて必須
+
+# ロックアウトポリシー（ブルートフォース対策）
+
+`Program.cs` の `AddIdentity` 内で設定。
+
+- ロックアウト時間: 5分（`DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5)`）
+- 最大失敗回数: 5回（`MaxFailedAccessAttempts = 5`）

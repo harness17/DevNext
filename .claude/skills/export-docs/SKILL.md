@@ -22,6 +22,7 @@ PANDOC="/c/Users/harne/AppData/Local/Microsoft/WinGet/Packages/JohnMacFarlane.Pa
 | 画面設計書.md | Word | 画面設計書.docx | Pandoc |
 | デプロイ手順書.md | Word | デプロイ手順書.docx | Pandoc |
 | CommonLibrary利用ガイド.md | Word | CommonLibrary利用ガイド.docx | Pandoc |
+| 設計思想ガイド.md | Word | 設計思想ガイド.docx | Pandoc |
 | DB設計書.md | Excel | DB設計書.xlsx | openpyxl |
 | テスト設計書.md（テストケース部分） | Excel | テストケース一覧.xlsx | openpyxl |
 
@@ -38,7 +39,7 @@ PANDOC="/c/Users/harne/AppData/Local/Microsoft/WinGet/Packages/JohnMacFarlane.Pa
 
 ```bash
 PANDOC="/c/Users/harne/AppData/Local/Microsoft/WinGet/Packages/JohnMacFarlane.Pandoc_Microsoft.Winget.Source_8wekyb3d8bbwe/pandoc-3.9.0.2/pandoc.exe"
-for f in docs/基本設計書.md docs/詳細設計書.md docs/テスト設計書.md docs/API仕様書.md docs/画面設計書.md docs/デプロイ手順書.md docs/CommonLibrary利用ガイド.md; do
+for f in docs/基本設計書.md docs/詳細設計書.md docs/テスト設計書.md docs/API仕様書.md docs/画面設計書.md docs/デプロイ手順書.md docs/CommonLibrary利用ガイド.md docs/設計思想ガイド.md; do
   "$PANDOC" "$f" -o "${f%.md}.docx" && echo "OK: $f"
 done
 ```

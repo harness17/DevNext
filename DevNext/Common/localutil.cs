@@ -14,6 +14,7 @@ namespace Site.Common
     /// </summary>
     public static class LocalUtil
     {
+        /// <summary>一覧画面の表示件数選択ドロップダウン用リストを返す（10/20/30 件）。</summary>
         public static IEnumerable<SelectListItem> SetRecoedNumberList()
         {
             return new SelectListItem[]
@@ -24,6 +25,7 @@ namespace Site.Common
             };
         }
 
+        /// <summary>クエリにページングの Skip/Take を適用する。recoedNumber が 0 のときは全件取得。</summary>
         public static void SetTakeSkip<TModel, CondModel>(ref IQueryable<TModel> query, CondModel cond)
             where CondModel : IRepositoryCondModel
         {
@@ -35,6 +37,7 @@ namespace Site.Common
             }
         }
 
+        /// <summary>現在のカルチャに応じて多言語文字列の日本語または英語を返す。</summary>
         public static string MultiLangStr(IMultipleLanguagesString? s)
         {
             if (s == null) return "";
@@ -43,12 +46,18 @@ namespace Site.Common
             return s.Ja ?? "";
         }
 
+        /// <summary>登録完了アラートメッセージを生成する。</summary>
         public static string GetCreateAlertMessage(string title) => GetAlertMessage("{1}を登録しました。", title);
+        /// <summary>更新完了アラートメッセージを生成する。</summary>
         public static string GetUpdateAlertMessage(string title) => GetAlertMessage("{1}を更新しました。", title);
+        /// <summary>削除完了アラートメッセージを生成する。</summary>
         public static string GetDeleteAlertMessage(string title) => GetAlertMessage("{1}を削除しました。", title);
+        /// <summary>処理失敗アラートメッセージを生成する。</summary>
         public static string GetErrorAlertMessage(string title) => GetAlertMessage("{1}の処理に失敗しました。", title);
+        /// <summary>テンプレートに title を埋め込んだアラートメッセージを返す。</summary>
         public static string GetAlertMessage(string template, string title) => string.Format(template, title, title);
 
+        /// <summary>SearchModelBase のページング状態を任意の ISearchModelBase 実装型へマッピングして返す。</summary>
         public static T MapPageModelTo<T>(SearchModelBase? pageModel) where T : ISearchModelBase, new()
         {
             var model = new T();
@@ -57,6 +66,7 @@ namespace Site.Common
             return mapper.Map(pageModel, model);
         }
 
+        /// <summary>PageRead の種別に応じてページャー状態（ページ番号・件数・ソート）を更新する。</summary>
         public static void SetPager(SearchCondModelBase? cond, ISearchModelBase baseModel)
         {
             if (cond == null) cond = new SearchCondModelBase();

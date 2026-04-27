@@ -10,6 +10,7 @@ namespace Dev.CommonLibrary.Batch
     {
         private readonly Logger _logger = Logger.GetLogger();
 
+        /// <summary>mutex で多重起動を防止しながらバッチを実行する。既に起動中の場合はスキップしてログを出力する。</summary>
         public void Run(IBatch batch, string mutexName)
         {
             bool createdNew;

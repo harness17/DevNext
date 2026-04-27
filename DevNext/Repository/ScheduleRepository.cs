@@ -20,29 +20,33 @@ namespace Site.Repository
 
         // ─── ScheduleEvent CRUD ───────────────────────────────────────────────
 
+        /// <summary>ID でイベントを取得する（論理削除済みは除外）。</summary>
         public ScheduleEventEntity? SelectById(long id)
             => _context.ScheduleEvent.FirstOrDefault(x => x.Id == id && !x.DelFlag);
 
+        /// <summary>イベントを新規登録する。</summary>
         public void Insert(ScheduleEventEntity entity)
         {
             _context.ScheduleEvent.Add(entity);
             _context.SaveChanges();
         }
 
+        /// <summary>更新前に現在の状態を履歴テーブルへコピーする。</summary>
         public void InsertHistory(ScheduleEventEntity entity)
         {
-            // 更新前に現在の状態を履歴テーブルへコピーする
             var history = MapToHistory(entity);
             _context.ScheduleEventHistory.Add(history);
             _context.SaveChanges();
         }
 
+        /// <summary>イベントを更新する。</summary>
         public void Update(ScheduleEventEntity entity)
         {
             _context.ScheduleEvent.Update(entity);
             _context.SaveChanges();
         }
 
+        /// <summary>イベントを論理削除する（DelFlag=true）。</summary>
         public void LogicalDelete(ScheduleEventEntity entity)
         {
             entity.SetForLogicalDelete();
@@ -86,22 +90,26 @@ namespace Site.Repository
 
         // ─── Participant 操作 ─────────────────────────────────────────────────
 
+        /// <summary>イベントの全参加者を取得する（論理削除済みは除外）。</summary>
         public List<ScheduleEventParticipantEntity> GetParticipants(long eventId)
             => _context.ScheduleEventParticipant
                 .AsNoTracking()
                 .Where(x => x.EventId == eventId && !x.DelFlag)
                 .ToList();
 
+        /// <summary>指定イベントの指定ユーザーの参加者エンティティを取得する。</summary>
         public ScheduleEventParticipantEntity? GetParticipant(long eventId, string userId)
             => _context.ScheduleEventParticipant
                 .FirstOrDefault(x => x.EventId == eventId && x.UserId == userId && !x.DelFlag);
 
+        /// <summary>参加者を登録する。</summary>
         public void InsertParticipant(ScheduleEventParticipantEntity entity)
         {
             _context.ScheduleEventParticipant.Add(entity);
             _context.SaveChanges();
         }
 
+        /// <summary>参加者ステータスを更新する。</summary>
         public void UpdateParticipant(ScheduleEventParticipantEntity entity)
         {
             _context.ScheduleEventParticipant.Update(entity);

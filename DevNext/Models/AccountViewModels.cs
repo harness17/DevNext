@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Site.Models
 {
+    /// <summary>外部ログイン確認フォーム用 ViewModel。</summary>
     public class ExternalLoginConfirmationViewModel
     {
         [Required]
@@ -10,11 +11,13 @@ namespace Site.Models
         public string Email { get; set; } = "";
     }
 
+    /// <summary>外部ログインプロバイダー一覧表示用 ViewModel。</summary>
     public class ExternalLoginListViewModel
     {
         public string? ReturnUrl { get; set; }
     }
 
+    /// <summary>二要素認証コード送信先プロバイダー選択用 ViewModel。</summary>
     public class SendCodeViewModel
     {
         public string? SelectedProvider { get; set; }
@@ -23,6 +26,7 @@ namespace Site.Models
         public bool RememberMe { get; set; }
     }
 
+    /// <summary>二要素認証コード検証用 ViewModel。</summary>
     public class VerifyCodeViewModel
     {
         [Required]
@@ -38,6 +42,7 @@ namespace Site.Models
         public bool RememberMe { get; set; }
     }
 
+    /// <summary>ログインフォーム用 ViewModel。</summary>
     public class LoginViewModel
     {
         [Required]
@@ -54,6 +59,7 @@ namespace Site.Models
         public bool RememberMe { get; set; }
     }
 
+    /// <summary>新規ユーザー登録フォーム用 ViewModel。</summary>
     public class RegisterViewModel
     {
         [Required]
@@ -73,6 +79,7 @@ namespace Site.Models
         public string ConfirmPassword { get; set; } = "";
     }
 
+    /// <summary>パスワードリセット実行フォーム用 ViewModel。</summary>
     public class ResetPasswordViewModel
     {
         [Required]
@@ -94,6 +101,7 @@ namespace Site.Models
         public string? Code { get; set; }
     }
 
+    /// <summary>パスワードリセットメール送信依頼フォーム用 ViewModel。</summary>
     public class ForgotPasswordViewModel
     {
         [Required]

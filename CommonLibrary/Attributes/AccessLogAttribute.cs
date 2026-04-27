@@ -14,13 +14,16 @@ namespace Dev.CommonLibrary.Attributes
     {
         private readonly Logger _logger = Logger.GetLogger();
 
+        /// <summary>アクション実行前にアクセスログを出力する。</summary>
         public void OnActionExecuting(ActionExecutingContext context)
         {
             _logger.Info(CreateLogModel(context));
         }
 
+        /// <summary>アクション実行後の処理（現在は何もしない）。</summary>
         public void OnActionExecuted(ActionExecutedContext context) { }
 
+        /// <summary>アクセスログ出力用モデルを生成する。サブクラスでオーバーライドしてログ内容をカスタマイズできる。</summary>
         public virtual ILogModel CreateLogModel(ActionExecutingContext context,
             [CallerFilePath] string sourceFilePath = "",
             [CallerMemberName] string method = "")

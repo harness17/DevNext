@@ -1,4 +1,5 @@
 using Dev.CommonLibrary.Attributes;
+using Dev.CommonLibrary.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Site.Common;
@@ -18,6 +19,7 @@ namespace Site.Controllers
     public class ScheduleController : Controller
     {
         private readonly ScheduleService _service;
+        private readonly Logger _logger = Logger.GetLogger();
 
         public ScheduleController(ScheduleService service)
         {
@@ -49,8 +51,9 @@ namespace Site.Controllers
                 var events = _service.GetEventsForRange(start, end, GetCurrentUserId());
                 return Json(events);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.Error(new LogModel($"GetEvents でエラーが発生しました: start={start:O}, end={end:O}"), ex);
                 // 内部エラーの詳細はクライアントに露出しない
                 return Json(new { error = "イベントの取得中にエラーが発生しました。" });
             }

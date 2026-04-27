@@ -22,6 +22,7 @@ namespace Dev.CommonLibrary.Entity
             return HttpContextAccessor?.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         }
 
+        /// <summary>新規登録時の監査カラム（作成者・作成日時・更新者・更新日時）を設定する。</summary>
         public void SetForCreate()
         {
             var userId = GetCurrentUserId();
@@ -31,6 +32,7 @@ namespace Dev.CommonLibrary.Entity
             UpdateDate = CreateDate;
         }
 
+        /// <summary>更新時の監査カラム（更新者・更新日時）を設定する。</summary>
         public void SetForUpdate()
         {
             var userId = GetCurrentUserId();
@@ -38,6 +40,7 @@ namespace Dev.CommonLibrary.Entity
             UpdateDate = DateTime.Now;
         }
 
+        /// <summary>論理削除フラグを立て、更新監査カラムを設定する。</summary>
         public void SetForLogicalDelete()
         {
             DelFlag = true;

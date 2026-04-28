@@ -1,4 +1,5 @@
 using Dev.CommonLibrary.Attributes;
+using Dev.CommonLibrary.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Site.Common;
@@ -17,6 +18,7 @@ namespace Site.Controllers
     public class ApprovalRequestController : Controller
     {
         private readonly ApprovalWorkflowService _service;
+        private readonly Logger _logger = Logger.GetLogger();
 
         public ApprovalRequestController(ApprovalWorkflowService service)
         {
@@ -106,7 +108,11 @@ namespace Site.Controllers
         public IActionResult Edit(long id)
         {
             var model = _service.GetForEdit(id, GetCurrentUserId());
-            if (model == null) return RedirectToAction(nameof(Index));
+            if (model == null)
+            {
+                _logger.Warn(new LogModel($"ApprovalRequest が見つかりません: id={id}"));
+                return RedirectToAction(nameof(Index));
+            }
             return View(model);
         }
 
@@ -129,7 +135,11 @@ namespace Site.Controllers
         public async Task<IActionResult> Detail(long id)
         {
             var model = await _service.GetDetailAsync(id);
-            if (model == null) return RedirectToAction(nameof(Index));
+            if (model == null)
+            {
+                _logger.Warn(new LogModel($"ApprovalRequest が見つかりません: id={id}"));
+                return RedirectToAction(nameof(Index));
+            }
 
             // ポイント: IDOR 対策 — Admin は全件閲覧可、Member は自分の申請のみ閲覧可
             if (!User.IsInRole("Admin") && model.RequesterUserId != GetCurrentUserId())
@@ -166,7 +176,11 @@ namespace Site.Controllers
         public IActionResult Delete(long id)
         {
             var model = _service.GetForDelete(id, GetCurrentUserId());
-            if (model == null) return RedirectToAction(nameof(Index));
+            if (model == null)
+            {
+                _logger.Warn(new LogModel($"ApprovalRequest が見つかりません: id={id}"));
+                return RedirectToAction(nameof(Index));
+            }
             return View(model);
         }
 

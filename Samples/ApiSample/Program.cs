@@ -154,7 +154,7 @@ app.MapControllers();
 app.Run();
 
 // ─────────────────────────────────────────────────────────────
-// シードデータ（ロール・初期ユーザー）
+// シードデータ（ロール・初期ユーザー・商品サンプル）
 // ─────────────────────────────────────────────────────────────
 static async Task SeedAsync(IServiceProvider sp)
 {
@@ -190,5 +190,19 @@ static async Task SeedAsync(IServiceProvider sp)
         };
         await userManager.CreateAsync(member, "Member1!");
         await userManager.AddToRoleAsync(member, "Member");
+    }
+
+    // 商品サンプルデータ（0件のときのみ投入）
+    var db = sp.GetRequiredService<ApiSampleDbContext>();
+    if (!db.ApiItems.Any())
+    {
+        db.ApiItems.AddRange(
+            new ApiSample.Entity.ApiItem { Name = "ノートPC",      Description = "軽量で高性能なモバイルノート", Price = 128000m, Stock = 10 },
+            new ApiSample.Entity.ApiItem { Name = "ワイヤレスマウス", Description = "静音クリックの人間工学デザイン", Price = 3980m,  Stock = 50 },
+            new ApiSample.Entity.ApiItem { Name = "メカニカルキーボード", Description = "青軸採用の打鍵感に優れたキーボード", Price = 12800m, Stock = 25 },
+            new ApiSample.Entity.ApiItem { Name = "USB-C ハブ",    Description = "7ポート対応の多機能ハブ",       Price = 4500m,  Stock = 30 },
+            new ApiSample.Entity.ApiItem { Name = "27インチモニター", Description = "4K対応・IPS パネル・60Hz",      Price = 49800m, Stock = 8  }
+        );
+        await db.SaveChangesAsync();
     }
 }

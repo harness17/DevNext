@@ -1,0 +1,49 @@
+@model ApiClientSample.Models.ItemFormViewModel
+@{
+    ViewData["Title"] = "商品登録";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">商品一覧</a></li>
+        <li class="breadcrumb-item active">新規登録</li>
+    </ol>
+</nav>
+
+<h2 class="mb-4">商品登録</h2>
+
+<div style="max-width:480px;">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">商品名</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">説明</label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Price" class="form-label">価格（円）</label>
+            <input asp-for="Price" class="form-control" type="number" min="0" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Stock" class="form-label">在庫数</label>
+            <input asp-for="Stock" class="form-control" type="number" min="0" />
+            <span asp-validation-for="Stock" class="text-danger"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">登録</button>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">キャンセル</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

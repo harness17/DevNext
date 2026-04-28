@@ -53,6 +53,8 @@ namespace Tests.Common
         [InlineData("CON", true, false)]  // Windows 予約デバイス名
         [InlineData("NUL.txt", true, false)]  // 拡張子付き予約名
         [InlineData("COM1", true, false)]  // シリアルポート予約名
+        [InlineData("../secret.txt", true, false)]   // パストラバーサル（スラッシュ）
+        [InlineData("../../etc/passwd", false, false)] // パスとしてもトラバーサルを拒否
         public void IsSafePath_ReturnsExpected(string path, bool isFileName, bool expected)
         {
             Assert.Equal(expected, Util.IsSafePath(path, isFileName));
@@ -98,6 +100,19 @@ namespace Tests.Common
             var result = Util.CreateSummary(pager, 30, "{0}件中 {1}〜{2}件");
 
             Assert.Equal("30件中 1〜10件", result.Summary);
+        }
+
+        [Fact]
+        public void CreateSummary_ZeroRecords_ReturnsZeroRange()
+        {
+            // 検索結果0件のとき "0件中 1〜10件" のような不正な表示にならないこと
+            var pager = new CommonListPagerModel(page: 1, recoedNumber: 10);
+            var result = Util.CreateSummary(pager, 0, "{0}件中 {1}〜{2}件");
+
+            Assert.Equal(0, result.FirstRecord);
+            Assert.Equal(0, result.EndRecord);
+            Assert.Equal(0, result.TotalRecords);
+            Assert.Equal("0件中 0〜0件", result.Summary);
         }
     }
 }

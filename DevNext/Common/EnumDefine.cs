@@ -3,12 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Site.Common
 {
+    /// <summary>言語識別子（最小セット）。Culture の判定に使用する。</summary>
     public enum LanguageMin
     {
         ja = 1,
         en = 2
     }
 
+    /// <summary>表示言語コード。UI 言語切替の選択肢として使用する。</summary>
     public enum LanguageCode
     {
         [Display(Name = "日本語", Order = 1)]
@@ -17,6 +19,7 @@ namespace Site.Common
         enUS = 2,
     }
 
+    /// <summary>エラー種別。RootError 画面のメッセージ分岐に使用する。</summary>
     public enum ErrorType
     {
         [Display(Name = "システムエラー")]
@@ -31,6 +34,7 @@ namespace Site.Common
         cannotuseerror = 5,
     }
 
+    /// <summary>一覧ページの再読み込みトリガー種別。ページング・ソート・件数変更を区別する。</summary>
     public enum PageRead
     {
         Resarch,
@@ -39,11 +43,13 @@ namespace Site.Common
         ChangeRecordNum
     }
 
+    /// <summary>カスタムルートデータキー。RouteData.Values からの値取得に使用する。</summary>
     public enum CustomRouteData
     {
         RouteSampleID,
     }
 
+    /// <summary>アプリケーションロール定義。Identity の Role 名と対応する。</summary>
     public enum ApplicationRoleType
     {
         [SubValue("1")]
@@ -54,6 +60,7 @@ namespace Site.Common
         Member = 2,
     }
 
+    /// <summary>サンプル用 Enum（実案件では置き換える）。</summary>
     public enum SampleEnum
     {
         [Display(Name = "選択肢1")]
@@ -64,6 +71,7 @@ namespace Site.Common
         select3 = 3
     }
 
+    /// <summary>サンプル用 Enum 2（実案件では置き換える）。</summary>
     public enum SampleEnum2
     {
         [Display(Name = "選択肢21")]

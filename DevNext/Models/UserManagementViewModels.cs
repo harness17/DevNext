@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Site.Models
 {
+    /// <summary>ユーザー管理一覧ページの ViewModel。</summary>
     // ポイント: SearchModelBase を継承することでページング・ソートに必要な
     //           Page / Sort / SortDir / RecordNum / PageRead プロパティを持つ
     public class UserManagementViewModel : SearchModelBase
@@ -15,6 +16,7 @@ namespace Site.Models
         public IEnumerable<SelectListItem> RecoedNumberList { get; } = LocalUtil.SetRecoedNumberList();
     }
 
+    /// <summary>ユーザー管理一覧の検索条件 ViewModel。</summary>
     // ポイント: SearchCondModelBase を継承して検索条件 + Pager 情報を持つ
     //           TempData に JSON シリアライズして保存することでページング時に条件を維持する
     public class UserManagementCondViewModel : SearchCondModelBase
@@ -28,6 +30,7 @@ namespace Site.Models
         public string? Email { get; set; }
     }
 
+    /// <summary>ユーザー一覧データ（行リスト + ページ概要）を保持する ViewModel。</summary>
     public class UserManagementDataViewModel
     {
         public List<UserManagementListItemViewModel> rows { get; set; } = new();

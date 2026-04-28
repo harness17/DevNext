@@ -7,6 +7,7 @@ namespace Dev.CommonLibrary.Common
     /// </summary>
     public static class SelectListUtility
     {
+        /// <summary>Enum の全値を SelectListItem に変換して返す。Value=Enum 名、Text=DisplayName。</summary>
         public static IEnumerable<SelectListItem> GetEnumSelectListItem<T>() where T : struct
         {
             var list = new List<SelectListItem>();
@@ -21,6 +22,7 @@ namespace Dev.CommonLibrary.Common
             return list;
         }
 
+        /// <summary>指定リストに含まれる Enum 値のみを SelectListItem に変換して返す。</summary>
         public static IEnumerable<SelectListItem> GetEnumSelectListItem<T>(List<T> obj) where T : struct
         {
             var list = new List<SelectListItem>();
@@ -35,6 +37,7 @@ namespace Dev.CommonLibrary.Common
             return list;
         }
 
+        /// <summary>Enum の全値を SelectListItem に変換して返す。Value=SubValue、Text=DisplayName。</summary>
         public static IEnumerable<SelectListItem> GetEnumSelectListItemToSubValue<T>() where T : struct
         {
             var list = new List<SelectListItem>();
@@ -49,6 +52,7 @@ namespace Dev.CommonLibrary.Common
             return list;
         }
 
+        /// <summary>Enum の全値を DisplayAttribute.Order 昇順で SelectListItem に変換して返す。</summary>
         public static IEnumerable<SelectListItem> GetEnumSelectListItemOrder<T>() where T : struct
         {
             var sortlist = Enum.GetNames(typeof(T))
@@ -59,6 +63,7 @@ namespace Dev.CommonLibrary.Common
             return sortlist.Select(area => new SelectListItem { Value = area.Name, Text = area.Text }).ToList();
         }
 
+        /// <summary>startNumber から maxNumber まで step 刻みの数値 SelectListItem リストを返す。</summary>
         public static IEnumerable<SelectListItem> GetNumberSelectList(int startNumber, int maxNumber, int step = 1, string format = "")
         {
             var list = new List<SelectListItem>();

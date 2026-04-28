@@ -25,15 +25,16 @@ scripts/          ← 開発補助スクリプト
 
 ### Samples/ の一覧
 
-| Sample | 概要 |
-|--------|------|
-| ApiSample | REST API + JWT 認証 + Swagger |
-| DatabaseSample | DB 操作パターン |
-| ExcelSample | Excel 出力・CSV エクスポート・インポート |
-| FileSample | ファイルアップロード・ダウンロード |
-| MailSample | メール送信 |
-| PdfSample | PDF 出力 |
-| WizardSample | ウィザード形式フォーム |
+| フォルダ | 概要 | ポート |
+|---------|------|--------|
+| `ApiSample` | REST API + JWT 認証 + Swagger | 5042 |
+| `ApiClientSample` | ApiSample を呼び出す MVC クライアントサイト | 5170 |
+| `DatabaseSample` | EF Core CRUD サンプル | — |
+| `ExcelSample` | Excel インポート・エクスポート | — |
+| `FileSample` | ファイルアップロード・ダウンロード | — |
+| `MailSample` | メール送信（smtp4dev） | — |
+| `PdfSample` | PDF 生成 | — |
+| `WizardSample` | 複数ステップフォーム | — |
 
 ### Samples/ の設計制約
 

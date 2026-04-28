@@ -9,6 +9,7 @@ namespace Dev.CommonLibrary.Common
     /// </summary>
     public static class Util
     {
+        /// <summary>文字列の MD5 ハッシュ値を小文字 16 進数で返す。</summary>
         public static string CalcMd5(string srcStr)
         {
             byte[] srcBytes = Encoding.UTF8.GetBytes(srcStr);
@@ -18,6 +19,7 @@ namespace Dev.CommonLibrary.Common
             return sb.ToString();
         }
 
+        /// <summary>ファイルパスからファイル名部分だけを取り出して返す（バックスラッシュ区切り）。</summary>
         public static string SetFileName(string strFileName)
         {
             string targettext = "\\";
@@ -29,9 +31,12 @@ namespace Dev.CommonLibrary.Common
             return strFileName;
         }
 
+        /// <summary>パストラバーサルや無効文字を含まない安全なパスか検証する。isFileName=true のときファイル名として検証する。</summary>
         public static bool IsSafePath(string path, bool isFileName)
         {
             if (string.IsNullOrEmpty(path)) return false;
+            // パストラバーサル（..）を含む場合は拒否
+            if (path.Contains("..")) return false;
             char[] invalidChars = isFileName
                 ? Path.GetInvalidFileNameChars()
                 : Path.GetInvalidPathChars();
@@ -40,12 +45,13 @@ namespace Dev.CommonLibrary.Common
             return true;
         }
 
+        /// <summary>ページャー情報と総件数からページ概要モデルを生成する。totalRecords=0 のときは 0〜0 件を返す。</summary>
         public static CommonListSummaryModel CreateSummary(CommonListPagerModel pager, int totalRecords, string listSummaryFormat)
         {
             int pageIndex = pager.page - 1;
-            int firstRecord = (pageIndex * pager.recoedNumber) + 1;
-            int endRecord = firstRecord - 1 + pager.recoedNumber;
-            if (firstRecord <= totalRecords && totalRecords <= endRecord) endRecord = totalRecords;
+            // totalRecords が 0 の場合は 0〜0 を返す（1〜10 のような不正な表示を防ぐ）
+            int firstRecord = totalRecords > 0 ? (pageIndex * pager.recoedNumber) + 1 : 0;
+            int endRecord = totalRecords > 0 ? Math.Min(firstRecord - 1 + pager.recoedNumber, totalRecords) : 0;
             string summary = string.Format(listSummaryFormat, totalRecords, firstRecord, endRecord);
             return new CommonListSummaryModel(pager.page, totalRecords, firstRecord, endRecord, summary);
         }

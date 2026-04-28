@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 
 namespace Dev.CommonLibrary.Repository
 {
+    /// <summary>汎用リポジトリインターフェース。CRUD・ページング・AutoMapper 射影の基本操作を定義する。</summary>
     public interface IRepository<TEntity, TCondModel>
         where TEntity : class, IEntity
         where TCondModel : class, IRepositoryCondModel
@@ -22,6 +23,7 @@ namespace Dev.CommonLibrary.Repository
         IQueryable<TEntity> GetBaseQuery(TCondModel? cond = null, bool includeDelete = false);
     }
 
+    /// <summary>履歴テーブルへの挿入操作を持つリポジトリインターフェース。</summary>
     public interface IRepositoryHistory<TEntity, TEntityHistory>
         where TEntity : class, IEntity
         where TEntityHistory : class, IEntityHistory
@@ -29,6 +31,7 @@ namespace Dev.CommonLibrary.Repository
         TEntityHistory InsertHistory(TEntity entity, bool isSaveChanges = false);
     }
 
+    /// <summary>リポジトリ検索条件の基底インターフェース。ページャー情報を必須として持つ。</summary>
     public interface IRepositoryCondModel
     {
         CommonListPagerModel Pager { get; set; }

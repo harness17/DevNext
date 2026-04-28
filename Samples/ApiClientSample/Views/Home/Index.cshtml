@@ -1,0 +1,66 @@
+@model List<ApiClientSample.Models.ItemViewModel>
+@{
+    ViewData["Title"] = "商品一覧";
+    bool isAdmin = ViewBag.IsAdmin == true;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">商品一覧 <small class="text-muted fs-6">from ApiSample</small></h2>
+    @if (isAdmin)
+    {
+        <a asp-controller="Items" asp-action="Create" class="btn btn-primary">＋ 新規登録</a>
+    }
+</div>
+
+@if (ViewBag.Error is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+else if (!Model.Any())
+{
+    <div class="alert alert-info">商品が登録されていません。</div>
+}
+else
+{
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>商品名</th>
+                <th>説明</th>
+                <th class="text-end">価格</th>
+                <th class="text-end">在庫</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="text-muted">@item.Id</td>
+                    <td>
+                        <a asp-controller="Items" asp-action="Detail" asp-route-id="@item.Id">@item.Name</a>
+                    </td>
+                    <td class="text-muted">@item.Description</td>
+                    <td class="text-end">¥@item.Price.ToString("N0")</td>
+                    <td class="text-end @(item.Stock == 0 ? "text-danger" : "")">@item.Stock</td>
+                    <td class="text-end" style="white-space:nowrap;">
+                        <a asp-controller="Items" asp-action="Detail" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-secondary">詳細</a>
+                        @if (isAdmin)
+                        {
+                            <a asp-controller="Items" asp-action="Edit" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-outline-warning ms-1">編集</a>
+                            <form asp-controller="Items" asp-action="Delete" asp-route-id="@item.Id"
+                                  method="post" class="d-inline ms-1"
+                                  onsubmit="return confirm('@item.Name を削除しますか？');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger">削除</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

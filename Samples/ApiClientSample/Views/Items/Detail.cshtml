@@ -1,0 +1,48 @@
+@model ApiClientSample.Models.ItemViewModel
+@{
+    ViewData["Title"] = "商品詳細";
+    bool isAdmin = ViewBag.IsAdmin == true;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">商品一覧</a></li>
+        <li class="breadcrumb-item active">詳細</li>
+    </ol>
+</nav>
+
+<h2 class="mb-4">商品詳細</h2>
+
+<div class="card" style="max-width:480px;">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-4">ID</dt>
+            <dd class="col-sm-8 text-muted">@Model.Id</dd>
+
+            <dt class="col-sm-4">商品名</dt>
+            <dd class="col-sm-8">@Model.Name</dd>
+
+            <dt class="col-sm-4">説明</dt>
+            <dd class="col-sm-8">@(Model.Description ?? "—")</dd>
+
+            <dt class="col-sm-4">価格</dt>
+            <dd class="col-sm-8">¥@Model.Price.ToString("N0")</dd>
+
+            <dt class="col-sm-4">在庫</dt>
+            <dd class="col-sm-8 @(Model.Stock == 0 ? "text-danger" : "")">@Model.Stock</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-3 d-flex gap-2">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">一覧に戻る</a>
+    @if (isAdmin)
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">編集</a>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+              onsubmit="return confirm('削除しますか？');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger">削除</button>
+        </form>
+    }
+</div>

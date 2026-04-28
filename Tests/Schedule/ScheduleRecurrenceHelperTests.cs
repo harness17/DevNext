@@ -154,5 +154,39 @@ namespace Tests.Schedule
             Assert.Equal(3, results.Count);
             Assert.All(results, r => Assert.Equal(15, r.Day));
         }
+
+        [Fact]
+        public void GetOccurrences_Weekly_Interval2_SkipsAlternateWeeks()
+        {
+            // 4/7（火）から隔週火曜 → 4/7, 4/21（4/14 は含まない）
+            var start = new DateTime(2026, 4, 7, 9, 0, 0); // 火曜
+            var results = ScheduleRecurrenceHelper.GetOccurrences(
+                start, RecurrenceType.Weekly, interval: 2,
+                recEnd: null, daysOfWeek: null,
+                windowStart: new DateTime(2026, 4, 1),
+                windowEnd: new DateTime(2026, 5, 1));
+
+            Assert.Equal(2, results.Count);
+            Assert.Equal(new DateTime(2026, 4, 7, 9, 0, 0), results[0]);
+            Assert.Equal(new DateTime(2026, 4, 21, 9, 0, 0), results[1]);
+        }
+
+        [Fact]
+        public void GetOccurrences_Monthly_Jan31_ShortMonthClampsToLastDay()
+        {
+            // C# の AddMonths は月末を超えた場合に月末に丸める仕様
+            // 1/31 → 2/28（2026年は非うるう年）→ 3/28（2/28 + 1か月 = 3/28、3/31 ではない点に注意）
+            var start = new DateTime(2026, 1, 31, 9, 0, 0);
+            var results = ScheduleRecurrenceHelper.GetOccurrences(
+                start, RecurrenceType.Monthly, interval: 1,
+                recEnd: null, daysOfWeek: null,
+                windowStart: new DateTime(2026, 1, 1),
+                windowEnd: new DateTime(2026, 4, 1));
+
+            Assert.Equal(3, results.Count);
+            Assert.Equal(new DateTime(2026, 1, 31, 9, 0, 0), results[0]);
+            Assert.Equal(new DateTime(2026, 2, 28, 9, 0, 0), results[1]); // 2月は28日まで
+            Assert.Equal(new DateTime(2026, 3, 28, 9, 0, 0), results[2]); // 2/28 + 1か月 = 3/28
+        }
     }
 }

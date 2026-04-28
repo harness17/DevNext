@@ -25,6 +25,27 @@ cd H:/ClaudeCode/DevNext/DevNext && dotnet run --no-build 2>&1 &
 
 **ポート**: デフォルト `http://localhost:5232`（`launchSettings.json` に従う）
 
+### バックグラウンド起動プロセスの後始末（必須）
+
+Claude がバックグラウンドで `dotnet run` を起動した場合、**テスト完了後に必ず停止する**。
+停止しないと次回の `dotnet run` でビルドがファイルロックエラーになる。
+
+```bash
+# テスト完了後に停止する（プロセス名で指定）
+taskkill //F //IM "ProjectName.exe"
+
+# 複数プロセスをまとめて停止する場合
+taskkill //F //IM "ApiSample.exe"
+taskkill //F //IM "ApiClientSample.exe"
+```
+
+ユーザーに操作を渡すときは必ず停止済みであることを確認すること。
+停止できていない場合は以下を案内する：
+
+```powershell
+Stop-Process -Name "ProjectName" -Force -ErrorAction SilentlyContinue
+```
+
 ### よくある起動失敗パターン
 
 | 症状 | 原因 | 対処 |

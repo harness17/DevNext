@@ -3,13 +3,14 @@
   <Project Path="CommonLibrary/CommonLibrary.csproj" />
   <Project Path="Tests/Tests.csproj" />
   <Folder Name="/Samples/">
+    <Project Path="BatchSample/BatchSample.csproj" />
+    <Project Path="Samples/ApiClientSample/ApiClientSample.csproj" />
     <Project Path="Samples/ApiSample/ApiSample.csproj" />
+    <Project Path="Samples/DatabaseSample/DatabaseSample.csproj" />
+    <Project Path="Samples/ExcelSample/ExcelSample.csproj" />
+    <Project Path="Samples/FileSample/FileSample.csproj" />
+    <Project Path="Samples/MailSample/MailSample.csproj" />
+    <Project Path="Samples/PdfSample/PdfSample.csproj" />
+    <Project Path="Samples/WizardSample/WizardSample.csproj" />
   </Folder>
-  <Project Path="BatchSample/BatchSample.csproj" />
-  <Project Path="Samples/DatabaseSample/DatabaseSample.csproj" />
-  <Project Path="Samples/ExcelSample/ExcelSample.csproj" />
-  <Project Path="Samples/FileSample/FileSample.csproj" />
-  <Project Path="Samples/MailSample/MailSample.csproj" />
-  <Project Path="Samples/PdfSample/PdfSample.csproj" />
-  <Project Path="Samples/WizardSample/WizardSample.csproj" />
 </Solution>

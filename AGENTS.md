@@ -23,6 +23,19 @@ docs/             ← 設計書・実装計画
 scripts/          ← 開発補助スクリプト
 ```
 
+### Samples/ の一覧
+
+| フォルダ | 概要 | ポート |
+|---------|------|--------|
+| `ApiSample` | REST API + JWT 認証 + Swagger | 5042 |
+| `ApiClientSample` | ApiSample を呼び出す MVC クライアントサイト | 5170 |
+| `DatabaseSample` | EF Core CRUD サンプル | — |
+| `ExcelSample` | Excel インポート・エクスポート | — |
+| `FileSample` | ファイルアップロード・ダウンロード | — |
+| `MailSample` | メール送信（smtp4dev） | — |
+| `PdfSample` | PDF 生成 | — |
+| `WizardSample` | 複数ステップフォーム | — |
+
 ### Samples/ の設計制約
 
 - 各Sampleは `CommonLibrary` を参照してよい

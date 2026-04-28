@@ -11,6 +11,8 @@ $DeployRoot   = "C:\inetpub\wwwroot\DevNext\samples"
 $SolutionRoot = "H:\ClaudeCode\DevNext"
 $AppcmdPath   = "C:\Windows\System32\inetsrv\appcmd.exe"
 $Samples      = @(
+    "ApiSample",
+    "ApiClientSample",
     "DatabaseSample",
     "ExcelSample",
     "FileSample",

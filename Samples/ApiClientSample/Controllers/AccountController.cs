@@ -7,7 +7,8 @@ namespace ApiClientSample.Controllers;
 /// <summary>ログイン・ログアウトを担当するコントローラー</summary>
 public class AccountController(ApiSampleClient apiClient) : Controller
 {
-    private const string SessionKeyToken = "JwtToken";
+    internal const string SessionKeyToken = "JwtToken";
+    internal const string SessionKeyIsAdmin = "IsAdmin";
 
     [HttpGet]
     public IActionResult Login() => View();
@@ -19,14 +20,15 @@ public class AccountController(ApiSampleClient apiClient) : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        var token = await apiClient.LoginAsync(model.Email, model.Password);
-        if (token is null)
+        var result = await apiClient.LoginAsync(model.Email, model.Password);
+        if (result is null)
         {
             ModelState.AddModelError(string.Empty, "メールアドレスまたはパスワードが正しくありません。ApiSample が起動しているか確認してください。");
             return View(model);
         }
 
-        HttpContext.Session.SetString(SessionKeyToken, token);
+        HttpContext.Session.SetString(SessionKeyToken, result.Token);
+        HttpContext.Session.SetString(SessionKeyIsAdmin, result.IsAdmin ? "1" : "0");
         return RedirectToAction("Index", "Home");
     }
 

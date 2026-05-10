@@ -175,7 +175,7 @@ Sonnet（Executor）がタスク全体を実行し、判断が難しい局面で
 
 実装が完了したら必ず以下を順番に実行してください：
 
-1. ビルドが通ることを確認: `cd H:/ClaudeCode/DevNext && dotnet build DevNext.slnx`
+1. ビルドが通ることを確認: `dotnet build DevNext.slnx`
 2. テストが通ることを確認: `cd Tests && dotnet test`
 3. `git add` で変更ファイルを個別指定してコミット（`git add -A` は使用しない）
 

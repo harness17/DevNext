@@ -51,7 +51,7 @@ docs/
 | オブジェクトマッピング | AutoMapper | 16.1.1 |
 | Excel処理（DatabaseSample） | ClosedXML | 0.104.x |
 | CSV処理（DatabaseSample） | CsvHelper | 33.x |
-| PDF生成（DatabaseSample） | QuestPDF | 2026.x |
+| PDF生成（DatabaseSample / PdfSample） | Microsoft.Playwright | 1.59.x |
 | テスト | xUnit / Moq | 2.9.x / 4.20.x |
 | カレンダー UI | FullCalendar | 6.1.x |
 | REST API ドキュメント（ApiSample） | Swashbuckle（Swagger UI） | 8.1.x |

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PdfSample.Data;
 using PdfSample.Repository;
 using PdfSample.Service;
-using QuestPDF.Infrastructure;
+using Dev.CommonLibrary.Pdf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,13 +47,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 
 builder.Services.AddScoped<PdfSampleService>();
+builder.Services.AddScoped<PlaywrightPdfService>();
+builder.Services.AddScoped<RazorViewToStringRenderer>();
 builder.Services.AddScoped<InvoiceRepository>();
 builder.Services.AddScoped<InvoiceItemRepository>();
 builder.Services.AddScoped<Dev.CommonLibrary.Attributes.AccessLogAttribute>();
 
 var app = builder.Build();
-
-QuestPDF.Settings.License = LicenseType.Community;
 
 using (var scope = app.Services.CreateScope())
 {

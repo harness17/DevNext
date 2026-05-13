@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        @@page {
+            size: A4 landscape;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: #212529;
+            font-family: "Meiryo", "Yu Gothic", "Noto Sans JP", sans-serif;
+            font-size: 9.5pt;
+            line-height: 1.45;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 18pt;
+            letter-spacing: 0;
+        }
+
+        .print-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 12mm;
+            padding-bottom: 5mm;
+            border-bottom: 1px solid #adb5bd;
+        }
+
+        .print-date {
+            color: #495057;
+            white-space: nowrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ced4da;
+            padding: 2.2mm;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f1f3f5;
+            text-align: left;
+        }
+
+        .text-end {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .section {
+            margin-top: 7mm;
+        }
+
+        .section-title {
+            margin: 0 0 3mm;
+            font-size: 12pt;
+        }
+
+        .detail-table th {
+            width: 32mm;
+        }
+
+        .file-list {
+            white-space: pre-wrap;
+        }
+
+        .image-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6mm;
+        }
+
+        .image-item {
+            page-break-inside: avoid;
+        }
+
+        .image-item img {
+            display: block;
+            max-width: 100%;
+            max-height: 80mm;
+            object-fit: contain;
+            border: 1px solid #ced4da;
+        }
+    </style>
+</head>
+<body>
+    @RenderBody()
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        @@page {
+            size: A4 portrait;
+            margin: 16mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: #212529;
+            font-family: "Meiryo", "Yu Gothic", "Noto Sans JP", sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.5;
+        }
+
+        .print-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16mm;
+            padding-bottom: 8mm;
+            border-bottom: 1px solid #adb5bd;
+        }
+
+        .print-title {
+            margin: 0 0 5mm;
+            font-size: 24pt;
+            letter-spacing: 0;
+        }
+
+        .print-meta {
+            min-width: 58mm;
+            display: grid;
+            grid-template-columns: 22mm 1fr;
+            gap: 2mm 4mm;
+            font-size: 9.5pt;
+        }
+
+        .print-meta dt {
+            color: #495057;
+            font-weight: 700;
+        }
+
+        .print-meta dd {
+            margin: 0;
+        }
+
+        .invoice-client {
+            margin-top: 8mm;
+            font-size: 14pt;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .invoice-items {
+            margin-top: 12mm;
+        }
+
+        .invoice-items th,
+        .invoice-items td {
+            border: 1px solid #ced4da;
+            padding: 3mm;
+        }
+
+        .invoice-items th {
+            background: #f1f3f5;
+            text-align: left;
+        }
+
+        .text-end {
+            text-align: right;
+        }
+
+        .total-row th,
+        .total-row td {
+            background: #f8f9fa;
+            font-size: 12pt;
+        }
+
+        .notes {
+            margin-top: 10mm;
+        }
+
+        .notes-title {
+            margin-bottom: 2mm;
+            font-weight: 700;
+        }
+
+        .notes-body {
+            min-height: 24mm;
+            padding: 4mm;
+            border: 1px solid #ced4da;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    @RenderBody()
+</body>
+</html>

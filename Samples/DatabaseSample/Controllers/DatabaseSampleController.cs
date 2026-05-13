@@ -3,6 +3,7 @@ using DatabaseSample.Data;
 using DatabaseSample.Models;
 using DatabaseSample.Service;
 using Dev.CommonLibrary.Attributes;
+using Dev.CommonLibrary.Pdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,14 +20,23 @@ namespace DatabaseSample.Controllers
     {
         private readonly DatabaseSampleDbContext _db;
         private readonly DatabaseSampleService _workerService;
+        private readonly RazorViewToStringRenderer _razorRenderer;
+        private readonly PlaywrightPdfService _pdfService;
         private readonly IWebHostEnvironment _env;
 
         // ポイント: コンストラクタインジェクション
         //           Program.cs に登録済みのサービスをフレームワークが自動解決して渡す
-        public DatabaseSampleController(DatabaseSampleDbContext db, DatabaseSampleService workerService, IWebHostEnvironment env)
+        public DatabaseSampleController(
+            DatabaseSampleDbContext db,
+            DatabaseSampleService workerService,
+            RazorViewToStringRenderer razorRenderer,
+            PlaywrightPdfService pdfService,
+            IWebHostEnvironment env)
         {
             _db = db;
             _workerService = workerService;
+            _razorRenderer = razorRenderer;
+            _pdfService = pdfService;
             _env = env;
         }
 
@@ -222,13 +232,16 @@ namespace DatabaseSample.Controllers
         /// <summary>
         /// 単体データをPDFとしてダウンロードする
         /// </summary>
-        public IActionResult PdfOutput(int? id)
+        public async Task<IActionResult> PdfOutput(int? id)
         {
             if (id == null) return BadRequest();
-            var memorystream = _workerService.ExportPdfSingle(id.Value, _env);
-            if (memorystream == null) return NotFound();
+            var pdfModel = _workerService.GetPdfDetail(id.Value, _env);
+            if (pdfModel == null) return NotFound();
+
+            var pdf = await GeneratePdfAsync("DatabaseSample/PrintDetail", pdfModel);
             string fileName = $"SampleEntity_{id}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
-            return File(memorystream, "application/pdf", fileName);
+            SetPrivateNoStoreCache();
+            return File(pdf, "application/pdf", fileName);
         }
 
         /// <summary>
@@ -236,12 +249,14 @@ namespace DatabaseSample.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult PdfDownload(DatabaseSampleViewModel model)
+        public async Task<IActionResult> PdfDownload(DatabaseSampleViewModel model)
         {
             var fromdate = DateTime.Now.ToString("yyyyMMddHHmmss");
             string fileName = $"ExportFile_{fromdate}.pdf";
-            var memorystream = _workerService.ExportPdf(model);
-            return File(memorystream, "application/pdf", fileName);
+            var pdfModel = _workerService.GetPdfList(model);
+            var pdf = await GeneratePdfAsync("DatabaseSample/PrintList", pdfModel);
+            SetPrivateNoStoreCache();
+            return File(pdf, "application/pdf", fileName);
         }
 
         // ─────────────────────────────────────────────
@@ -369,6 +384,19 @@ namespace DatabaseSample.Controllers
         private bool IsAjaxRequest()
         {
             return Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        }
+
+        private async Task<byte[]> GeneratePdfAsync(string viewName, object model)
+        {
+            var html = await _razorRenderer.RenderAsync(ControllerContext, viewName, model);
+            return await _pdfService.GenerateFromHtmlAsync(html);
+        }
+
+        private void SetPrivateNoStoreCache()
+        {
+            Response.Headers.CacheControl = "no-store, private";
+            Response.Headers.Pragma = "no-cache";
+            Response.Headers.Expires = "0";
         }
     }
 }

@@ -181,6 +181,36 @@ namespace DatabaseSample.Models
         public List<SampleEntityChild> Children { get; set; } = new();
     }
 
+    /// <summary>
+    /// 一覧 PDF 印刷用 ViewModel。
+    /// </summary>
+    public class DatabaseSamplePdfListViewModel
+    {
+        public DateTime OutputDate { get; set; } = DateTime.Now;
+        public List<SampleEntity> Rows { get; set; } = new();
+    }
+
+    /// <summary>
+    /// 詳細 PDF 印刷用 ViewModel。
+    /// </summary>
+    public class DatabaseSamplePdfDetailViewModel
+    {
+        public DateTime OutputDate { get; set; } = DateTime.Now;
+        public SampleEntity Parent { get; set; } = new();
+        public List<SampleEntityChild> Children { get; set; } = new();
+        public List<string> NonImageFiles { get; set; } = new();
+        public List<DatabaseSamplePdfImageViewModel> Images { get; set; } = new();
+    }
+
+    /// <summary>
+    /// 詳細 PDF に埋め込む画像データ。
+    /// </summary>
+    public class DatabaseSamplePdfImageViewModel
+    {
+        public string FileName { get; set; } = "";
+        public string DataUri { get; set; } = "";
+    }
+
     // ─────────────────────────────────────────────
     // 子エンティティ 新規作成・編集用 ViewModel
     // ─────────────────────────────────────────────

@@ -7,9 +7,6 @@ using DatabaseSample.Models;
 using DatabaseSample.Repository;
 using Dev.CommonLibrary.Common;
 using Microsoft.Extensions.Logging.Abstractions;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 
 namespace DatabaseSample.Service
 {
@@ -370,250 +367,62 @@ namespace DatabaseSample.Service
             return memorystream;
         }
 
-        // ポイント: QuestPDF を使用したPDF一覧出力
-        public MemoryStream ExportPdf(DatabaseSampleViewModel model)
+        // ポイント: PDF 出力は Playwright 印刷用 View に渡すデータだけをサービスで組み立てる
+        public DatabaseSamplePdfListViewModel GetPdfList(DatabaseSampleViewModel model)
         {
-            QuestPDF.Settings.License = LicenseType.Community;
-
-            var rowData     = _sampleRepository.GetBaseQuery(_sampleRepository.GetCondModel(model.Cond)).ToList();
-            var memoryStream = new MemoryStream();
-
-            Document.Create(container =>
+            return new DatabaseSamplePdfListViewModel
             {
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.A4.Landscape());
-                    page.Margin(1, Unit.Centimetre);
-                    page.DefaultTextStyle(x =>
-                        x.FontFamily("Noto Sans CJK JP", "Meiryo", "MS Gothic").FontSize(9));
-
-                    page.Header()
-                        .PaddingBottom(5)
-                        .Text($"DBサンプル一覧　出力日時：{DateTime.Now:yyyy/MM/dd HH:mm}")
-                        .FontSize(11).Bold();
-
-                    page.Content().Table(table =>
-                    {
-                        table.ColumnsDefinition(columns =>
-                        {
-                            columns.ConstantColumn(50);
-                            columns.RelativeColumn(3);
-                            columns.ConstantColumn(70);
-                            columns.ConstantColumn(60);
-                            columns.ConstantColumn(80);
-                            columns.ConstantColumn(80);
-                            columns.RelativeColumn(2);
-                        });
-
-                        static IContainer HeaderCellStyle(IContainer container) =>
-                            container.DefaultTextStyle(x => x.Bold())
-                                     .BorderBottom(1).BorderColor(Colors.Grey.Medium)
-                                     .Background(Colors.Grey.Lighten3)
-                                     .PaddingVertical(4).PaddingHorizontal(4);
-
-                        table.Header(header =>
-                        {
-                            header.Cell().Element(HeaderCellStyle).Text("ID");
-                            header.Cell().Element(HeaderCellStyle).Text("文字列データ");
-                            header.Cell().Element(HeaderCellStyle).Text("数値データ");
-                            header.Cell().Element(HeaderCellStyle).Text("BoolData");
-                            header.Cell().Element(HeaderCellStyle).Text("EnumData");
-                            header.Cell().Element(HeaderCellStyle).Text("EnumData2");
-                            header.Cell().Element(HeaderCellStyle).Text("作成日時");
-                        });
-
-                        foreach (var (row, index) in rowData.Select((r, i) => (r, i)))
-                        {
-                            var background = index % 2 == 0 ? Colors.White : Colors.Grey.Lighten5;
-
-                            static IContainer DataCellStyle(IContainer c) =>
-                                c.BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
-                                 .PaddingVertical(3).PaddingHorizontal(4);
-
-                            IContainer CellWithBg(IContainer c) => DataCellStyle(c).Background(background);
-
-                            table.Cell().Element(CellWithBg).Text(row.Id.ToString());
-                            table.Cell().Element(CellWithBg).Text(row.StringData);
-                            table.Cell().Element(CellWithBg).AlignRight().Text(row.IntData.ToString());
-                            table.Cell().Element(CellWithBg).AlignCenter().Text(row.BoolData ? "あり" : "なし");
-                            table.Cell().Element(CellWithBg).Text(row.EnumData.ToString());
-                            table.Cell().Element(CellWithBg).Text(row.EnumData2.ToString());
-                            table.Cell().Element(CellWithBg).Text(row.CreateDate.ToString("yyyy/MM/dd HH:mm"));
-                        }
-                    });
-
-                    page.Footer().AlignRight().Text(text =>
-                    {
-                        text.Span("Page ");
-                        text.CurrentPageNumber();
-                        text.Span(" / ");
-                        text.TotalPages();
-                    });
-                });
-            }).GeneratePdf(memoryStream);
-
-            memoryStream.Position = 0;
-            return memoryStream;
+                OutputDate = DateTime.Now,
+                Rows = _sampleRepository.GetBaseQuery(_sampleRepository.GetCondModel(model.Cond)).ToList()
+            };
         }
 
-        /// <summary>単体データをPDFとして出力する</summary>
-        public MemoryStream? ExportPdfSingle(int id, IWebHostEnvironment env)
+        /// <summary>単体データのPDF印刷用データを取得する</summary>
+        public DatabaseSamplePdfDetailViewModel? GetPdfDetail(int id, IWebHostEnvironment env)
         {
-            QuestPDF.Settings.License = LicenseType.Community;
-
             var entity = _sampleRepository.SelectById((long)id);
             if (entity == null) return null;
 
-            var children       = _childRepository.GetChildrenByParentId((long)id);
             var imageExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpeg", ".jpg" };
-            var uploadFolder   = Path.Combine(env.WebRootPath, "Uploads", "Sample", entity.Id.ToString());
-            var fileNames      = (entity.FileData ?? "")
+            var uploadFolder = Path.Combine(env.WebRootPath, "Uploads", "Sample", entity.Id.ToString());
+            var fileNames = (entity.FileData ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            var memoryStream = new MemoryStream();
-
-            Document.Create(container =>
+            var model = new DatabaseSamplePdfDetailViewModel
             {
-                container.Page(page =>
+                OutputDate = DateTime.Now,
+                Parent = entity,
+                Children = _childRepository.GetChildrenByParentId((long)id),
+                NonImageFiles = fileNames
+                    .Where(f => !imageExtensions.Contains(Path.GetExtension(f)))
+                    .ToList()
+            };
+
+            foreach (var fileName in fileNames.Where(f => imageExtensions.Contains(Path.GetExtension(f))))
+            {
+                var filePath = Path.Combine(uploadFolder, fileName);
+                if (!File.Exists(filePath)) continue;
+
+                model.Images.Add(new DatabaseSamplePdfImageViewModel
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(2, Unit.Centimetre);
-                    page.DefaultTextStyle(x =>
-                        x.FontFamily("Noto Sans CJK JP", "Meiryo", "MS Gothic").FontSize(10));
-
-                    page.Header().PaddingBottom(10).Column(col =>
-                    {
-                        col.Item().Text("DBサンプル 詳細").FontSize(14).Bold();
-                        col.Item().Text($"出力日時：{DateTime.Now:yyyy/MM/dd HH:mm}")
-                            .FontSize(9).FontColor(Colors.Grey.Medium);
-                    });
-
-                    page.Content().Column(content =>
-                    {
-                        content.Item().Table(table =>
-                        {
-                            table.ColumnsDefinition(columns =>
-                            {
-                                columns.ConstantColumn(120);
-                                columns.RelativeColumn();
-                            });
-
-                            static IContainer LabelStyle(IContainer c) =>
-                                c.Background(Colors.Grey.Lighten3)
-                                 .BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
-                                 .PaddingVertical(6).PaddingHorizontal(8)
-                                 .DefaultTextStyle(x => x.Bold());
-
-                            static IContainer ValueStyle(IContainer c) =>
-                                c.BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
-                                 .PaddingVertical(6).PaddingHorizontal(8);
-
-                            void Row(string label, string value)
-                            {
-                                table.Cell().Element(LabelStyle).Text(label);
-                                table.Cell().Element(ValueStyle).Text(value);
-                            }
-
-                            Row("ID",           entity.Id.ToString());
-                            Row("ユーザーID",   entity.ApplicationUserId ?? "");
-                            Row("文字列データ",  entity.StringData);
-                            Row("数値データ",   entity.IntData.ToString());
-                            Row("BoolData",     entity.BoolData ? "あり" : "なし");
-                            Row("EnumData",     entity.EnumData.ToString());
-                            Row("EnumData2",    entity.EnumData2.ToString());
-                            Row("作成日時",     entity.CreateDate.ToString("yyyy/MM/dd HH:mm:ss"));
-                            Row("更新日時",     entity.UpdateDate.ToString("yyyy/MM/dd HH:mm:ss"));
-
-                            var nonImageFiles = fileNames
-                                .Where(f => !imageExtensions.Contains(Path.GetExtension(f)))
-                                .ToList();
-                            if (nonImageFiles.Any())
-                                Row("添付ファイル", string.Join("\n", nonImageFiles));
-                        });
-
-                        content.Item().PaddingTop(16).Column(childSection =>
-                        {
-                            childSection.Item().PaddingBottom(6)
-                                .Text($"子エンティティ一覧（{children.Count} 件）")
-                                .FontSize(11).Bold();
-
-                            if (children.Count == 0)
-                            {
-                                childSection.Item()
-                                    .Text("子エンティティはありません。")
-                                    .FontColor(Colors.Grey.Medium);
-                            }
-                            else
-                            {
-                                childSection.Item().Table(childTable =>
-                                {
-                                    childTable.ColumnsDefinition(cols =>
-                                    {
-                                        cols.ConstantColumn(50);
-                                        cols.RelativeColumn(3);
-                                        cols.ConstantColumn(70);
-                                        cols.ConstantColumn(60);
-                                        cols.ConstantColumn(120);
-                                    });
-
-                                    static IContainer HeaderCell(IContainer c) =>
-                                        c.Background(Colors.Grey.Lighten2)
-                                         .Border(1).BorderColor(Colors.Grey.Lighten1)
-                                         .PaddingVertical(5).PaddingHorizontal(6)
-                                         .DefaultTextStyle(x => x.Bold().FontSize(9));
-
-                                    static IContainer DataCell(IContainer c) =>
-                                        c.Border(1).BorderColor(Colors.Grey.Lighten2)
-                                         .PaddingVertical(4).PaddingHorizontal(6)
-                                         .DefaultTextStyle(x => x.FontSize(9));
-
-                                    childTable.Cell().Element(HeaderCell).Text("子ID");
-                                    childTable.Cell().Element(HeaderCell).Text("文字列データ");
-                                    childTable.Cell().Element(HeaderCell).Text("数値データ");
-                                    childTable.Cell().Element(HeaderCell).Text("BoolData");
-                                    childTable.Cell().Element(HeaderCell).Text("作成日時");
-
-                                    for (int i = 0; i < children.Count; i++)
-                                    {
-                                        var child = children[i];
-                                        IContainer RowCell(IContainer c) =>
-                                            i % 2 == 0
-                                                ? DataCell(c)
-                                                : c.Background(Colors.Grey.Lighten4)
-                                                   .Border(1).BorderColor(Colors.Grey.Lighten2)
-                                                   .PaddingVertical(4).PaddingHorizontal(6)
-                                                   .DefaultTextStyle(x => x.FontSize(9));
-
-                                        childTable.Cell().Element(RowCell).Text(child.Id.ToString());
-                                        childTable.Cell().Element(RowCell).Text(child.StringData);
-                                        childTable.Cell().Element(RowCell).Text(child.IntData.ToString());
-                                        childTable.Cell().Element(RowCell).Text(child.BoolData ? "あり" : "なし");
-                                        childTable.Cell().Element(RowCell).Text(child.CreateDate.ToString("yyyy/MM/dd HH:mm"));
-                                    }
-                                });
-                            }
-                        });
-
-                        // ポイント: 画像ファイルのみ PDF 内に直接埋め込む
-                        foreach (var fileName in fileNames.Where(f => imageExtensions.Contains(Path.GetExtension(f))))
-                        {
-                            var filePath = Path.Combine(uploadFolder, fileName);
-                            if (!File.Exists(filePath)) continue;
-
-                            var imageBytes = File.ReadAllBytes(filePath);
-
-                            content.Item().PaddingTop(12).Column(imgCol =>
-                            {
-                                imgCol.Item().Text(fileName).FontSize(9).FontColor(Colors.Grey.Medium);
-                                imgCol.Item().MaxHeight(300).Image(imageBytes).FitArea();
-                            });
-                        }
-                    });
+                    FileName = fileName,
+                    DataUri = CreateDataUri(filePath)
                 });
-            }).GeneratePdf(memoryStream);
+            }
 
-            memoryStream.Position = 0;
-            return memoryStream;
+            return model;
+        }
+
+        private static string CreateDataUri(string filePath)
+        {
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            var mimeType = extension switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                _ => "application/octet-stream"
+            };
+            return $"data:{mimeType};base64,{Convert.ToBase64String(File.ReadAllBytes(filePath))}";
         }
 
         // ポイント: AutoMapper の前付け名・後付け名マッピングのサンプル

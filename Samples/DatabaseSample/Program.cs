@@ -2,6 +2,7 @@ using DatabaseSample.Data;
 using DatabaseSample.Repository;
 using DatabaseSample.Service;
 using Dev.CommonLibrary.Entity;
+using Dev.CommonLibrary.Pdf;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,6 +46,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 
 builder.Services.AddScoped<DatabaseSampleService>();
+builder.Services.AddScoped<PlaywrightPdfService>();
+builder.Services.AddScoped<RazorViewToStringRenderer>();
 builder.Services.AddScoped<SampleEntityRepository>();
 builder.Services.AddScoped<SampleEntityChildRepository>();
 builder.Services.AddScoped<Dev.CommonLibrary.Attributes.AccessLogAttribute>();

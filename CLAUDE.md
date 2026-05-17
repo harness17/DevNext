@@ -80,3 +80,6 @@ scripts/          ← 開発補助スクリプト
 @rules/commonlibrary-boundary.md
 @rules/advisor-strategy.md
 @rules/browser-test.md
+@rules/cross-agent-harness.md
+@rules/project-collaboration-profile.md
+@rules/handoff-protocol.md

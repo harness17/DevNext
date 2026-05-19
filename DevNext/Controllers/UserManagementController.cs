@@ -115,6 +115,44 @@ namespace Site.Controllers
             return View(model);
         }
 
+        /// <summary>パスワード再設定フォーム表示。</summary>
+        public async Task<IActionResult> ResetPassword(string? id)
+        {
+            if (id == null) return BadRequest();
+            var model = await _workerService.GetUserResetPasswordAsync(id);
+            if (model == null)
+            {
+                _logger.Warn(new LogModel($"ユーザーが見つかりません: id={id}"));
+                return NotFound();
+            }
+            return View(model);
+        }
+
+        /// <summary>パスワード再設定処理（POST）。</summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(UserManagementResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _workerService.ResetPasswordAsync(model.Id, model.NewPassword);
+                if (result.Succeeded)
+                {
+                    TempData[SessionKey.Message] = LocalUtil.GetAlertMessage("{1}のパスワードを変更しました。", "ユーザー");
+                    return RedirectToAction("Index", new { returnList = true });
+                }
+
+                // ポイント: Identity のパスワードポリシー違反などのエラーを画面に表示する
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            // ポイント: バリデーションエラー時は対象ユーザー名を補完して再表示する
+            var reloaded = await _workerService.GetUserResetPasswordAsync(model.Id);
+            if (reloaded != null) model.UserName = reloaded.UserName;
+            return View(model);
+        }
+
         /// <summary>ユーザー削除確認フォーム表示。</summary>
         public async Task<IActionResult> Delete(string? id)
         {
@@ -123,7 +161,7 @@ namespace Site.Controllers
             // ポイント: 初期 Admin ユーザーへの削除操作をここで遮断する
             if (id == Const.SystemAdminUserId)
             {
-                TempData[SessionKey.Message] = LocalUtil.GetErrorAlertMessage("初期管理者ユーザーは削除できません");
+                TempData[SessionKey.Message] = LocalUtil.GetErrorAlertMessage("初期管理者ユーザーは無効化できません");
                 return RedirectToAction("Index", new { returnList = true });
             }
 
@@ -136,13 +174,15 @@ namespace Site.Controllers
             return View(model);
         }
 
-        /// <summary>ユーザー削除処理（POST）。</summary>
+        /// <summary>ユーザー無効化処理（POST）。</summary>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            await _workerService.DeleteUserAsync(id);
-            TempData[SessionKey.Message] = LocalUtil.GetDeleteAlertMessage("ユーザー");
+            var result = await _workerService.DisableUserAsync(id);
+            TempData[SessionKey.Message] = result.Succeeded
+                ? LocalUtil.GetAlertMessage("{1}を無効化しました。", "ユーザー")
+                : LocalUtil.GetErrorAlertMessage(result.Errors.FirstOrDefault()?.Description ?? "ユーザーを無効化できませんでした");
             return RedirectToAction("Index", new { returnList = true });
         }
 

@@ -43,10 +43,16 @@ namespace Site.Controllers
             ViewBag.ReturnUrl = returnUrl;
             if (!ModelState.IsValid) return View(model);
 
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            var result = user == null
+                ? Microsoft.AspNetCore.Identity.SignInResult.Failed
+                : await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: true);
 
             if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user!, model.RememberMe);
                 return RedirectToLocal(returnUrl);
+            }
 
             if (result.IsLockedOut)
             {

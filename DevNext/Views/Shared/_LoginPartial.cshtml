@@ -5,17 +5,35 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <span class="nav-link text-white">@UserManager.GetUserName(User)</span>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-white" asp-controller="Manage" asp-action="Index">アカウント管理</a>
-    </li>
-    <li class="nav-item">
-        <form asp-controller="Account" asp-action="LogOff" method="post" class="d-inline">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-link nav-link text-white">ログアウト</button>
-        </form>
+    @* ポイント: ユーザー名をトグルにしたドロップダウンに集約する。
+               Admin は「ユーザー管理」、Member は「アカウント管理」を表示する。 *@
+    <li class="nav-item dropdown">
+        <a class="nav-link text-white dropdown-toggle d-inline-flex align-items-center gap-1" href="#"
+           id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-circle-user"></i>
+            <span>@UserManager.GetUserName(User)</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a class="dropdown-item" asp-controller="UserManagement" asp-action="Index">ユーザー管理</a>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <a class="dropdown-item" asp-controller="Manage" asp-action="Index">アカウント管理</a>
+                </li>
+            }
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form asp-controller="Account" asp-action="LogOff" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item">ログアウト</button>
+                </form>
+            </li>
+        </ul>
     </li>
 }
 else

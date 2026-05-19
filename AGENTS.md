@@ -131,6 +131,16 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 ---
 
+## 共同開発ハーネス（Codex × Claude Code）
+
+Codex は作業開始時に `CLAUDE_CODE_HANDOFF.md` の最新セクションを読み、`.agents/skills/implement-task/SKILL.md` と `.claude/rules/project-collaboration-profile.md` に従って作業する。
+
+Claude Code から Codex へ振る場合は `CLAUDE_CODE_HANDOFF.md` に目的、完成条件、触ってよい範囲、verify コマンド、レビュー観点を追記する。反対側レビューは `.claude/skills/cross-review/SKILL.md` と `.claude/rules/handoff-protocol.md` に従う。
+
+merge 前はセルフ verify、相互レビュー、重大指摘なし、ユーザーの明示指示の 4 条件を揃える。
+
+---
+
 ## アドバイザー戦略（モデル選択）
 
 Sonnet（Executor）がタスク全体を実行し、判断が難しい局面でのみ Opus（Advisor）に相談する。

@@ -13,6 +13,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
-    <PackageReference Include="QuestPDF" Version="2026.2.3" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
   </ItemGroup>
 </Project>

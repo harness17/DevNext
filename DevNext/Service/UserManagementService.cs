@@ -17,6 +17,8 @@ namespace Site.Service
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        public static readonly DateTimeOffset DisabledLockoutEnd =
+            new(new DateTime(9999, 12, 31, 23, 59, 59, DateTimeKind.Utc));
 
         public UserManagementService(
             UserManager<ApplicationUser> userManager,
@@ -71,6 +73,7 @@ namespace Site.Service
                     Email          = user.Email ?? "",
                     LockoutEnabled = user.LockoutEnabled,
                     LockoutEnd     = user.LockoutEnd,
+                    IsDisabled     = IsDisabled(user),
                     EmailConfirmed = user.EmailConfirmed,
                     Roles          = roles.ToList(),
                 });
@@ -148,19 +151,54 @@ namespace Site.Service
         }
 
         /// <summary>
-        /// ユーザーを削除する（初期 Admin ユーザーは削除不可）
+        /// 指定IDのユーザーをパスワード再設定画面用 ViewModel に変換して返す。
         /// </summary>
-        public async Task<IdentityResult> DeleteUserAsync(string id)
+        public async Task<UserManagementResetPasswordViewModel?> GetUserResetPasswordAsync(string id)
         {
-            // ポイント: 初期 Admin ユーザーはシステム管理上の必須アカウントのため削除を禁止する
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return null;
+
+            return new UserManagementResetPasswordViewModel
+            {
+                Id       = user.Id,
+                UserName = user.UserName ?? "",
+            };
+        }
+
+        /// <summary>
+        /// 管理者として対象ユーザーのパスワードを再設定する。
+        /// ポイント: 現在のパスワードを知らなくても再設定できるよう、リセットトークンを発行して適用する。
+        /// </summary>
+        public async Task<IdentityResult> ResetPasswordAsync(string id, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "ユーザーが見つかりません。" });
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            return await _userManager.ResetPasswordAsync(user, token, newPassword);
+        }
+
+        /// <summary>
+        /// ユーザーを無効化する（初期 Admin ユーザーは無効化不可）
+        /// </summary>
+        public async Task<IdentityResult> DisableUserAsync(string id)
+        {
+            // ポイント: 初期 Admin ユーザーはシステム管理上の必須アカウントのため無効化を禁止する
             if (id == Const.SystemAdminUserId)
-                return IdentityResult.Failed(new IdentityError { Description = "初期管理者ユーザーは削除できません。" });
+                return IdentityResult.Failed(new IdentityError { Description = "初期管理者ユーザーは無効化できません。" });
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return IdentityResult.Failed(new IdentityError { Description = "ユーザーが見つかりません。" });
 
-            return await _userManager.DeleteAsync(user);
+            user.LockoutEnabled = true;
+            user.LockoutEnd = DisabledLockoutEnd;
+            user.AccessFailedCount = 0;
+
+            // ポイント: UpdateSecurityStampAsync は SecurityStamp を更新したうえで内部で永続化を行う。
+            //           SecurityStamp が変わることで、ログイン中ユーザーの Cookie も検証間隔到達時に失効する。
+            return await _userManager.UpdateSecurityStampAsync(user);
         }
 
         /// <summary>
@@ -178,5 +216,8 @@ namespace Site.Service
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem { Value = r.Name, Text = r.Name })
                 .ToList();
+
+        public static bool IsDisabled(ApplicationUser user)
+            => user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value >= DisabledLockoutEnd;
     }
 }

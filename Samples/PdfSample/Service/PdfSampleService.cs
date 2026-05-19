@@ -4,11 +4,7 @@ using PdfSample.Data;
 using PdfSample.Entity;
 using PdfSample.Models;
 using PdfSample.Repository;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 using System.Security.Claims;
-using System.IO.Compression;
 
 namespace PdfSample.Service;
 
@@ -156,115 +152,6 @@ public class PdfSampleService
 
         _invoiceRepository.LogicalDelete(entity, false);
         _context.SaveChanges();
-    }
-
-    /// <summary>
-    /// 単一請求書を PDF としてメモリ上に生成する。
-    /// </summary>
-    public MemoryStream? ExportPdf(long id)
-    {
-        var model = GetInvoiceDetail(id);
-        if (model == null) return null;
-
-        var total = model.Items.Sum(x => x.SubTotal);
-        var memoryStream = new MemoryStream();
-
-        // 請求書ヘッダー、明細テーブル、合計、備考を1ページにまとめて出力する。
-        Document.Create(container =>
-        {
-            container.Page(page =>
-            {
-                page.Size(PageSizes.A4);
-                page.Margin(2, Unit.Centimetre);
-                page.DefaultTextStyle(x => x.FontFamily("Noto Sans CJK JP", "Meiryo", "MS Gothic").FontSize(10));
-
-                page.Header().Column(col =>
-                {
-                    col.Item().Text("請求書").FontSize(20).Bold();
-                    col.Item().PaddingTop(8).Text($"請求書番号: {model.InvoiceNumber}");
-                    col.Item().Text($"取引先名: {model.ClientName}");
-                    col.Item().Text($"発行日: {model.IssueDate:yyyy/MM/dd}");
-                    col.Item().Text($"支払期限: {model.DueDate:yyyy/MM/dd}");
-                });
-
-                page.Content().PaddingTop(16).Column(col =>
-                {
-                    col.Item().Table(table =>
-                    {
-                        table.ColumnsDefinition(columns =>
-                        {
-                            columns.RelativeColumn(4);
-                            columns.ConstantColumn(60);
-                            columns.ConstantColumn(100);
-                            columns.ConstantColumn(100);
-                        });
-
-                        static IContainer HeaderCellStyle(IContainer c) =>
-                            c.Background(Colors.Grey.Lighten3).Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5);
-                        static IContainer CellStyle(IContainer c) =>
-                            c.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5);
-
-                        table.Header(header =>
-                        {
-                            header.Cell().Element(HeaderCellStyle).Text("品目").Bold();
-                            header.Cell().Element(HeaderCellStyle).AlignRight().Text("数量").Bold();
-                            header.Cell().Element(HeaderCellStyle).AlignRight().Text("単価").Bold();
-                            header.Cell().Element(HeaderCellStyle).AlignRight().Text("小計").Bold();
-                        });
-
-                        foreach (var item in model.Items)
-                        {
-                            table.Cell().Element(CellStyle).Text(item.Description);
-                            table.Cell().Element(CellStyle).AlignRight().Text(item.Quantity.ToString());
-                            table.Cell().Element(CellStyle).AlignRight().Text(item.UnitPrice.ToString("#,0.##"));
-                            table.Cell().Element(CellStyle).AlignRight().Text(item.SubTotal.ToString("#,0.##"));
-                        }
-
-                        table.Cell().ColumnSpan(3).Element(CellStyle).AlignRight().Text("合計金額").Bold();
-                        table.Cell().Element(CellStyle).AlignRight().Text($"{total:#,0.##} 円").Bold();
-                    });
-
-                    col.Item().PaddingTop(12).Text("備考").Bold();
-                    col.Item().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(8).MinHeight(70)
-                        .Text(string.IsNullOrWhiteSpace(model.Notes) ? "なし" : model.Notes);
-                });
-
-                page.Footer().AlignRight().Text(text =>
-                {
-                    text.Span("Page ");
-                    text.CurrentPageNumber();
-                });
-            });
-        }).GeneratePdf(memoryStream);
-
-        memoryStream.Position = 0;
-        return memoryStream;
-    }
-
-    /// <summary>
-    /// 複数請求書の PDF を ZIP にまとめて出力する。
-    /// </summary>
-    public MemoryStream ExportPdfBulk(List<long> ids)
-    {
-        var zipStream = new MemoryStream();
-        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
-        {
-            foreach (var id in ids.Distinct())
-            {
-                var detail = GetInvoiceDetail(id);
-                if (detail == null) continue;
-
-                using var pdfStream = ExportPdf(id);
-                if (pdfStream == null) continue;
-
-                var entry = archive.CreateEntry($"請求書_{detail.InvoiceNumber}_{id}.pdf");
-                using var entryStream = entry.Open();
-                pdfStream.CopyTo(entryStream);
-            }
-        }
-
-        zipStream.Position = 0;
-        return zipStream;
     }
 
     private static bool IsValidItemRow(InvoiceItemViewModel item)

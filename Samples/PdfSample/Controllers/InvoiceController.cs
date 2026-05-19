@@ -1,9 +1,11 @@
 using Dev.CommonLibrary.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Dev.CommonLibrary.Pdf;
 using PdfSample.Common;
 using PdfSample.Models;
 using PdfSample.Service;
+using System.IO.Compression;
 
 namespace PdfSample.Controllers;
 
@@ -12,10 +14,17 @@ namespace PdfSample.Controllers;
 public class InvoiceController : Controller
 {
     private readonly PdfSampleService _service;
+    private readonly RazorViewToStringRenderer _razorRenderer;
+    private readonly PlaywrightPdfService _pdfService;
 
-    public InvoiceController(PdfSampleService service)
+    public InvoiceController(
+        PdfSampleService service,
+        RazorViewToStringRenderer razorRenderer,
+        PlaywrightPdfService pdfService)
     {
         _service = service;
+        _razorRenderer = razorRenderer;
+        _pdfService = pdfService;
     }
 
     /// <summary>
@@ -167,12 +176,15 @@ public class InvoiceController : Controller
     /// 単一請求書の PDF をダウンロードする。
     /// </summary>
     [HttpGet]
-    public IActionResult DownloadPdf(long? id)
+    public async Task<IActionResult> DownloadPdf(long? id)
     {
         if (id == null) return BadRequest();
-        var stream = _service.ExportPdf(id.Value);
-        if (stream == null) return NotFound();
-        return File(stream, "application/pdf", $"請求書_{id}_{DateTime.Now:yyyyMMddHHmmss}.pdf");
+        var detail = _service.GetInvoiceDetail(id.Value);
+        if (detail == null) return NotFound();
+
+        var pdf = await GenerateInvoicePdfAsync(detail);
+        SetPrivateNoStoreCache();
+        return File(pdf, "application/pdf", $"請求書_{detail.InvoiceNumber}_{DateTime.Now:yyyyMMddHHmmss}.pdf");
     }
 
     /// <summary>
@@ -180,7 +192,7 @@ public class InvoiceController : Controller
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult DownloadZip(InvoiceViewModel model)
+    public async Task<IActionResult> DownloadZip(InvoiceViewModel model)
     {
         if (model.SelectedIds == null || model.SelectedIds.Count == 0)
         {
@@ -188,8 +200,43 @@ public class InvoiceController : Controller
             return RedirectToAction(nameof(Index), new { returnList = true });
         }
 
-        var stream = _service.ExportPdfBulk(model.SelectedIds);
+        var stream = await GenerateInvoiceZipAsync(model.SelectedIds);
+        SetPrivateNoStoreCache();
         return File(stream, "application/zip", $"請求書一括_{DateTime.Now:yyyyMMddHHmmss}.zip");
+    }
+
+    private async Task<byte[]> GenerateInvoicePdfAsync(InvoiceDetailViewModel detail)
+    {
+        var html = await _razorRenderer.RenderAsync(ControllerContext, "Invoice/Print", detail);
+        return await _pdfService.GenerateFromHtmlAsync(html);
+    }
+
+    private async Task<MemoryStream> GenerateInvoiceZipAsync(IEnumerable<long> ids)
+    {
+        var zipStream = new MemoryStream();
+        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            foreach (var id in ids.Distinct())
+            {
+                var detail = _service.GetInvoiceDetail(id);
+                if (detail == null) continue;
+
+                var pdf = await GenerateInvoicePdfAsync(detail);
+                var entry = archive.CreateEntry($"請求書_{detail.InvoiceNumber}_{id}.pdf");
+                await using var entryStream = entry.Open();
+                await entryStream.WriteAsync(pdf);
+            }
+        }
+
+        zipStream.Position = 0;
+        return zipStream;
+    }
+
+    private void SetPrivateNoStoreCache()
+    {
+        Response.Headers.CacheControl = "no-store, private";
+        Response.Headers.Pragma = "no-cache";
+        Response.Headers.Expires = "0";
     }
 
     private static void NormalizeItems(InvoiceDetailViewModel model)

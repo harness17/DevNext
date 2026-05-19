@@ -63,6 +63,11 @@ namespace Site.Models
     public class RegisterViewModel
     {
         [Required]
+        [StringLength(100, ErrorMessage = "{0} は {1} 文字以内で入力してください。")]
+        [Display(Name = "ユーザー名")]
+        public string UserName { get; set; } = "";
+
+        [Required]
         [EmailAddress]
         [Display(Name = "電子メール")]
         public string Email { get; set; } = "";

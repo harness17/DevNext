@@ -21,7 +21,7 @@
 
 - ExcelSample の `Program.cs` パターン（Identity・DI・Cookie 設定）を踏襲する
 - ページング・ソート・検索は DatabaseSample のパターンを踏襲する
-- PDF 生成ライブラリは QuestPDF 2026.2.3（既存 DatabaseSample と同バージョン）
+- PDF 生成ライブラリは Microsoft.Playwright 1.59.0（Razor 印刷ビューを headless Chromium で PDF 化）
 - DB は `PdfSampleDB`（独立）。起動時に `EnsureCreated` + Seeder で自動初期化
 - Sample 同士は依存しない
 - `AGENTS.md` のルールに従って実装すること
@@ -48,7 +48,7 @@
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
-      <PackageReference Include="QuestPDF" Version="2026.2.3" />
+      <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
     </ItemGroup>
   </Project>
   ```
@@ -68,10 +68,9 @@
 - [ ] `Samples/PdfSample/Program.cs` を作成する
 
   - ExcelSample の `Program.cs` を基に namespace・DbContext・Service 名を変更
-  - `QuestPDF.Settings.License = LicenseType.Community;` を `var app = builder.Build();` の直後に追加
   - 起動時 DB 初期化ブロック（`EnsureCreated` + `PdfSampleSeeder.SeedAsync`）を追加
   - `MapControllerRoute` のデフォルト: `{controller=Invoice}/{action=Index}/{id?}`
-  - DI 登録: `PdfSampleService`、`InvoiceRepository`、`InvoiceItemRepository`、`AccessLogAttribute`
+  - DI 登録: `PdfSampleService`、`PlaywrightPdfService`、`RazorViewToStringRenderer`、`InvoiceRepository`、`InvoiceItemRepository`、`AccessLogAttribute`
 
 - [ ] `DevNext.sln` に PdfSample プロジェクトエントリを追加する
 
@@ -195,17 +194,17 @@
   - `InsertInvoice(InvoiceDetailViewModel model, string? userName) : void`
   - `UpdateInvoice(InvoiceDetailViewModel model) : void` — 明細行は全削除→再 Insert 戦略
   - `DeleteInvoice(long id) : void` — 論理削除
-  - `ExportPdf(long id) : MemoryStream?` — QuestPDF で A4 縦の請求書 PDF 生成
-  - `ExportPdfBulk(List<long> ids) : MemoryStream` — 複数 PDF を ZIP にまとめる
+  - `GetInvoiceDetail(long id) : InvoiceDetailViewModel?` — PDF 印刷ビューにも使う詳細データを取得
 
-  PDF レイアウト（QuestPDF）:
+  PDF レイアウト（Playwright headless print）:
   ```
-  Page（A4 縦、余白 2cm）
-  ├ Header: タイトル「請求書」・請求書番号・取引先名・発行日・支払期限
-  ├ Content: 明細テーブル（品目/数量/単価/小計）、合計金額行、備考欄
-  └ Footer: ページ番号
+  _LayoutPrint（@page A4 縦、余白 16mm）
+  └ Print.cshtml
+     ├ Header: タイトル「請求書」・請求書番号・取引先名・発行日・支払期限
+     ├ Content: 明細テーブル（品目/数量/単価/小計）、合計金額行
+     └ Notes: 備考欄
   ```
-  日本語フォント: `FontFamily("Noto Sans CJK JP", "Meiryo", "MS Gothic")`
+  日本語フォント: CSS の `font-family: "Meiryo", "Yu Gothic", "Noto Sans JP", sans-serif`
 
   ZIP 生成の注意:
   - `ZipArchive` は `leaveOpen: true` で作成し最後に `zipStream.Position = 0` をセットする

@@ -9,6 +9,7 @@ namespace Dev.CommonLibrary.Common
         public string sort { get; set; }
         public string sortdir { get; set; }
         public int recoedNumber { get; set; }
+        public PagerTextModel PagerTextModel { get; set; } = new();
 
         public CommonListPagerModel(int page = 1, string sort = "", string sortdir = "ASC", int recoedNumber = 10)
         {
@@ -38,5 +39,16 @@ namespace Dev.CommonLibrary.Common
             EndRecord = endRecord;
             Summary = summary;
         }
+    }
+
+    /// <summary>
+    /// ページャーリンクに表示する文言を保持するモデル。
+    /// </summary>
+    public class PagerTextModel
+    {
+        public string firstText { get; set; } = "最初";
+        public string previousText { get; set; } = "前へ";
+        public string nextText { get; set; } = "次へ";
+        public string lastText { get; set; } = "最後";
     }
 }

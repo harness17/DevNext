@@ -1,0 +1,40 @@
+@model DatabaseSamplePdfListViewModel
+@{
+    Layout = "_LayoutPrint";
+    ViewData["Title"] = "DBサンプル一覧";
+}
+
+<header class="print-header">
+    <h1>DBサンプル一覧</h1>
+    <div class="print-date">出力日時: @Model.OutputDate.ToString("yyyy/MM/dd HH:mm")</div>
+</header>
+
+<section class="section">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>文字列データ</th>
+                <th class="text-end">数値データ</th>
+                <th class="text-center">BoolData</th>
+                <th>EnumData</th>
+                <th>EnumData2</th>
+                <th>作成日時</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Rows)
+            {
+                <tr>
+                    <td>@row.Id</td>
+                    <td>@row.StringData</td>
+                    <td class="text-end">@row.IntData</td>
+                    <td class="text-center">@(row.BoolData ? "あり" : "なし")</td>
+                    <td>@row.EnumData</td>
+                    <td>@row.EnumData2</td>
+                    <td>@row.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

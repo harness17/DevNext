@@ -48,6 +48,7 @@ namespace Site.Models
         public bool LockoutEnabled { get; set; }
         // ポイント: LockoutEnd はロックアウト解除日時。現在時刻と比較してロック中かどうかを判定する
         public DateTimeOffset? LockoutEnd { get; set; }
+        public bool IsDisabled { get; set; }
         public bool EmailConfirmed { get; set; }
         // ポイント: ロールは Identity から非同期で取得するためサービス側で詰める
         public List<string> Roles { get; set; } = new();
@@ -81,5 +82,30 @@ namespace Site.Models
 
         // ポイント: 全ロール一覧（チェックボックス選択肢の生成に使用）
         public List<SelectListItem> AvailableRoles { get; set; } = new();
+    }
+
+    /// <summary>
+    /// 管理者によるパスワード再設定フォーム用 ViewModel。
+    /// ポイント: 管理者リセットのため現在のパスワードは要求しない。
+    /// </summary>
+    public class UserManagementResetPasswordViewModel
+    {
+        [Required]
+        public string Id { get; set; } = "";
+
+        // ポイント: 対象ユーザーを画面に表示するための表示専用項目
+        [Display(Name = "ユーザー名")]
+        public string UserName { get; set; } = "";
+
+        [Required]
+        [StringLength(100, ErrorMessage = "{0} の長さは {2} 文字以上である必要があります。", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "新しいパスワード")]
+        public string NewPassword { get; set; } = "";
+
+        [DataType(DataType.Password)]
+        [Display(Name = "新しいパスワードの確認入力")]
+        [Compare("NewPassword", ErrorMessage = "新しいパスワードと確認のパスワードが一致しません。")]
+        public string ConfirmPassword { get; set; } = "";
     }
 }

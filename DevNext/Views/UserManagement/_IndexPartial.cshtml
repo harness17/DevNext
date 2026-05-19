@@ -50,8 +50,8 @@ else
                         </a>
                     </th>
                     <th>ロール</th>
-                    @* ポイント: ロック状態は LockoutEnd と現在時刻を比較して判定する *@
-                    <th>ロック状態</th>
+                    @* ポイント: 無効化状態と LockoutEnd を使ったロック状態をまとめて表示する *@
+                    <th>状態</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -68,7 +68,11 @@ else
                             }
                         </td>
                         <td>
-                            @if (row.LockoutEnd.HasValue && row.LockoutEnd > DateTimeOffset.UtcNow)
+                            @if (row.IsDisabled)
+                            {
+                                <span class="badge bg-secondary">無効</span>
+                            }
+                            else if (row.LockoutEnd.HasValue && row.LockoutEnd > DateTimeOffset.UtcNow)
                             {
                                 <span class="badge bg-danger">ロック中</span>
                             }
@@ -79,14 +83,14 @@ else
                         </td>
                         <td>
                             <a asp-action="Edit" asp-route-id="@row.Id" class="btn btn-sm btn-primary">編集</a>
-                            @* ポイント: 初期 Admin ユーザーは削除禁止のためボタンを無効化する *@
+                            @* ポイント: 初期 Admin ユーザーは無効化禁止のためボタンを無効化する *@
                             @if (row.Id == Const.SystemAdminUserId)
                             {
-                                <button type="button" class="btn btn-sm btn-danger" disabled title="初期管理者ユーザーは削除できません">削除</button>
+                                <button type="button" class="btn btn-sm btn-danger" disabled title="初期管理者ユーザーは無効化できません">無効化</button>
                             }
                             else
                             {
-                                <a asp-action="Delete" asp-route-id="@row.Id" class="btn btn-sm btn-danger">削除</a>
+                                <a asp-action="Delete" asp-route-id="@row.Id" class="btn btn-sm btn-danger">無効化</a>
                             }
                         </td>
                     </tr>

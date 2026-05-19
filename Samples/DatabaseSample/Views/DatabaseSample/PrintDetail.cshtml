@@ -1,0 +1,88 @@
+@model DatabaseSamplePdfDetailViewModel
+@{
+    Layout = "_LayoutPrint";
+    ViewData["Title"] = $"DBサンプル詳細_{Model.Parent.Id}";
+}
+
+<style>
+    @@page {
+        size: A4 portrait;
+        margin: 16mm;
+    }
+</style>
+
+<header class="print-header">
+    <h1>DBサンプル 詳細</h1>
+    <div class="print-date">出力日時: @Model.OutputDate.ToString("yyyy/MM/dd HH:mm")</div>
+</header>
+
+<section class="section">
+    <h2 class="section-title">親エンティティ</h2>
+    <table class="detail-table">
+        <tbody>
+            <tr><th>ID</th><td>@Model.Parent.Id</td></tr>
+            <tr><th>ユーザーID</th><td>@Model.Parent.ApplicationUserId</td></tr>
+            <tr><th>文字列データ</th><td>@Model.Parent.StringData</td></tr>
+            <tr><th>数値データ</th><td>@Model.Parent.IntData</td></tr>
+            <tr><th>BoolData</th><td>@(Model.Parent.BoolData ? "あり" : "なし")</td></tr>
+            <tr><th>EnumData</th><td>@Model.Parent.EnumData</td></tr>
+            <tr><th>EnumData2</th><td>@Model.Parent.EnumData2</td></tr>
+            <tr><th>作成日時</th><td>@Model.Parent.CreateDate.ToString("yyyy/MM/dd HH:mm:ss")</td></tr>
+            <tr><th>更新日時</th><td>@Model.Parent.UpdateDate.ToString("yyyy/MM/dd HH:mm:ss")</td></tr>
+            @if (Model.NonImageFiles.Any())
+            {
+                <tr><th>添付ファイル</th><td class="file-list">@string.Join("\n", Model.NonImageFiles)</td></tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="section">
+    <h2 class="section-title">子エンティティ一覧（@Model.Children.Count 件）</h2>
+    @if (!Model.Children.Any())
+    {
+        <p>子エンティティはありません。</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>子ID</th>
+                    <th>文字列データ</th>
+                    <th class="text-end">数値データ</th>
+                    <th class="text-center">BoolData</th>
+                    <th>作成日時</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var child in Model.Children)
+                {
+                    <tr>
+                        <td>@child.Id</td>
+                        <td>@child.StringData</td>
+                        <td class="text-end">@child.IntData</td>
+                        <td class="text-center">@(child.BoolData ? "あり" : "なし")</td>
+                        <td>@child.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@if (Model.Images.Any())
+{
+    <section class="section">
+        <h2 class="section-title">添付画像</h2>
+        <div class="image-list">
+            @foreach (var image in Model.Images)
+            {
+                <figure class="image-item">
+                    <img src="@image.DataUri" alt="@image.FileName" />
+                    <figcaption>@image.FileName</figcaption>
+                </figure>
+            }
+        </div>
+    </section>
+}

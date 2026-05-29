@@ -29,18 +29,24 @@ public static class PdfPrintHelper
     /// </summary>
     /// <param name="request">現在のリクエスト</param>
     /// <param name="pathAndQuery">PathBase より後ろのパス＋クエリ（先頭スラッシュ込み、例: <c>/Statistics?print=1</c>）</param>
+    /// <remarks>
+    /// スキームとポートは Host ヘッダー（改ざん可能）ではなく実接続から取得する。
+    /// スキームは <see cref="HttpRequest.Scheme"/>、ポートは <see cref="ConnectionInfo.LocalPort"/> を優先し、
+    /// HTTPS で着信したリクエストに対して HTTP ポートへ接続して失敗する事故を防ぐ。
+    /// </remarks>
     public static string BuildLoopbackUrl(HttpRequest request, string pathAndQuery)
     {
         var pathBase = request.PathBase.HasValue ? request.PathBase.Value : string.Empty;
+        var scheme = string.IsNullOrEmpty(request.Scheme) ? "https" : request.Scheme;
 
-        // Host にポートが無い場合（IIS 等）は実際の接続先ポートをフォールバックにする。
-        var port = request.Host.Port ?? request.HttpContext.Connection.LocalPort;
+        // 実接続ポートを優先。取得できない場合のみ Host のポート、最後にスキーム既定ポートへフォールバック。
+        var port = request.HttpContext.Connection.LocalPort;
         if (port <= 0)
         {
-            port = 80;
+            port = request.Host.Port ?? (scheme == "https" ? 443 : 80);
         }
 
-        return $"http://{LoopbackHost}:{port}{pathBase}{pathAndQuery}";
+        return $"{scheme}://{LoopbackHost}:{port}{pathBase}{pathAndQuery}";
     }
 
     /// <summary>

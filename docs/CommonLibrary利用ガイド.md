@@ -24,6 +24,7 @@
 10. [ロガー（Logger）](#10-ロガーlogger)
 11. [新規プロジェクトへの導入方法](#11-新規プロジェクトへの導入方法)
 12. [CommonLibrary への追加ルール](#12-commonlibrary-への追加ルール)
+13. [PDF 生成（PlaywrightPdfService / PdfPrintHelper）](#13-pdf-生成playwrightpdfservice--pdfprinthelper)
 
 ---
 
@@ -336,6 +337,22 @@ var copy = original.Clone<MyClass>();
 bool empty = list.IsNullOrEmpty();  // null でも例外が出ない
 ```
 
+### CalendarColorExtensions（カレンダー色）
+
+enum メンバーに `[CalendarColor]` 属性（`Dev.CommonLibrary.Attributes`）を付け、カレンダー・統計など複数画面で同じ色定義を一元参照する。`GetCalendarColor()` は `Dev.CommonLibrary.Extensions` にある。
+
+```csharp
+public enum ScheduleKind
+{
+    [CalendarColor("#E2F0D9", "#A9D08E", "#375623")] Attend,
+    [CalendarColor("#FCE4D6", "#F4B183", "#833C00")] Remote,
+}
+
+CalendarColorValue color = ScheduleKind.Attend.GetCalendarColor();
+// color.Background / color.Border / color.Text を View で参照
+// 属性未設定の値は既定色（グレー）を返す
+```
+
 ---
 
 ## 8. ユーティリティクラス
@@ -582,6 +599,58 @@ using Dev.CommonLibrary.Repository;
      NO → 既存クラスの責務名で説明できるか確認。できなければ新クラスを作る。
      YES → 新クラスとして追加する。
 ```
+
+---
+
+## 13. PDF 生成（PlaywrightPdfService / PdfPrintHelper）
+
+### 概要
+
+Chromium（Playwright）で HTML を PDF 化する。2 つの入力方式を提供する。
+
+| メソッド | 入力 | 用途 |
+|---|---|---|
+| `GenerateFromHtmlAsync(html)` | HTML 文字列 | `RazorViewToStringRenderer` でレンダリングした静的 HTML |
+| `GenerateFromUrlAsync(url, cookies, readyFlagJs, landscape)` | 内部 URL | 認証付きページや Chart.js など動的描画を含むページ |
+
+### DI 登録（必須）
+
+`PlaywrightPdfService` は `IPlaywrightFactory`（Playwright を Singleton で使い回し、初期化コストを削減）に依存する。
+
+```csharp
+builder.Services.AddSingleton<IPlaywrightFactory, PlaywrightFactory>();
+builder.Services.AddScoped<PlaywrightPdfService>();
+builder.Services.AddScoped<RazorViewToStringRenderer>(); // HTML 方式を使う場合
+```
+
+### HTML 文字列方式
+
+```csharp
+var html = await _razorRenderer.RenderAsync(ControllerContext, "Invoice/Print", detail);
+var pdf = await _pdfService.GenerateFromHtmlAsync(html);
+return File(pdf, "application/pdf", "invoice.pdf");
+```
+
+### 内部 URL 方式（認証付き・動的描画）
+
+`PdfPrintHelper` で Host ヘッダーを信頼しないループバック URL と認証 Cookie を構築する。
+
+```csharp
+var url = PdfPrintHelper.BuildLoopbackUrl(Request, $"/Invoice/Print?id={id}");
+var cookies = PdfPrintHelper.ExtractAuthCookies(Request); // 既定: Identity.Application / Session
+var pdf = await _pdfService.GenerateFromUrlAsync(
+    url, cookies,
+    readyFlagJs: "() => window.chartsReady === true", // Chart.js 等の描画完了待ち。不要なら null
+    landscape: true);
+return File(pdf, "application/pdf", "invoice.pdf");
+```
+
+### セキュリティ注意
+
+- 内部レンダリング先 URL は `Request.Host`（外部から改ざん可能）で組み立てず、`PdfPrintHelper.BuildLoopbackUrl` で `127.0.0.1` + 同一プロセスポートに固定する（Host ヘッダー注入対策）。
+- 転送する Cookie は `ExtractAuthCookies` で認証/セッション用プレフィックスに絞り、不要な Cookie を内部レンダリングへ渡さない。
+
+> サンプル: `Samples/PdfSample` の `InvoiceController.DownloadPdf`（HTML 方式）/ `DownloadPdfViaUrl`（URL 方式）。
 
 ---
 

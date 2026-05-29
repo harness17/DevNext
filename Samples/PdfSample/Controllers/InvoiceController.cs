@@ -188,6 +188,39 @@ public class InvoiceController : Controller
     }
 
     /// <summary>
+    /// 印刷用ページを表示する。内部URLレンダリング方式の PDF 化対象（<see cref="DownloadPdfViaUrl"/>）。
+    /// </summary>
+    [HttpGet]
+    public IActionResult Print(long? id)
+    {
+        if (id == null) return BadRequest();
+        var detail = _service.GetInvoiceDetail(id.Value);
+        if (detail == null) return NotFound();
+        return View(detail);
+    }
+
+    /// <summary>
+    /// 単一請求書の PDF を「内部URLレンダリング方式」でダウンロードする。
+    /// 認証付きの印刷ページ（<see cref="Print"/>）をループバックURLでレンダリングして PDF 化する。
+    /// HTML 文字列方式（<see cref="DownloadPdf"/>）と異なり、ページ側の JS や認証状態をそのまま使える。
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> DownloadPdfViaUrl(long? id)
+    {
+        if (id == null) return BadRequest();
+        var detail = _service.GetInvoiceDetail(id.Value);
+        if (detail == null) return NotFound();
+
+        // Host ヘッダーを信頼せずループバックURLを組み、認証Cookieだけを渡す。
+        var url = PdfPrintHelper.BuildLoopbackUrl(Request, $"/Invoice/Print?id={id.Value}");
+        var cookies = PdfPrintHelper.ExtractAuthCookies(Request);
+        var pdf = await _pdfService.GenerateFromUrlAsync(url, cookies);
+
+        SetPrivateNoStoreCache();
+        return File(pdf, "application/pdf", $"請求書URL_{detail.InvoiceNumber}_{DateTime.Now:yyyyMMddHHmmss}.pdf");
+    }
+
+    /// <summary>
     /// 選択済み請求書を ZIP 形式で一括ダウンロードする。
     /// </summary>
     [HttpPost]
@@ -207,7 +240,7 @@ public class InvoiceController : Controller
 
     private async Task<byte[]> GenerateInvoicePdfAsync(InvoiceDetailViewModel detail)
     {
-        var html = await _razorRenderer.RenderAsync(ControllerContext, "Invoice/Print", detail);
+        var html = await _razorRenderer.RenderAsync(ControllerContext, "Print", detail);
         return await _pdfService.GenerateFromHtmlAsync(html);
     }
 

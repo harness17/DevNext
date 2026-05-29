@@ -70,7 +70,10 @@ public class PlaywrightPdfService
 
         var context = await browser.NewContextAsync(new BrowserNewContextOptions
         {
-            ViewportSize = new ViewportSize { Width = 1280, Height = 800 }
+            ViewportSize = new ViewportSize { Width = 1280, Height = 800 },
+            // ループバック(127.0.0.1)宛ての HTTPS は開発用自己署名証明書になるため許可する。
+            // 接続先がループバックに固定されているため証明書検証を省いても外部中間者リスクは生じない。
+            IgnoreHTTPSErrors = true
         });
 
         if (cookies is not null)

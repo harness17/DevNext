@@ -22,6 +22,7 @@ Razor ビューで型が解決できずに 500 エラーが発生する場合、
 @using Site.Common
 @using Site.Entity
 @using Dev.CommonLibrary.Entity
+@using Dev.CommonLibrary.Extensions.Helper
 @using Microsoft.AspNetCore.Mvc.Rendering
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 ```
@@ -35,6 +36,7 @@ Razor ビューで型が解決できずに 500 エラーが発生する場合、
 @using Site.Common
 @using Site.Entity
 @using Dev.CommonLibrary.Entity
+@using Dev.CommonLibrary.Extensions.Helper
 @using [追加する名前空間]          ← ここに追加
 @using Microsoft.AspNetCore.Mvc.Rendering
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

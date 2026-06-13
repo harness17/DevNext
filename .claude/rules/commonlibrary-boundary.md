@@ -15,6 +15,8 @@
 | ロギング | `Logger`, `LogModel`, `ILogModel` |
 | 属性 | `AccessLogAttribute`, `SubValueAttribute`, `FileAttribute` |
 | 拡張メソッド | `StringExtensions`, `EnumExtensions` など |
+| HTML 拡張 | `HtmlExtensions`, `PagerHtmlExtensions`, `HtmlExtensionsForCheckBox` など |
+| PDF 生成 | `PlaywrightPdfService`, `RazorViewToStringRenderer` |
 | バッチ基底 | `IBatch`, `BatchService` |
 
 ## ブラックリスト（入れてはいけないもの）

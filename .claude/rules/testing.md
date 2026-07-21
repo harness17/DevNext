@@ -27,10 +27,11 @@ cd Tests && dotnet test
 
 ```
 Tests/
-  Common/        ← Dev.CommonLibrary.Common のテスト
-  Extensions/    ← Dev.CommonLibrary.Extensions のテスト
-  Schedule/      ← Site.Service 系のテスト（例: ScheduleRecurrenceHelper）
-  Samples/       ← 各 Sample 固有ロジックのテスト（必要に応じて作成）
+  Common/          ← Dev.CommonLibrary.Common のテスト
+  Extensions/      ← Dev.CommonLibrary.Extensions のテスト
+  Schedule/        ← ScheduleRecurrenceHelper 等のテスト
+  UserManagement/  ← Site.Service.UserManagementService のテスト
+  Samples/         ← 各 Sample 固有ロジックのテスト（必要に応じて作成）
 ```
 
 ### テストケース設計の最低ライン

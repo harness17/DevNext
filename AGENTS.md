@@ -94,7 +94,7 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 ## データベースルール
 
 - **SQL Server**、DB名: `DevNextDB`、接続文字列キー: `SiteConnection`
-- 接続設定: 各プロジェクトの `appsettings.json`（接続文字列は `appsettings.Development.json` に記載し `appsettings.json` にはプレースホルダーのみ置くこと。`appsettings.Development.json` は `.gitignore` 対象）
+- 接続設定: 各プロジェクトの `appsettings.json`（Windows 認証 + `TrustServerCertificate=True` を使うため機密情報なし。本番環境は環境変数 `ConnectionStrings__SiteConnection` で上書きする）
 - **EF Core Migrations** を使用してスキーマ管理する
 - DB 作成・マイグレーション適用・Seed 投入はアプリ起動時に自動実行される（`Program.cs` の `MigrateAsync` + `SeedAsync`）
 - テーブル・カラムを追加・変更した場合は `/add-entity` スキルを使用すること
@@ -135,7 +135,7 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 Codex は作業開始時に `CLAUDE_CODE_HANDOFF.md` の最新セクションを読み、`.agents/skills/implement-task/SKILL.md` と `.claude/rules/project-collaboration-profile.md` に従って作業する。
 
-Claude Code から Codex へ振る場合は `CLAUDE_CODE_HANDOFF.md` に目的、完成条件、触ってよい範囲、verify コマンド、レビュー観点を追記する。反対側レビューは `.claude/skills/cross-review/SKILL.md` と `.claude/rules/handoff-protocol.md` に従う。
+Claude Code から Codex へ振る場合は `CLAUDE_CODE_HANDOFF.md` に目的、完成条件、触ってよい範囲、verify コマンド、レビュー観点を追記する。反対側レビューは `.claude/skills/cross-review/SKILL.md` と `.claude/rules/handoff-protocol.md` に従う。Codex 側からスクリプトで自動トリガーする場合は `scripts/invoke-claude-review.ps1` を使用する。
 
 merge 前はセルフ verify、相互レビュー、重大指摘なし、ユーザーの明示指示の 4 条件を揃える。
 

@@ -13,10 +13,10 @@
 | Repository 基底 | `RepositoryBase`, `IRepository` |
 | ページング | `CommonListPagerModel`, `CommonListSummaryModel` |
 | ロギング | `Logger`, `LogModel`, `ILogModel` |
-| 属性 | `AccessLogAttribute`, `SubValueAttribute`, `FileAttribute` |
-| 拡張メソッド | `StringExtensions`, `EnumExtensions` など |
+| 属性 | `AccessLogAttribute`, `SubValueAttribute`, `FileAttribute`, `CalendarColorAttribute` |
+| 拡張メソッド | `StringExtensions`, `EnumExtensions`, `CalendarColorExtensions` など |
 | HTML 拡張 | `HtmlExtensions`, `PagerHtmlExtensions`, `HtmlExtensionsForCheckBox` など |
-| PDF 生成 | `PlaywrightPdfService`, `RazorViewToStringRenderer` |
+| PDF 生成 | `PlaywrightPdfService`, `RazorViewToStringRenderer`, `PdfPrintHelper`, `PlaywrightPdfFactory` |
 | バッチ基底 | `IBatch`, `BatchService` |
 
 ## ブラックリスト（入れてはいけないもの）

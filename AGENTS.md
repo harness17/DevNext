@@ -135,7 +135,7 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 Codex は作業開始時に `CLAUDE_CODE_HANDOFF.md` の最新セクションを読み、`.agents/skills/implement-task/SKILL.md` と `.claude/rules/project-collaboration-profile.md` に従って作業する。
 
-Claude Code から Codex へ振る場合は `CLAUDE_CODE_HANDOFF.md` に目的、完成条件、触ってよい範囲、verify コマンド、レビュー観点を追記する。反対側レビューは `.claude/skills/cross-review/SKILL.md` と `.claude/rules/handoff-protocol.md` に従う。Codex 側からスクリプトで自動トリガーする場合は `scripts/invoke-claude-review.ps1` を使用する。
+Claude Code から Codex へ振る方法は2種類ある。①非同期ハンドオフ方式（`/codex-handoff` スキル）: `CLAUDE_CODE_HANDOFF.md` に目的・完成条件・触ってよい範囲・verify コマンド・レビュー観点を追記し Codex に渡す。②MCP同期方式（`/codex-dev` スキル）: Claude Code が仕様を設計し MCP サーバ経由で Codex を起動・完了待ちする。いずれも反対側レビューは `.claude/skills/cross-review/SKILL.md` と `.claude/rules/handoff-protocol.md` に従う。Codex 側からスクリプトで自動トリガーする場合は `scripts/invoke-claude-review.ps1` を使用する。
 
 merge 前はセルフ verify、相互レビュー、重大指摘なし、ユーザーの明示指示の 4 条件を揃える。
 

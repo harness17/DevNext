@@ -46,6 +46,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 
 builder.Services.AddScoped<DatabaseSampleService>();
+builder.Services.AddSingleton<IPlaywrightFactory, PlaywrightFactory>();
 builder.Services.AddScoped<PlaywrightPdfService>();
 builder.Services.AddScoped<RazorViewToStringRenderer>();
 builder.Services.AddScoped<SampleEntityRepository>();

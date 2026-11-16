@@ -10,10 +10,10 @@
 
 | 用途 | コマンド |
 |------|---------|
-| マイグレーション追加 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations add <名前> --project DevNext` |
-| DB に適用 | `cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext` |
-| 適用済み一覧 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations list --project DevNext` |
-| 最後のマイグレーションを削除 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations remove --project DevNext` |
+| マイグレーション追加 | `dotnet ef migrations add <名前> --project DevNext` |
+| DB に適用 | `dotnet ef database update --project DevNext` |
+| 適用済み一覧 | `dotnet ef migrations list --project DevNext` |
+| 最後のマイグレーションを削除 | `dotnet ef migrations remove --project DevNext` |
 
 ## Seed データ（初期ユーザー）
 

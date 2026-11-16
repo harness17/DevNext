@@ -4,16 +4,18 @@
 
 | 用途 | コマンド |
 |------|---------|
-| ビルド | `cd H:/ClaudeCode/DevNext && dotnet build DevNext.slnx` |
+| ビルド | `dotnet build DevNext.slnx` |
 | 開発サーバー起動 | `cd DevNext && dotnet run` |
 | テスト実行 | `cd Tests && dotnet test` |
-| マイグレーション追加 | `cd H:/ClaudeCode/DevNext && dotnet ef migrations add <名前> --project DevNext` |
-| DB に適用（手動） | `cd H:/ClaudeCode/DevNext && dotnet ef database update --project DevNext` |
+| マイグレーション追加 | `dotnet ef migrations add <名前> --project DevNext` |
+| DB に適用（手動） | `dotnet ef database update --project DevNext` |
 
 ## デプロイ
 
 | 用途 | コマンド |
 |------|---------|
+| 本体 IIS デプロイ（一括） | `/iis-deploy` スキルを使用 |
+| Sample IIS デプロイ（一括） | `powershell -ExecutionPolicy Bypass -File scripts/deploy-samples.ps1` |
 | 発行（Release） | `cd DevNext && dotnet publish -c Release -o <出力パス>` |
 | AppPool 停止 | `Stop-WebAppPool -Name 'DevNext'` |
 | AppPool 起動 | `Start-WebAppPool -Name 'DevNext'` |

@@ -33,6 +33,8 @@ Samples/
   WizardSample/            # 多段階フォームサンプル（独立 Web アプリ）
   ExcelSample/             # Excel エクスポート・インポートサンプル（独立 Web アプリ、ClosedXML 使用）
   ApiSample/               # REST API + JWT 認証 + Swagger サンプル（独立 Web API）
+  ApiClientSample/         # ApiSample を呼び出す MVC クライアントサイト
+  PdfSample/               # PDF 生成サンプル（Playwright 使用）
 docs/
   setup.md                 # セットアップ手順
   customization.md         # 新案件向けカスタマイズ指針
@@ -141,7 +143,10 @@ Sample に新しいテーブル・カラムを追加する場合は、Sample 側
 | FileSample | ファイルアップロード・ダウンロード・削除 | [file-upload](docs/recipes/file-upload.md) |
 | MailSample | テンプレートメール送信・送信ログ | — |
 | WizardSample | 多段階フォーム（TempData を使ったステップ間状態保持） | [wizard](docs/recipes/wizard.md) |
+| ExcelSample | Excel エクスポート・インポート（ClosedXML 使用） | [excel-export](docs/recipes/excel-export.md) |
 | ApiSample | REST API（CRUD）+ JWT Bearer 認証 + Swagger UI（`/swagger` でアクセス） | — |
+| ApiClientSample | ApiSample を呼び出す MVC クライアントサイト（ポート 5170） | — |
+| PdfSample | PDF 生成（Playwright URL方式・HTML方式） | [pdf-export](docs/recipes/pdf-export.md) |
 
 ---
 
@@ -234,10 +239,16 @@ EPPlus は商用ライセンスが必要なため業務案件では制約にな�
 
 ## 関連記事
 
-DevNext を題材にした Zenn の技術記事です。
+DevNext を題材にした、または DevNext の構成を参照している技術記事です。
+
+### Zenn
 
 - [ASP.NET MVCの自作HelperをASP.NET Coreに移植した話](https://zenn.dev/harness17/articles/devnext-mvc-helper-extensions) (2026-05-10)
 - [FullCalendarでDTOの色が反映されない時に見たこと](https://zenn.dev/harness17/articles/fullcalendar-event-color-rendering) (2026-05-10)
+
+### Qiita
+
+- [Claude CodeのCLAUDE.mdを@importで分割してトピック別ルールに整理した](https://qiita.com/harnesswinner/items/6678320489deec25113a) (2026-05-24) — DevNext の `.claude/rules/` 構成を実例として参照
 
 ---
 

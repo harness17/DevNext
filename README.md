@@ -240,7 +240,8 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 1. **完成条件の宣言**（`/sprint`）— 実装前に、ベースにするサンプル・正常系・認可・異常系・テストを完成条件として決める
 2. **実装** — エンティティ追加は `/add-entity`、検索条件の復元は `/search-restore`
 3. **検証**（`/verify`）— ビルド・xUnit・ブラウザでの動作確認
-4. **マージ**（`/merge-master`）— コードレビュー、ページ・README・設計書の更新（`/add-page`・`/export-docs`）を経て develop → master
+4. **マージ**（`/merge-master`）— コードレビュー、ページ・README・設計書の更新（`/add-page`・`/export-docs`）を経て、develop → master の PR を作成する
+5. **CI**（GitHub Actions `build-and-test`）— PR でビルドとテストが自動実行される。master はブランチ保護で CI 通過が必須のため、pass を確認してから PR をマージする
 
 ### 主なスキル
 

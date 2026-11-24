@@ -86,23 +86,63 @@ git log --oneline -5
 
 ---
 
-## Step 6: マージコミット作成
+## Step 6: PR 作成 → CI 通過確認 → マージ
 
-全ステップが完了したらマージを実行する。
+master はブランチ保護で CI（`build-and-test`）通過が必須のため、ローカルでの `git merge` + push はできない。必ず PR 経由でマージする。
+
+### 6-1. develop を push して PR を作成
 
 ```bash
-cd H:/ClaudeCode/DevNext && git checkout master
-git merge develop --no-ff -m "merge: develop → master ($(date '+%Y-%m-%d') <機能名>)"
-git checkout develop
+cd H:/ClaudeCode/DevNext
+git fetch origin
+git status -sb   # origin/develop より behind なら rebase してから push する
+git push origin develop
+gh pr create --base master --head develop --title "<機能名>" --body "<Summary / Review / Test plan>"
 ```
 
-マージ完了後、develop ブランチに戻ったことを確認してユーザーに報告する。
+### 6-2. 自動マージを予約する（推奨）
+
+リポジトリは自動マージを許可済み。PR 作成直後に予約すれば、CI が pass した時点で GitHub がマージする（fail なら保護によりマージされない）。
+
+```bash
+gh pr merge <PR番号> --auto --merge --subject "merge: develop → master ($(date '+%Y-%m-%d') <機能名>)"
+```
+
+予約したら 6-3・6-4 は不要。CI が fail した場合は下表の手順で develop を修正して push する（予約は維持される）。
+
+### 6-3. CI の結果を確認（自動マージを使わない場合）
+
+```bash
+gh pr checks <PR番号>
+```
+
+| 結果 | 対応 |
+|------|------|
+| すべて `pass` | 6-4 へ進む |
+| `fail` がある | **マージしない**。ログ（`gh run view <run-id> --log-failed`）で原因を特定し、develop で修正 → push して再実行させる |
+| `pending` / チェックが表示されない | **マージしない**。完了を待つ。ワークフローが起動していなければ `.github/workflows/ci.yml` のトリガーを確認する |
+
+ローカルの `/verify` が通っていても CI が通るとは限らない（OS 差・未コミットファイル・ローカル専用設定への依存）。CI の結果を正とする。
+
+### 6-4. マージ（自動マージを使わない場合）
+
+```bash
+gh pr view <PR番号> --json mergeable,mergeStateStatus   # MERGEABLE / CLEAN を確認
+gh pr merge <PR番号> --merge --subject "merge: develop → master ($(date '+%Y-%m-%d') <機能名>)"
+git fetch origin master:master   # ローカル master を追従（develop のまま実行できる）
+```
+
+- `--merge`（マージコミット）を使う。squash / rebase は develop との履歴が分岐するため使わない
+- `--delete-branch` は付けない（develop は継続利用する）
+
+マージ完了後、develop ブランチにいることを確認してユーザーに報告する。
 
 ---
 
 ## 注意事項
 
 - 各ステップで問題が見つかった場合は**必ず中止**してユーザーに報告する
-- `master` への直接コミットは禁止（マージのみ）
+- `master` への直接コミット・直接 push は禁止（PR 経由のマージのみ。ブランチ保護で強制されている）
+- CI が `fail` / `pending` の PR はマージしない（ブランチ保護を管理者権限で迂回しない）
 - マージ後は `develop` ブランチに戻ること
 - ドキュメント更新がある場合は `/export-docs` 実行後にマージすること

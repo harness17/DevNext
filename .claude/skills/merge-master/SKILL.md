@@ -100,7 +100,17 @@ git push origin develop
 gh pr create --base master --head develop --title "<機能名>" --body "<Summary / Review / Test plan>"
 ```
 
-### 6-2. CI の結果を確認
+### 6-2. 自動マージを予約する（推奨）
+
+リポジトリは自動マージを許可済み。PR 作成直後に予約すれば、CI が pass した時点で GitHub がマージする（fail なら保護によりマージされない）。
+
+```bash
+gh pr merge <PR番号> --auto --merge --subject "merge: develop → master ($(date '+%Y-%m-%d') <機能名>)"
+```
+
+予約したら 6-3・6-4 は不要。CI が fail した場合は下表の手順で develop を修正して push する（予約は維持される）。
+
+### 6-3. CI の結果を確認（自動マージを使わない場合）
 
 ```bash
 gh pr checks <PR番号>
@@ -108,13 +118,13 @@ gh pr checks <PR番号>
 
 | 結果 | 対応 |
 |------|------|
-| すべて `pass` | 6-3 へ進む |
+| すべて `pass` | 6-4 へ進む |
 | `fail` がある | **マージしない**。ログ（`gh run view <run-id> --log-failed`）で原因を特定し、develop で修正 → push して再実行させる |
 | `pending` / チェックが表示されない | **マージしない**。完了を待つ。ワークフローが起動していなければ `.github/workflows/ci.yml` のトリガーを確認する |
 
 ローカルの `/verify` が通っていても CI が通るとは限らない（OS 差・未コミットファイル・ローカル専用設定への依存）。CI の結果を正とする。
 
-### 6-3. マージ
+### 6-4. マージ（自動マージを使わない場合）
 
 ```bash
 gh pr view <PR番号> --json mergeable,mergeStateStatus   # MERGEABLE / CLEAN を確認

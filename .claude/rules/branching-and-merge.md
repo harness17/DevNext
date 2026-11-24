@@ -11,7 +11,7 @@
 ユーザーが master（main）への反映を指示したら、`/merge-master` の手順で **PR 作成 → CI 通過確認 → マージまでを一続きで完了させる**。
 PR を作っただけで止めない。途中で止まるのは、CI 失敗・レビュー差し戻し・コンフリクトなど、下のチェックリストを満たせないときだけとし、その場合は理由を報告する。
 
-- マージは `gh pr merge --merge`（マージコミット）。develop ブランチは削除しない
+- マージは `gh pr merge --merge`（マージコミット）。PR 作成直後に `gh pr merge --auto --merge` で自動マージを予約するのを基本とする。develop ブランチは削除しない
 - CI（`.github/workflows/ci.yml` の `build-and-test`）が `pass` になるまでマージしない。`fail` / `pending` のままマージしない
 - ブランチ保護を管理者権限で迂回しない（`--admin` を使わない）
 

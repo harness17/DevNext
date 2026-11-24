@@ -17,7 +17,7 @@ builder.Services.AddDataProtection()
     .SetApplicationName("DevNext");
 
 // Add services to the container.
-builder.Services.AddControllersWithViews()
+builder.Services.AddControllersWithViews(options => options.UseJapaneseValidationMessages())
     .AddRazorRuntimeCompilation();
 
 // DBContext

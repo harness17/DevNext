@@ -28,16 +28,6 @@ namespace Site.Common
             [typeof(RegularExpressionAttribute)] = "{0}の形式が正しくありません。",
         };
 
-        /// <summary>
-        /// DataType 系属性は未指定でも ErrorMessage が .NET 既定の英文を返すため、その英文を「未指定」とみなす判定に使う
-        /// </summary>
-        private static readonly HashSet<string?> FrameworkDefaultMessages = new()
-        {
-            new EmailAddressAttribute().ErrorMessage,
-            new PhoneAttribute().ErrorMessage,
-            new UrlAttribute().ErrorMessage,
-        };
-
         /// <summary>StringLength は MinimumLength の有無で文言を切り替えるため個別に持つ</summary>
         internal const string StringLengthMax = "{0}は{1}文字以内で入力してください。";
         internal const string StringLengthRange = "{0}は{2}文字以上{1}文字以内で入力してください。";
@@ -49,7 +39,7 @@ namespace Site.Common
             {
                 // 明示指定を上書きすると ErrorMessage と ResourceName の二重指定で例外になるため、未指定時のみ設定する
                 var hasCustomMessage = !string.IsNullOrEmpty(attribute.ErrorMessage)
-                    && !FrameworkDefaultMessages.Contains(attribute.ErrorMessage);
+                    && attribute.ErrorMessage != FrameworkDefaultMessage(attribute);
                 if (hasCustomMessage || !string.IsNullOrEmpty(attribute.ErrorMessageResourceName))
                 {
                     continue;
@@ -64,6 +54,24 @@ namespace Site.Common
         }
 
         /// <summary>
+        /// DataType 系属性は未指定でも ErrorMessage が .NET 既定文言を返すため、その文言を「未指定」とみなす判定に使う
+        /// </summary>
+        /// <remarks>
+        /// 既定文言は UI カルチャで変わるため、起動時に固定せず判定のたびに新しいインスタンスから取得する
+        /// </remarks>
+        private static string? FrameworkDefaultMessage(ValidationAttribute attribute)
+        {
+            // 派生型はコンストラクタ引数が不明なため、既定文言を持つ3型そのものだけを対象にする
+            return attribute.GetType() switch
+            {
+                var t when t == typeof(EmailAddressAttribute) => new EmailAddressAttribute().ErrorMessage,
+                var t when t == typeof(PhoneAttribute) => new PhoneAttribute().ErrorMessage,
+                var t when t == typeof(UrlAttribute) => new UrlAttribute().ErrorMessage,
+                _ => null,
+            };
+        }
+
+        /// <summary>
         /// 属性に対応する既定メッセージを返す。対象外の属性は null（.NET 既定のまま）
         /// </summary>
         internal static string? ResolveMessage(ValidationAttribute attribute)
@@ -73,7 +81,8 @@ namespace Site.Common
                 return stringLength.MinimumLength > 0 ? StringLengthRange : StringLengthMax;
             }
 
-            // 派生属性（独自の RequiredAttribute 継承など）にも適用するため、継承階層をさかのぼって探す
+            // 派生属性（独自の RequiredAttribute 継承など）にも適用するため、継承階層をさかのぼって探す。
+            // 派生属性がコンストラクタで持たせた既定文言も日本語既定で上書きする（文言を固定したい場合は ErrorMessage を明示する）
             for (var type = attribute.GetType(); type != null && type != typeof(ValidationAttribute); type = type.BaseType)
             {
                 if (Messages.TryGetValue(type, out var message))

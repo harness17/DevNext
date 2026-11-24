@@ -24,7 +24,8 @@ namespace Site.Common
             provider.SetValueIsInvalidAccessor(value => $"値「{value}」は正しくありません。");
             provider.SetValueMustBeANumberAccessor(field => $"{field}は数値で入力してください。");
             provider.SetNonPropertyValueMustBeANumberAccessor(() => "数値で入力してください。");
-            provider.SetValueMustNotBeNullAccessor(value => $"{value}は必須です。");
+            // 引数はフィールド名ではなく入力値（int 欄の空送信では空文字）のため、値を埋め込まない文言にする
+            provider.SetValueMustNotBeNullAccessor(_ => "値は必須です。");
             provider.SetMissingBindRequiredValueAccessor(field => $"{field}は必須です。");
             provider.SetMissingKeyOrValueAccessor(() => "値は必須です。");
             provider.SetMissingRequestBodyRequiredValueAccessor(() => "リクエスト本文は必須です。");

@@ -50,6 +50,32 @@ namespace Tests.Validation
             // Nullable 有効時の非 null 参照型には MVC が暗黙に [Required] を付与する（プロバイダーの登録順の回帰確認）
             [Display(Name = "区分")]
             public string Kind { get; set; } = "";
+
+            [MinLength(4)]
+            [Display(Name = "パスコード")]
+            public string? PassCode { get; set; }
+
+            [Phone]
+            [Display(Name = "電話番号")]
+            public string? Tel { get; set; }
+
+            [Url]
+            [Display(Name = "サイト")]
+            public string? Site { get; set; }
+
+            [RegularExpression("^[0-9]+$")]
+            [Display(Name = "郵便番号")]
+            public string? Zip { get; set; }
+
+            [Required(ErrorMessageResourceType = typeof(TestMessages), ErrorMessageResourceName = nameof(TestMessages.Custom))]
+            [Display(Name = "リソース指定")]
+            public string? ResourceBased { get; set; }
+        }
+
+        /// <summary>ErrorMessageResourceName 指定時に上書きされないことを確かめるためのリソース代替</summary>
+        public static class TestMessages
+        {
+            public static string Custom => "リソースの文言";
         }
 
         private static (IModelMetadataProvider Provider, MvcOptions Options) BuildMvc()
@@ -123,6 +149,54 @@ namespace Tests.Validation
         public void ImplicitRequired_ForNonNullableReference_ReturnsJapanese()
         {
             Assert.Equal("区分は必須です。", Format<RequiredAttribute>(nameof(SampleModel.Kind)));
+        }
+
+        [Fact]
+        public void MinLength_ReturnsJapanese()
+        {
+            Assert.Equal("パスコードは4文字以上で入力してください。", Format<MinLengthAttribute>(nameof(SampleModel.PassCode)));
+        }
+
+        [Fact]
+        public void Phone_ReturnsJapanese()
+        {
+            Assert.Equal("電話番号は電話番号の形式で入力してください。", Format<PhoneAttribute>(nameof(SampleModel.Tel)));
+        }
+
+        [Fact]
+        public void Url_ReturnsJapanese()
+        {
+            Assert.Equal("サイトはURLの形式で入力してください。", Format<UrlAttribute>(nameof(SampleModel.Site)));
+        }
+
+        [Fact]
+        public void RegularExpression_ReturnsJapanese()
+        {
+            Assert.Equal("郵便番号の形式が正しくありません。", Format<RegularExpressionAttribute>(nameof(SampleModel.Zip)));
+        }
+
+        [Fact]
+        public void Required_WithErrorMessageResourceName_KeepsResource()
+        {
+            Assert.Equal("リソースの文言", Format<RequiredAttribute>(nameof(SampleModel.ResourceBased)));
+        }
+
+        [Fact]
+        public void ModelBinding_NullForNonNullable_DoesNotEmbedValue()
+        {
+            // 引数には入力値（空文字）が渡るため、値を埋め込むと「は必須です。」のように欠ける。その回帰確認
+            var (_, options) = BuildMvc();
+            Assert.Equal("値は必須です。", options.ModelBindingMessageProvider.ValueMustNotBeNullAccessor(""));
+        }
+
+        [Fact]
+        public void ModelBinding_NonPropertyAndMissingBindRequired_ReturnJapanese()
+        {
+            var (_, options) = BuildMvc();
+            var provider = options.ModelBindingMessageProvider;
+            Assert.Equal("値「abc」は正しくありません。", provider.NonPropertyAttemptedValueIsInvalidAccessor("abc"));
+            Assert.Equal("数値で入力してください。", provider.NonPropertyValueMustBeANumberAccessor());
+            Assert.Equal("数量は必須です。", provider.MissingBindRequiredValueAccessor("数量"));
         }
 
         [Fact]

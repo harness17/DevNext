@@ -2,7 +2,7 @@
 
 ## プロジェクト概要
 
-- **種別**: ASP.NET Core 10 MVC Webアプリ（ポートフォリオ兼テンプレート）
+- **種別**: ASP.NET Core 11 MVC Webアプリ（ポートフォリオ兼テンプレート）
 - **目的**: 新案件の出発点となるコアテンプレート（認証・ユーザー管理・基本CRUD）
 - **言語**: C# / Razor Views / JavaScript (jQuery)
 
@@ -62,6 +62,7 @@ scripts/          ← 開発補助スクリプト
 
 ## ルール参照
 
+@rules/devnext-template-usage.md
 @rules/coding-policy.md
 @rules/namespaces.md
 @rules/di-and-password.md

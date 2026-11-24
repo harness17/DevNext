@@ -205,6 +205,62 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 ---
 
+## 開発用ハーネス（AI エージェント向け開発ルール）
+
+このリポジトリには、Claude Code や Codex などの AI エージェントが DevNext を出発点に新規開発するときのルールとスキルを同梱しています。
+エージェントは作業開始時にこれらを読み込み、同じ手順・品質基準で実装します。
+
+### 構成
+
+| ファイル | 役割 |
+|---------|------|
+| `CLAUDE.md` | Claude Code の入口。`.claude/rules/` のルールを `@import` で読み込むインデックス |
+| `AGENTS.md` | Codex・Cursor など他エージェント共通のガイドライン |
+| `.claude/rules/` | トピック別のルール（コーディング方針・DB・テスト・ブランチ運用・CommonLibrary の責務境界など） |
+| `.claude/skills/` | 定型作業を手順化したスキル（`/スキル名` で実行） |
+| `CLAUDE_CODE_HANDOFF.md` | Claude Code と Codex の間の作業引き継ぎログ |
+
+### 新規開発の基本ルール
+
+新しい機能はゼロから書かず、**既存サンプルまたはコアの実装をベースに作る**ことを `.claude/rules/devnext-template-usage.md` で定めています。
+
+| 作りたい機能 | ベース |
+|------------|--------|
+| CRUD・ページャー・検索つき一覧 | `Samples/DatabaseSample/` |
+| 認証・ユーザー管理・所有者チェック | DevNext 本体（`AccountController` / `UserManagementController` / `ApprovalRequestController`） |
+| 多段階フォーム | `Samples/WizardSample/` |
+| ファイル・Excel・PDF・メール | `Samples/FileSample/` / `ExcelSample/` / `PdfSample/` / `MailSample/` |
+| REST API・外部 API 呼び出し | `Samples/ApiSample/` / `ApiClientSample/` |
+| バッチ処理 | `BatchSample/` |
+
+該当するベースがない新しいパターンは、コアに入れず新しい Sample として `Samples/` に追加します（`/new-sample`）。
+
+### 開発フロー
+
+1. **完成条件の宣言**（`/sprint`）— 実装前に、ベースにするサンプル・正常系・認可・異常系・テストを完成条件として決める
+2. **実装** — エンティティ追加は `/add-entity`、検索条件の復元は `/search-restore`
+3. **検証**（`/verify`）— ビルド・xUnit・ブラウザでの動作確認
+4. **マージ**（`/merge-master`）— コードレビュー、ページ・README・設計書の更新（`/add-page`・`/export-docs`）を経て develop → master
+
+### 主なスキル
+
+| スキル | 用途 |
+|--------|------|
+| `/sprint` | 完成条件（スプリントコントラクト）を宣言して実装を開始する |
+| `/verify` | ビルド・テスト・ブラウザ確認を一括実行する |
+| `/add-entity` | エンティティ（DB テーブル）追加とマイグレーション |
+| `/add-page` | ページ追加後のホーム・ナビ・ドキュメント・README 更新チェック |
+| `/new-sample` | 新しい Sample プロジェクトの追加 |
+| `/search-restore` | 検索条件・ページ状態の復元パターンの実装 |
+| `/merge-master` | develop → master マージ前の6ステップチェック |
+| `/export-docs` | `docs/` の Markdown を Word に出力 |
+| `/iis-deploy` | IIS へのデプロイ |
+| `/kill-dotnet` | ファイルロックの原因になる dotnet プロセスの停止 |
+| `/update-harness` | ルール・スキルを実装に合わせて更新する |
+| `/codex-dev` `/codex-handoff` `/cross-review` | Codex への実装委譲・引き継ぎ・相互レビュー |
+
+---
+
 ## 設計の意図
 
 このプロジェクトでは、単に「動くコードを書く」だけでなく、**なぜその構造・技術を選んだか**を意識して設計しています。

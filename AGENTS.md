@@ -7,7 +7,7 @@ Claude Code固有の設定（スキル・フック）は `.claude/` を参照し
 
 ## プロジェクト概要
 
-- **種別**: ASP.NET Core 10 MVC Webアプリ（ポートフォリオ兼テンプレート）
+- **種別**: ASP.NET Core 11 MVC Webアプリ（ポートフォリオ兼テンプレート）
 - **目的**: 新案件の出発点となるコアテンプレート（認証・ユーザー管理・基本CRUD）
 - **言語**: C# / Razor Views / JavaScript (jQuery)
 

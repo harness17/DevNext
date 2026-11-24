@@ -62,6 +62,7 @@ scripts/          ← 開発補助スクリプト
 
 ## ルール参照
 
+@rules/devnext-template-usage.md
 @rules/coding-policy.md
 @rules/namespaces.md
 @rules/di-and-password.md

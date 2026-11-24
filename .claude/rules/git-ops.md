@@ -1,43 +1,23 @@
-# Git 操作ルール
+# Git 操作ルール（DevNext 固有追加）
 
-## git add は個別ファイル指定
+基本ルール（`git add -A` 禁止・個別ファイル指定・Permission denied 対処・ブランチ運用）はグローバル `~/.claude/rules/git-ops.md` を参照。ここは DevNext 固有の追加事項のみ。
 
-`git add -A` や `git add .` は使用しない。
+## dotnet プロセスのファイルロック
 
-**理由:**
-- `.gitignore` 済みのファイルを誤って含める可能性がある
-- git オブジェクト DB がロック中の場合に `Permission denied` エラーになりやすい
-- 意図しないファイル（`appsettings.Development.json` など）がコミットに混入するリスク
+`git add` で Permission denied が出る典型原因は、`Site.exe`（または Sample 実行ファイル）が dotnet プロセスにロックされていること。
 
-**正しいやり方:**
-
-```bash
-# ファイルを個別に指定する
-git add CLAUDE.md .claude/rules/di-and-password.md DevNext/Program.cs
-
-# .claude/ 配下を一括追加する場合は安全なパスを明示する
-git add .claude/rules/ .claude/skills/
-```
-
-## git add で Permission denied が出たとき
-
-git オブジェクト DB がロックされている場合。dotnet プロセスが `Site.exe` を掴んでいることが多い。
-
-```bash
-# 方法1: 実行中の dotnet プロセスを停止してから再試行
+```powershell
+# まず当該プロセスを止めてから再実行する
 Stop-Process -Name "dotnet" -Force -ErrorAction SilentlyContinue
-
-# 方法2: 特定の PID を停止
-Stop-Process -Id <PID> -Force
+Stop-Process -Name "Site" -Force -ErrorAction SilentlyContinue
 ```
+
+バックグラウンド起動の `dotnet run` を落とし忘れていないかも確認する（`rules/browser-test.md` の後始末ルール）。
 
 ## CLAUDE.md のコミット
 
-`CLAUDE.md` は `.gitignore` に `/.claude/**` パターンが設定されているが、`git add -f` でforce-track済み。
-通常の `git add CLAUDE.md` で追加できる。
+`.gitignore` に `/.claude/**` パターンがあるが、`CLAUDE.md` は `git add -f` で force-track 済み。通常の `git add CLAUDE.md` で追加できる。
 
-## ブランチルール
+## マージ運用
 
-- 開発は `develop` ブランチで行う
-- `master` への直接コミット禁止
-- 詳細は `branching-and-merge.md` を参照
+`master` への直接コミット禁止・マージ前チェックリストは `rules/branching-and-merge.md` を参照。

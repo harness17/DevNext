@@ -31,6 +31,7 @@ Tests/
   Extensions/       ← Dev.CommonLibrary.Extensions のテスト
   Schedule/         ← Site.Service 系のテスト（例: ScheduleRecurrenceHelper）
   UserManagement/   ← Site.Service.UserManagementService のテスト
+  Validation/       ← Site.Common 検証メッセージ・バリデーションのテスト
   Samples/          ← 各 Sample 固有ロジックのテスト（必要に応じて作成）
 ```
 
